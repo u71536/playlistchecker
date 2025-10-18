@@ -1,0 +1,110 @@
+{% extends "base.html" %}
+
+{% block title %}Мои плейлисты - PlaylistChecker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fas fa-list"></i> Мои плейлисты
+            </h1>
+            <div>
+                <a href="{{ url_for('check_playlists_now') }}" class="btn btn-warning me-2">
+                    <i class="fas fa-sync"></i> Проверить сейчас
+                </a>
+                <a href="{{ url_for('add_playlist') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Добавить плейлист
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if playlists %}
+<div class="row">
+    {% for playlist in playlists %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card playlist-card h-100">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <div class="d-flex align-items-center">
+                    {% if playlist.service == 'spotify' %}
+                        <i class="fab fa-spotify text-success me-2"></i>
+                    {% elif playlist.service == 'deezer' %}
+                        <i class="fas fa-music text-primary me-2"></i>
+                    {% elif playlist.service == 'apple_music' %}
+                        <i class="fab fa-apple text-dark me-2"></i>
+                    {% elif playlist.service == 'yandex_music' %}
+                        <i class="fas fa-music text-danger me-2"></i>
+                    {% endif %}
+                    <span class="badge bg-secondary">{{ playlist.service|title }}</span>
+                </div>
+                <div class="dropdown">
+                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                        <i class="fas fa-ellipsis-v"></i>
+                    </button>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="{{ url_for('check_playlists_now') }}"><i class="fas fa-sync"></i> Проверить сейчас</a></li>
+                        <li><a class="dropdown-item" href="{{ url_for('playlist_tracks', playlist_id=playlist.id) }}"><i class="fas fa-eye"></i> Просмотреть треки</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash"></i> Удалить</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="card-body">
+                <h5 class="card-title">{{ playlist.name }}</h5>
+                {% if playlist.description %}
+                    <p class="card-text text-muted">{{ playlist.description[:150] }}{% if playlist.description|length > 150 %}...{% endif %}</p>
+                {% endif %}
+                
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <div class="border-end">
+                            <h6 class="text-primary">{{ playlist.tracks|length }}</h6>
+                            <small class="text-muted">Треков</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <div class="border-end">
+                            <h6 class="text-warning">{{ playlist.tracks|selectattr('is_removed', 'equalto', true)|list|length }}</h6>
+                            <small class="text-muted">Удалено</small>
+                        </div>
+                    </div>
+                    <div class="col-4">
+                        <h6 class="text-success">{{ playlist.tracks|selectattr('is_removed', 'equalto', false)|list|length }}</h6>
+                        <small class="text-muted">Активных</small>
+                    </div>
+                </div>
+                
+                <div class="d-flex justify-content-between align-items-center">
+                    <small class="text-muted">
+                        {% if playlist.last_checked %}
+                            <i class="fas fa-clock"></i> {{ playlist.last_checked.strftime('%d.%m.%Y %H:%M') }}
+                        {% else %}
+                            <i class="fas fa-exclamation-circle text-warning"></i> Не проверялся
+                        {% endif %}
+                    </small>
+                    <span class="badge bg-{% if playlist.last_checked %}success{% else %}warning{% endif %}">
+                        {% if playlist.last_checked %}Активен{% else %}Ожидает{% endif %}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="fas fa-music fa-4x text-muted mb-4"></i>
+            <h3 class="text-muted">У вас пока нет плейлистов</h3>
+            <p class="text-muted mb-4">Добавьте плейлисты из ваших любимых музыкальных сервисов для отслеживания изменений</p>
+            <a href="{{ url_for('add_playlist') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus"></i> Добавить первый плейлист
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

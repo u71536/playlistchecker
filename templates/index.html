@@ -1,0 +1,194 @@
+{% extends "base.html" %}
+
+{% block title %}PlaylistChecker - Отслеживание изменений в плейлистах Spotify, Apple Music, Yandex Music{% endblock %}
+
+{% block description %}PlaylistChecker - профессиональный сервис для мониторинга плейлистов. Отслеживайте исчезновение песен из ваших плейлистов Spotify, Apple Music и Yandex Music. Получайте уведомления о любых изменениях в режиме реального времени.{% endblock %}
+
+{% block keywords %}плейлист, музыка, spotify, apple music, yandex music, отслеживание, мониторинг, песни, треки, исчезновение, уведомления, музыкальные сервисы{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="fas fa-music"></i> PlaylistChecker
+            </h1>
+            <p class="lead">Отслеживайте изменения в ваших плейлистах на всех популярных музыкальных платформах</p>
+            <p class="text-muted">Профессиональный мониторинг плейлистов Spotify, Apple Music и Yandex Music. Узнайте первыми, когда песни исчезают из ваших коллекций.</p>
+        </div>
+
+        {% if not current_user.is_authenticated %}
+        <div class="row mb-5">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-sign-in-alt fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Уже есть аккаунт?</h5>
+                        <p class="card-text">Войдите в систему, чтобы начать отслеживать свои плейлисты</p>
+                        <a href="{{ url_for('login') }}" class="btn btn-primary">
+                            <i class="fas fa-sign-in-alt"></i> Войти
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="fas fa-user-plus fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Новый пользователь?</h5>
+                        <p class="card-text">Зарегистрируйтесь, чтобы создать свой аккаунт</p>
+                        <a href="{{ url_for('register') }}" class="btn btn-success">
+                            <i class="fas fa-user-plus"></i> Зарегистрироваться
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="row">
+            <div class="col-12">
+                <h2 class="text-center mb-4">Поддерживаемые сервисы</h2>
+            </div>
+        </div>
+
+        <div class="row g-4">
+            <div class="col-md-6 col-lg-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fab fa-spotify fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Spotify</h5>
+                        <p class="card-text">Отслеживайте изменения в ваших плейлистах Spotify</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Deezer временно скрыт
+            <div class="col-md-6 col-lg-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-music fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Deezer</h5>
+                        <p class="card-text">Мониторинг плейлистов на платформе Deezer</p>
+                    </div>
+                </div>
+            </div>
+            -->
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fab fa-apple fa-3x text-dark mb-3"></i>
+                        <h5 class="card-title">Apple Music</h5>
+                        <p class="card-text">Контроль плейлистов в Apple Music</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-3">
+                <div class="card text-center h-100">
+                    <div class="card-body">
+                        <i class="fas fa-music fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">Yandex Music</h5>
+                        <p class="card-text">Отслеживание плейлистов Яндекс.Музыки</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <h3 class="card-title text-center mb-4">
+                            <i class="fas fa-bell"></i> Как это работает?
+                        </h3>
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <span class="fw-bold">1</span>
+                                </div>
+                                <h5 class="mt-2">Подключите сервисы</h5>
+                                <p>Авторизуйтесь в ваших музыкальных сервисах</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <span class="fw-bold">2</span>
+                                </div>
+                                <h5 class="mt-2">Добавьте плейлисты</h5>
+                                <p>Выберите плейлисты для мониторинга</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <div class="bg-primary text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <span class="fw-bold">3</span>
+                                </div>
+                                <h5 class="mt-2">Получайте уведомления</h5>
+                                <p>Мы уведомим вас о любых изменениях</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SEO Content Section -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="text-center mb-4">Почему важно отслеживать изменения в плейлистах?</h2>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="fas fa-exclamation-triangle text-warning"></i> Проблема исчезающих песен</h4>
+                                <p>Музыкальные сервисы регулярно удаляют треки из своих каталогов из-за истечения лицензий, проблем с авторскими правами или изменений в политике платформы. Ваши любимые песни могут исчезнуть без предупреждения.</p>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="fas fa-shield-alt text-success"></i> Защита ваших коллекций</h4>
+                                <p>PlaylistChecker помогает сохранить целостность ваших музыкальных коллекций, уведомляя о любых изменениях в режиме реального времени. Вы всегда будете знать, что происходит с вашими плейлистами.</p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="fas fa-clock text-info"></i> Автоматический мониторинг</h4>
+                                <p>Наш сервис проверяет ваши плейлисты каждые 10 минут, обеспечивая максимально быстрое обнаружение изменений. Больше не нужно вручную проверять каждый плейлист.</p>
+                            </div>
+                            <div class="col-md-6 mb-4">
+                                <h4><i class="fas fa-mobile-alt text-primary"></i> Удобные уведомления</h4>
+                                <p>Получайте мгновенные уведомления о любых изменениях в ваших плейлистах. Узнайте, какие песни исчезли, и примите меры для восстановления вашей коллекции.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="row mt-4">
+            <div class="col-12">
+                <div class="card bg-primary text-white">
+                    <div class="card-body">
+                        <h3 class="text-center mb-4">Возможности PlaylistChecker</h3>
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-3">
+                                <i class="fas fa-sync-alt fa-2x mb-2"></i>
+                                <h5>Автоматическая синхронизация</h5>
+                                <p>Постоянный мониторинг всех ваших плейлистов</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <i class="fas fa-chart-line fa-2x mb-2"></i>
+                                <h5>Детальная статистика</h5>
+                                <p>Анализ изменений и трендов в ваших коллекциях</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-3">
+                                <i class="fas fa-lock fa-2x mb-2"></i>
+                                <h5>Безопасность данных</h5>
+                                <p>Ваши данные защищены современными методами шифрования</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

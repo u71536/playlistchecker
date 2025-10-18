@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Мои плейлисты Spotify - PlaylistChecker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1>
+                <i class="fab fa-spotify text-success"></i> Мои плейлисты Spotify
+            </h1>
+            <a href="{{ url_for('add_playlist') }}" class="btn btn-outline-primary">
+                <i class="fas fa-plus"></i> Добавить вручную
+            </a>
+        </div>
+    </div>
+</div>
+
+{% if playlists %}
+<div class="row">
+    {% for playlist in playlists %}
+    <div class="col-md-6 col-lg-4 mb-4">
+        <div class="card h-100">
+            <div class="card-body">
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <h5 class="card-title">{{ playlist.name }}</h5>
+                    <span class="badge bg-{% if playlist.public %}success{% else %}secondary{% endif %}">
+                        {% if playlist.public %}Публичный{% else %}Приватный{% endif %}
+                    </span>
+                </div>
+                
+                {% if playlist.description %}
+                    <p class="card-text text-muted small">{{ playlist.description[:100] }}{% if playlist.description|length > 100 %}...{% endif %}</p>
+                {% endif %}
+                
+                <div class="row text-center mb-3">
+                    <div class="col-6">
+                        <div class="border-end">
+                            <h6 class="text-primary">{{ playlist.tracks_count }}</h6>
+                            <small class="text-muted">Треков</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <h6 class="text-info">{{ playlist.owner }}</h6>
+                        <small class="text-muted">Владелец</small>
+                    </div>
+                </div>
+                
+                <div class="d-grid gap-2">
+                    <a href="{{ url_for('add_spotify_playlist', playlist_id=playlist.id) }}" 
+                       class="btn btn-success">
+                        <i class="fas fa-plus"></i> Добавить для мониторинга
+                    </a>
+                    <a href="{{ playlist.url }}" target="_blank" class="btn btn-outline-success">
+                        <i class="fab fa-spotify"></i> Открыть в Spotify
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+<div class="row mt-4">
+    <div class="col-12">
+        <div class="alert alert-info">
+            <h5><i class="fas fa-info-circle"></i> Как это работает?</h5>
+            <p class="mb-0">
+                Выберите плейлисты, которые хотите отслеживать. Мы будем проверять их каждый день 
+                и уведомлять вас, если какие-то треки будут удалены.
+            </p>
+        </div>
+    </div>
+</div>
+
+{% else %}
+<div class="row">
+    <div class="col-12">
+        <div class="text-center py-5">
+            <i class="fab fa-spotify fa-4x text-muted mb-4"></i>
+            <h3 class="text-muted">Плейлисты не найдены</h3>
+            <p class="text-muted mb-4">У вас пока нет плейлистов в Spotify или произошла ошибка при их получении</p>
+            <a href="{{ url_for('add_playlist') }}" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Добавить плейлист вручную
+            </a>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

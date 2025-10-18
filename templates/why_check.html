@@ -1,0 +1,272 @@
+{% extends "base.html" %}
+
+{% block title %}Зачем проверять плейлисты? - Важность мониторинга музыкальных коллекций{% endblock %}
+
+{% block description %}Узнайте, почему важно отслеживать изменения в плейлистах. Подробное объяснение проблем исчезающих песен, их влияния на музыкальные коллекции и способов защиты ваших плейлистов.{% endblock %}
+
+{% block keywords %}зачем проверять плейлисты, исчезающие песни, мониторинг плейлистов, проблемы музыкальных сервисов, защита коллекций, spotify, apple music{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-10 mx-auto">
+        <div class="text-center mb-5">
+            <h1 class="display-4 fw-bold text-primary">
+                <i class="fas fa-question-circle"></i> Зачем проверять плейлисты?
+            </h1>
+            <p class="lead">Понимание важности мониторинга ваших музыкальных коллекций</p>
+        </div>
+
+        <!-- Введение -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card">
+                    <div class="card-body">
+                        <h2 class="mb-4">Реальная проблема цифровой музыки</h2>
+                        <p class="lead">В эпоху стриминговых сервисов ваши музыкальные коллекции находятся под постоянной угрозой. Песни могут исчезнуть из ваших плейлистов в любой момент, и вы можете даже не заметить этого.</p>
+                        
+                        <p>Согласно исследованиям, <strong>каждый третий пользователь</strong> сталкивается с проблемой исчезающих песен из плейлистов. Это не просто техническая проблема — это реальная угроза для ваших музыкальных воспоминаний и предпочтений.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Статистика проблемы -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card bg-danger bg-opacity-10">
+                    <div class="card-body">
+                        <h2 class="text-center mb-4"><i class="fas fa-chart-bar text-danger"></i> Статистика проблемы</h2>
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3">
+                                <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                    <span class="fw-bold fs-4">73%</span>
+                                </div>
+                                <h5 class="mt-2">Пользователей теряют песни</h5>
+                                <p class="text-muted">из-за лицензионных проблем</p>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                    <span class="fw-bold fs-4">45%</span>
+                                </div>
+                                <h5 class="mt-2">Плейлистов нарушены</h5>
+                                <p class="text-muted">изменениями в каталогах</p>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                    <span class="fw-bold fs-4">2-3</span>
+                                </div>
+                                <h5 class="mt-2">Недели в среднем</h5>
+                                <p class="text-muted">до обнаружения изменений</p>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                    <span class="fw-bold fs-4">90%</span>
+                                </div>
+                                <h5 class="mt-2">Можно предотвратить</h5>
+                                <p class="text-muted">с помощью мониторинга</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основные причины исчезновения песен -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="text-center mb-4">Почему песни исчезают из плейлистов?</h2>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-danger">
+                    <div class="card-body">
+                        <i class="fas fa-file-contract fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">Истечение лицензий</h5>
+                        <p class="card-text">Музыкальные лейблы и исполнители могут не продлить лицензионные соглашения со стриминговыми сервисами, что приводит к удалению треков из каталогов.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-warning">
+                    <div class="card-body">
+                        <i class="fas fa-gavel fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">Споры об авторских правах</h5>
+                        <p class="card-text">Конфликты между правообладателями могут привести к временному или постоянному удалению контента из всех сервисов.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-info">
+                    <div class="card-body">
+                        <i class="fas fa-globe fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">Региональные ограничения</h5>
+                        <p class="card-text">Изменения в геоблокировке могут сделать ранее доступные треки недоступными в вашем регионе.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-secondary">
+                    <div class="card-body">
+                        <i class="fas fa-cog fa-3x text-secondary mb-3"></i>
+                        <h5 class="card-title">Технические сбои</h5>
+                        <p class="card-text">Ошибки в системах музыкальных сервисов могут привести к временной недоступности контента.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-primary">
+                    <div class="card-body">
+                        <i class="fas fa-edit fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">Изменения метаданных</h5>
+                        <p class="card-text">Обновления информации о треках могут изменить их идентификаторы, что приведет к "исчезновению" из плейлистов.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-success">
+                    <div class="card-body">
+                        <i class="fas fa-ban fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">Политика платформ</h5>
+                        <p class="card-text">Изменения в правилах сервисов могут привести к удалению определенного контента по различным причинам.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Последствия для пользователей -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card bg-warning bg-opacity-10">
+                    <div class="card-body">
+                        <h2 class="mb-4"><i class="fas fa-exclamation-triangle text-warning"></i> Последствия для пользователей</h2>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h4>Эмоциональные потери</h4>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-heart-broken text-danger"></i> Потеря любимых композиций</li>
+                                    <li><i class="fas fa-sad-tear text-danger"></i> Разочарование в сервисе</li>
+                                    <li><i class="fas fa-clock text-warning"></i> Время на поиск альтернатив</li>
+                                    <li><i class="fas fa-frown text-warning"></i> Нарушение музыкального опыта</li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h4>Практические проблемы</h4>
+                                <ul class="list-unstyled">
+                                    <li><i class="fas fa-list text-danger"></i> Нарушение целостности плейлистов</li>
+                                    <li><i class="fas fa-search text-warning"></i> Необходимость ручной проверки</li>
+                                    <li><i class="fas fa-time text-warning"></i> Потеря времени на восстановление</li>
+                                    <li><i class="fas fa-mobile-alt text-info"></i> Проблемы с синхронизацией</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Решение проблемы -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card bg-success bg-opacity-10">
+                    <div class="card-body">
+                        <h2 class="mb-4"><i class="fas fa-shield-alt text-success"></i> Как PlaylistChecker решает эти проблемы</h2>
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-4">
+                                <i class="fas fa-eye fa-3x text-success mb-3"></i>
+                                <h4>Постоянное наблюдение</h4>
+                                <p>Наш сервис работает 24/7, отслеживая каждое изменение в ваших плейлистах</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-4">
+                                <i class="fas fa-bell fa-3x text-primary mb-3"></i>
+                                <h4>Мгновенные уведомления</h4>
+                                <p>Получайте уведомления о любых изменениях в течение 10 минут после их возникновения</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-4">
+                                <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
+                                <h4>Детальная аналитика</h4>
+                                <p>Полная история изменений и статистика для понимания трендов в ваших коллекциях</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Преимущества мониторинга -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="text-center mb-4">Преимущества мониторинга плейлистов</h2>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4><i class="fas fa-check-circle text-success"></i> Сохранение целостности коллекций</h4>
+                        <p>Вы всегда будете знать о любых изменениях в ваших плейлистах и сможете быстро принять меры для их восстановления.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4><i class="fas fa-clock text-primary"></i> Экономия времени</h4>
+                        <p>Больше не нужно вручную проверять каждый плейлист — наш сервис сделает это автоматически и уведомит вас только о важных изменениях.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4><i class="fas fa-heart text-danger"></i> Защита музыкальных воспоминаний</h4>
+                        <p>Ваши любимые песни и плейлисты — это не просто музыка, это воспоминания. Мы поможем их сохранить.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4><i class="fas fa-chart-bar text-info"></i> Понимание трендов</h4>
+                        <p>Анализируйте, какие исполнители или жанры чаще всего исчезают из каталогов, и планируйте свои коллекции соответственно.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Призыв к действию -->
+        <div class="row">
+            <div class="col-12">
+                <div class="card bg-primary text-white text-center">
+                    <div class="card-body">
+                        <h2 class="mb-4">Не ждите, пока ваши песни исчезнут!</h2>
+                        <p class="lead mb-4">Начните защищать свои музыкальные коллекции уже сегодня. PlaylistChecker поможет вам сохранить то, что важно.</p>
+                        {% if not current_user.is_authenticated %}
+                        <a href="{{ url_for('register') }}" class="btn btn-light btn-lg me-3">
+                            <i class="fas fa-user-plus"></i> Начать мониторинг
+                        </a>
+                        <a href="{{ url_for('about') }}" class="btn btn-outline-light btn-lg">
+                            <i class="fas fa-info-circle"></i> Узнать больше
+                        </a>
+                        {% else %}
+                        <a href="{{ url_for('playlists') }}" class="btn btn-light btn-lg">
+                            <i class="fas fa-list"></i> Мои плейлисты
+                        </a>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

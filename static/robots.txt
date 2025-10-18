@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://yourdomain.com/sitemap.xml
+
+# Disallow private areas
+Disallow: /instance/
+Disallow: /migrations/
+Disallow: /__pycache__/
+Disallow: /services/__pycache__/
+
+# Allow important pages
+Allow: /
+Allow: /about
+Allow: /why-check
+Allow: /login
+Allow: /register
