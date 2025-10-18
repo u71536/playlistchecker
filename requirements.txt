@@ -11,3 +11,4 @@ python-dotenv==1.0.0
 APScheduler==3.10.4
 PyJWT==2.8.0
 yandex-music==2.1.0
+email_validator==2.1.0
