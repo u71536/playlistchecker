@@ -3,40 +3,39 @@ version: '3.8'
 services:
   web:
     build: .
-    ports:
-      - "5000:5000"
-    environment:
-      - FLASK_ENV=production
-      - DATABASE_URL=sqlite:///instance/playlistchecker.db
+    container_name: playlistchecker-web
+    restart: unless-stopped
+    env_file:
+      - .env
     volumes:
       - ./instance:/app/instance
-      - ./.env:/app/.env:ro
-    restart: unless-stopped
+    networks:
+      - traefik-network
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.playlistchecker.rule=Host(`checkingplaylist.com`)"
+      - "traefik.http.routers.playlistchecker.entrypoints=websecure"
+      - "traefik.http.routers.playlistchecker.tls.certresolver=letsencrypt"
+      - "traefik.http.services.playlistchecker.loadbalancer.server.port=5000"
     depends_on:
-      - nginx
+      - db
 
-  nginx:
-    image: nginx:alpine
-    ports:
-      - "80:80"
-      - "443:443"
+  db:
+    image: postgres:15-alpine
+    container_name: playlistchecker-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: playlistchecker
+      POSTGRES_USER: playlistchecker
+      POSTGRES_PASSWORD: playlistcheckerQp9)3ni~
     volumes:
-      - ./nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./ssl:/etc/nginx/ssl:ro
-    restart: unless-stopped
-    depends_on:
-      - web
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - traefik-network
 
-  # Опционально: PostgreSQL для продакшена
-  # postgres:
-  #   image: postgres:15-alpine
-  #   environment:
-  #     POSTGRES_DB: playlistchecker
-  #     POSTGRES_USER: playlistchecker
-  #     POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-  #   volumes:
-  #     - postgres_data:/var/lib/postgresql/data
-  #   restart: unless-stopped
+volumes:
+  postgres_data:
 
-# volumes:
-#   postgres_data:
+networks:
+  traefik-network:
+    external: true

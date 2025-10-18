@@ -145,7 +145,13 @@ class PlaylistMonitor:
                 
                 # Обновляем время последней проверки
                 playlist.last_checked = datetime.utcnow()
-                db.session.commit()
+                try:
+                    db.session.commit()
+                    logger.info(f"Время последней проверки публичного плейлиста {playlist.name} обновлено")
+                except Exception as e:
+                    logger.error(f"Ошибка при обновлении времени проверки публичного плейлиста {playlist.name}: {str(e)}")
+                    db.session.rollback()
+                    raise
                 
                 logger.info(f"Публичный плейлист {playlist.name} проверен. Удалено: {len(removed_track_ids)}, добавлено: {len(new_track_ids)}")
                 
@@ -190,7 +196,13 @@ class PlaylistMonitor:
                 
                 # Обновляем время последней проверки
                 playlist.last_checked = datetime.utcnow()
-                db.session.commit()
+                try:
+                    db.session.commit()
+                    logger.info(f"Время последней проверки плейлиста {playlist.name} обновлено")
+                except Exception as e:
+                    logger.error(f"Ошибка при обновлении времени проверки плейлиста {playlist.name}: {str(e)}")
+                    db.session.rollback()
+                    raise
                 
                 logger.info(f"Плейлист {playlist.name} проверен. Удалено: {len(removed_track_ids)}, добавлено: {len(new_track_ids)}")
                 
@@ -232,7 +244,13 @@ class PlaylistMonitor:
                                 
                                 # Обновляем время последней проверки
                                 playlist.last_checked = datetime.utcnow()
-                                db.session.commit()
+                                try:
+                                    db.session.commit()
+                                    logger.info(f"Время последней проверки плейлиста {playlist.name} обновлено после обновления токена")
+                                except Exception as e:
+                                    logger.error(f"Ошибка при обновлении времени проверки плейлиста {playlist.name} после обновления токена: {str(e)}")
+                                    db.session.rollback()
+                                    raise
                                 
                                 logger.info(f"Плейлист {playlist.name} проверен после обновления токена. Удалено: {len(removed_track_ids)}, добавлено: {len(new_track_ids)}")
                                 return
@@ -294,28 +312,46 @@ class PlaylistMonitor:
     
     def _handle_removed_tracks_impl(self, playlist, removed_track_ids):
         """Внутренняя реализация обработки удаленных треков"""
-        for track_id in removed_track_ids:
-            track = Track.query.filter_by(
-                playlist_id=playlist.id,
-                service_track_id=track_id,
-                is_removed=False
-            ).first()
-            
-            if track:
-                # Отмечаем трек как удаленный
-                track.is_removed = True
-                track.removed_at = datetime.utcnow()
-                
-                # Создаем уведомление
-                notification = Notification(
-                    user_id=playlist.user_id,
+        try:
+            for track_id in removed_track_ids:
+                track = Track.query.filter_by(
                     playlist_id=playlist.id,
-                    track_id=track.id,
-                    message=f"Трек '{track.name}' от {track.artist} был удален из плейлиста '{playlist.name}'"
-                )
-                db.session.add(notification)
+                    service_track_id=track_id,
+                    is_removed=False
+                ).first()
                 
-                logger.info(f"Трек {track.name} отмечен как удаленный из плейлиста {playlist.name}")
+                if track:
+                    logger.info(f"Найден трек для удаления: {track.name} (ID: {track.id})")
+                    
+                    # Отмечаем трек как удаленный
+                    track.is_removed = True
+                    track.removed_at = datetime.utcnow()
+                    
+                    # Создаем уведомление
+                    notification = Notification(
+                        user_id=playlist.user_id,
+                        playlist_id=playlist.id,
+                        track_id=track.id,
+                        message=f"Трек '{track.name}' от {track.artist} был удален из плейлиста '{playlist.name}'"
+                    )
+                    db.session.add(notification)
+                    
+                    logger.info(f"Трек {track.name} отмечен как удаленный из плейлиста {playlist.name}")
+                    
+                    # Принудительно сохраняем изменения для каждого трека
+                    try:
+                        db.session.commit()
+                        logger.info(f"Изменения для трека {track.name} успешно сохранены в БД")
+                    except Exception as commit_error:
+                        logger.error(f"Ошибка при сохранении трека {track.name}: {str(commit_error)}")
+                        db.session.rollback()
+                        raise
+                else:
+                    logger.warning(f"Трек с ID {track_id} не найден в плейлисте {playlist.name}")
+        except Exception as e:
+            logger.error(f"Ошибка в _handle_removed_tracks_impl: {str(e)}")
+            db.session.rollback()
+            raise
     
     def _handle_new_tracks(self, playlist, current_tracks, new_track_ids):
         """Обработать новые треки"""
