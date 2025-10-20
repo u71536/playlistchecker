@@ -1,14 +1,17 @@
-version: '3.8'
+# version: '3.8'  # Убрано как устаревшее
 
 services:
   web:
-    # Вариант 1: Сборка из GitHub (раскомментировать если нужно)
+    # Вариант 1: Локальная сборка (временно)
+    build: .
+    
+    # Вариант 2: Сборка из GitHub (включить когда репозиторий станет публичным)
     # build:
     #   context: https://github.com/u71536/playlistchecker.git
     #   dockerfile: Dockerfile
     
-    # Вариант 2: Готовый образ из GitHub Container Registry
-    image: ghcr.io/u71536/playlistchecker:latest
+    # Вариант 2: Готовый образ из GitHub Container Registry (включить после первой сборки)
+    # image: ghcr.io/u71536/playlistchecker:latest
     
     container_name: playlistchecker-web
     restart: unless-stopped
