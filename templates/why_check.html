@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Зачем проверять плейлисты? - Важность мониторинга музыкальных коллекций{% endblock %}
+{% block title %}{{ _('Зачем проверять плейлисты?') }} - {{ _('Важность мониторинга музыкальных коллекций') }}{% endblock %}
 
-{% block description %}Узнайте, почему важно отслеживать изменения в плейлистах. Подробное объяснение проблем исчезающих песен, их влияния на музыкальные коллекции и способов защиты ваших плейлистов.{% endblock %}
+{% block description %}{{ _('Узнайте, почему важно отслеживать изменения в плейлистах. Подробное объяснение проблем исчезающих песен, их влияния на музыкальные коллекции и способов защиты ваших плейлистов.') }}{% endblock %}
 
-{% block keywords %}зачем проверять плейлисты, исчезающие песни, мониторинг плейлистов, проблемы музыкальных сервисов, защита коллекций, spotify, apple music{% endblock %}
+{% block keywords %}{{ _('зачем проверять плейлисты, исчезающие песни, мониторинг плейлистов, проблемы музыкальных сервисов, защита коллекций, spotify, apple music') }}{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-lg-10 mx-auto">
         <div class="text-center mb-5">
             <h1 class="display-4 fw-bold text-primary">
-                <i class="fas fa-question-circle"></i> Зачем проверять плейлисты?
+                <i class="fas fa-question-circle"></i> {{ _('Зачем проверять плейлисты?') }}
             </h1>
-            <p class="lead">Понимание важности мониторинга ваших музыкальных коллекций</p>
+            <p class="lead">{{ _('Понимание важности мониторинга ваших музыкальных коллекций') }}</p>
         </div>
 
         <!-- Введение -->
@@ -21,7 +21,7 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h2 class="mb-4">Реальная проблема цифровой музыки</h2>
+                        <h2 class="mb-4">{{ _('Реальная проблема цифровой музыки') }}</h2>
                         <p class="lead">В эпоху стриминговых сервисов ваши музыкальные коллекции находятся под постоянной угрозой. Песни могут исчезнуть из ваших плейлистов в любой момент, и вы можете даже не заметить этого.</p>
                         
                         <p>Согласно исследованиям, <strong>каждый третий пользователь</strong> сталкивается с проблемой исчезающих песен из плейлистов. Это не просто техническая проблема — это реальная угроза для ваших музыкальных воспоминаний и предпочтений.</p>
@@ -35,13 +35,13 @@
             <div class="col-12">
                 <div class="card bg-danger bg-opacity-10">
                     <div class="card-body">
-                        <h2 class="text-center mb-4"><i class="fas fa-chart-bar text-danger"></i> Статистика проблемы</h2>
+                        <h2 class="text-center mb-4"><i class="fas fa-chart-bar text-danger"></i> {{ _('Статистика проблемы') }}</h2>
                         <div class="row text-center">
                             <div class="col-md-3 mb-3">
                                 <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
                                     <span class="fw-bold fs-4">73%</span>
                                 </div>
-                                <h5 class="mt-2">Пользователей теряют песни</h5>
+                                <h5 class="mt-2">{{ _('Пользователей теряют песни') }}</h5>
                                 <p class="text-muted">из-за лицензионных проблем</p>
                             </div>
                             <div class="col-md-3 mb-3">

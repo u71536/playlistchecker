@@ -3,7 +3,7 @@ import requests
 import logging
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
-from datetime import datetime
+from datetime import datetime, date
 import os
 
 logger = logging.getLogger(__name__)
@@ -260,12 +260,67 @@ PlaylistChecker - Уведомление
             logger.error(f"Ошибка отправки браузерного уведомления: {str(e)}")
             return False
     
+    def check_notification_already_sent(self, user_id, playlist_id, track_service_id, notification_type):
+        """Проверить, было ли уже отправлено уведомление для этого конкретного изменения"""
+        from app import NotificationHistory
+        
+        existing_notification = NotificationHistory.query.filter_by(
+            user_id=user_id,
+            playlist_id=playlist_id,
+            track_service_id=track_service_id,
+            notification_type=notification_type
+        ).first()
+        
+        return existing_notification is not None
+    
+    def save_notification_history(self, user_id, playlist_id, notification_data, sent_via):
+        """Сохранить историю отправленного уведомления"""
+        from app import NotificationHistory, db
+        
+        history = NotificationHistory(
+            user_id=user_id,
+            playlist_id=playlist_id,
+            notification_type=notification_data.get('type', 'track_changed'),
+            track_service_id=notification_data.get('track_service_id'),
+            track_name=notification_data.get('track_name'),
+            artist_name=notification_data.get('artist_name'),
+            playlist_name=notification_data.get('playlist_name'),
+            message=notification_data.get('message', ''),
+            sent_via=sent_via
+        )
+        
+        try:
+            db.session.add(history)
+            db.session.commit()
+            logger.info(f"Сохранена история уведомления для пользователя {user_id}")
+            return True
+        except Exception as e:
+            logger.error(f"Ошибка сохранения истории уведомления: {str(e)}")
+            db.session.rollback()
+            return False
+
     def send_all_notifications(self, user, notification_data):
-        """Отправить уведомления по всем каналам"""
+        """Отправить уведомления по всем каналам с проверкой уникальности"""
+        # Проверяем, было ли уже отправлено уведомление для этого конкретного изменения
+        playlist_id = notification_data.get('playlist_id')
+        track_service_id = notification_data.get('track_service_id')
+        notification_type = notification_data.get('type')
+        
+        if self.check_notification_already_sent(user.id, playlist_id, track_service_id, notification_type):
+            logger.info(f"Уведомление для пользователя {user.username} о треке {track_service_id} уже было отправлено")
+            return {
+                'email': False,
+                'telegram': False,
+                'browser': False,
+                'skipped': True,
+                'reason': 'already_notified'
+            }
+        
         results = {
             'email': False,
             'telegram': False,
-            'browser': False
+            'browser': False,
+            'skipped': False
         }
         
         title = f"Изменение в плейлисте {notification_data.get('playlist_name', '')}"
@@ -273,23 +328,31 @@ PlaylistChecker - Уведомление
         track_name = notification_data.get('track_name')
         playlist_name = notification_data.get('playlist_name')
         
+        sent_channels = []
+        
         # Email уведомление
         if user.email and user.email_notifications_enabled:
-            results['email'] = self.send_email_notification(
-                user.email, title, message, track_name, playlist_name
-            )
+            if self.send_email_notification(user.email, title, message, track_name, playlist_name):
+                results['email'] = True
+                sent_channels.append('email')
         
         # Telegram уведомление
         if hasattr(user, 'telegram_chat_id') and user.telegram_chat_id and user.telegram_notifications_enabled:
-            results['telegram'] = self.send_telegram_notification(
-                user.telegram_chat_id, message, track_name, playlist_name
-            )
+            if self.send_telegram_notification(user.telegram_chat_id, message, track_name, playlist_name):
+                results['telegram'] = True
+                sent_channels.append('telegram')
         
         # Браузерное уведомление
         if user.browser_notifications_enabled:
-            results['browser'] = self.send_browser_notification(
-                user.id, title, message, track_name, playlist_name
-            )
+            if self.send_browser_notification(user.id, title, message, track_name, playlist_name):
+                results['browser'] = True
+                sent_channels.append('browser')
+        
+        # Сохраняем историю только если хотя бы одно уведомление было отправлено
+        if sent_channels:
+            sent_via = ', '.join(sent_channels)
+            playlist_id = notification_data.get('playlist_id')
+            self.save_notification_history(user.id, playlist_id, notification_data, sent_via)
         
         logger.info(f"Уведомления для пользователя {user.username}: {results}")
         return results

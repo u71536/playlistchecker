@@ -341,9 +341,13 @@ class PlaylistMonitor:
                         from services.notification_service import notification_service
                         
                         notification_data = {
+                            'type': 'track_removed',
                             'message': f"Трек '{track.name}' от {track.artist} был удален из плейлиста '{playlist.name}'",
-                            'track_name': f"{track.name} - {track.artist}",
-                            'playlist_name': playlist.name
+                            'track_service_id': track.service_track_id,
+                            'track_name': track.name,
+                            'artist_name': track.artist,
+                            'playlist_name': playlist.name,
+                            'playlist_id': playlist.id
                         }
                         
                         notification_service.send_all_notifications(playlist.user, notification_data)
@@ -379,20 +383,64 @@ class PlaylistMonitor:
     
     def _handle_new_tracks_impl(self, playlist, current_tracks, new_track_ids):
         """Внутренняя реализация обработки новых треков"""
-        for track_data in current_tracks:
-            if track_data['id'] in new_track_ids:
-                track = Track(
-                    playlist_id=playlist.id,
-                    service_track_id=track_data['id'],
-                    name=track_data['name'],
-                    artist=track_data['artist'],
-                    album=track_data.get('album', ''),
-                    duration=track_data.get('duration', 0),
-                    added_at=datetime.utcnow()
-                )
-                db.session.add(track)
-                
-                logger.info(f"Добавлен новый трек {track.name} в плейлист {playlist.name}")
+        try:
+            for track_data in current_tracks:
+                if track_data['id'] in new_track_ids:
+                    track = Track(
+                        playlist_id=playlist.id,
+                        service_track_id=track_data['id'],
+                        name=track_data['name'],
+                        artist=track_data['artist'],
+                        album=track_data.get('album', ''),
+                        duration=track_data.get('duration', 0),
+                        added_at=datetime.utcnow()
+                    )
+                    db.session.add(track)
+                    db.session.flush()  # Получаем ID трека
+                    
+                    # Создаем уведомление в базе данных
+                    notification = Notification(
+                        user_id=playlist.user_id,
+                        playlist_id=playlist.id,
+                        track_id=track.id,
+                        message=f"Новый трек '{track.name}' от {track.artist} добавлен в плейлист '{playlist.name}'"
+                    )
+                    db.session.add(notification)
+                    
+                    # Отправляем уведомления по всем каналам
+                    try:
+                        from services.notification_service import notification_service
+                        
+                        notification_data = {
+                            'type': 'track_added',
+                            'message': f"Новый трек '{track.name}' от {track.artist} добавлен в плейлист '{playlist.name}'",
+                            'track_service_id': track.service_track_id,
+                            'track_name': track.name,
+                            'artist_name': track.artist,
+                            'playlist_name': playlist.name,
+                            'playlist_id': playlist.id
+                        }
+                        
+                        notification_service.send_all_notifications(playlist.user, notification_data)
+                        logger.info(f"Уведомления о новом треке отправлены для пользователя {playlist.user.username}")
+                        
+                    except Exception as notification_error:
+                        logger.error(f"Ошибка отправки уведомлений о новом треке: {str(notification_error)}")
+                    
+                    logger.info(f"Добавлен новый трек {track.name} в плейлист {playlist.name}")
+                    
+                    # Принудительно сохраняем изменения для каждого трека
+                    try:
+                        db.session.commit()
+                        logger.info(f"Новый трек {track.name} успешно сохранен в БД")
+                    except Exception as commit_error:
+                        logger.error(f"Ошибка при сохранении нового трека {track.name}: {str(commit_error)}")
+                        db.session.rollback()
+                        raise
+        except Exception as e:
+            logger.error(f"Ошибка в _handle_new_tracks_impl: {str(e)}")
+            db.session.rollback()
+            raise
     
     def add_playlist(self, user, service, playlist_url):
         """Добавить новый плейлист для мониторинга"""

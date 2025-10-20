@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Регистрация - PlaylistChecker{% endblock %}
+{% block title %}{{ _('Регистрация') }} - PlaylistChecker{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
@@ -8,7 +8,7 @@
         <div class="card">
             <div class="card-body">
                 <h2 class="card-title text-center mb-4">
-                    <i class="fas fa-user-plus"></i> Регистрация
+                    <i class="fas fa-user-plus"></i> {{ _('Регистрация') }}
                 </h2>
                 
                 <form method="POST">

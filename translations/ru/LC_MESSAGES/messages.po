@@ -1,0 +1,513 @@
+# Russian translations for PROJECT.
+# Copyright (C) 2025 ORGANIZATION
+# This file is distributed under the same license as the PROJECT project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2025.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: PROJECT VERSION\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2025-10-20 19:50+0300\n"
+"PO-Revision-Date: 2025-10-20 18:33+0300\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: ru\n"
+"Language-Team: ru <LL@li.org>\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && "
+"n%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: app.py:328
+msgid "Неверное имя пользователя или пароль"
+msgstr "Неверное имя пользователя или пароль"
+
+#: templates/about.html:3 templates/about.html:14 templates/base.html:106
+#: templates/base.html:203
+msgid "О сервисе"
+msgstr "О сервисе"
+
+#: templates/about.html:3
+#, fuzzy
+msgid "Мониторинг плейлистов Spotify, Apple Music, Yandex Music"
+msgstr "Отслеживание изменений в плейлистах Spotify, Apple Music, Yandex Music"
+
+#: templates/about.html:5
+msgid ""
+"Узнайте больше о PlaylistChecker - профессиональном сервисе для "
+"отслеживания изменений в плейлистах. Подробное описание функций, "
+"возможностей и преимуществ нашего сервиса мониторинга музыкальных "
+"коллекций."
+msgstr ""
+
+#: templates/about.html:7
+msgid ""
+"о сервисе, playlistchecker, мониторинг плейлистов, функции, возможности, "
+"spotify, apple music, yandex music, музыкальные сервисы"
+msgstr ""
+
+#: templates/about.html:16
+msgid "Профессиональное решение для мониторинга ваших музыкальных коллекций"
+msgstr "Профессиональное решение для мониторинга ваших музыкальных коллекций"
+
+#: templates/about.html:24
+#, fuzzy
+msgid "Что такое PlaylistChecker?"
+msgstr "Возможности PlaylistChecker"
+
+#: templates/about.html:25
+msgid ""
+"PlaylistChecker — это инновационный веб-сервис, созданный для решения "
+"проблемы исчезающих песен из музыкальных плейлистов. Мы понимаем, как "
+"важно сохранить целостность ваших музыкальных коллекций, и предлагаем "
+"автоматизированное решение для мониторинга изменений."
+msgstr ""
+
+#: templates/about.html:27
+msgid ""
+"Наш сервис работает 24/7, отслеживая ваши плейлисты на популярных "
+"музыкальных платформах и уведомляя вас о любых изменениях в режиме "
+"реального времени. Больше не нужно вручную проверять каждый плейлист — мы"
+" сделаем это за вас!"
+msgstr ""
+
+#: templates/about.html:38 templates/index.html:142
+msgid "Проблема исчезающих песен"
+msgstr "Проблема исчезающих песен"
+
+#: templates/about.html:41
+msgid "Почему песни исчезают?"
+msgstr "Почему песни исчезают?"
+
+#: templates/about.html:43
+msgid "Истечение лицензионных соглашений"
+msgstr "Истечение лицензионных соглашений"
+
+#: templates/about.html:44
+msgid "Изменения в политике платформ"
+msgstr "Изменения в политике платформ"
+
+#: templates/about.html:45
+msgid "Проблемы с авторскими правами"
+msgstr "Проблемы с авторскими правами"
+
+#: templates/about.html:46
+msgid "Технические сбои сервисов"
+msgstr "Технические сбои сервисов"
+
+#: templates/about.html:47
+msgid "Региональные ограничения"
+msgstr "Региональные ограничения"
+
+#: templates/about.html:51
+msgid "Последствия для пользователей"
+msgstr "Последствия для пользователей"
+
+#: templates/about.html:53
+msgid "Потеря любимых композиций"
+msgstr "Потеря любимых композиций"
+
+#: templates/about.html:54
+msgid "Нарушение целостности плейлистов"
+msgstr "Нарушение целостности плейлистов"
+
+#: templates/about.html:55
+msgid "Необходимость ручной проверки"
+msgstr "Необходимость ручной проверки"
+
+#: templates/about.html:56
+msgid "Потеря времени на восстановление"
+msgstr "Потеря времени на восстановление"
+
+#: templates/about.html:68 templates/index.html:170
+msgid "Возможности PlaylistChecker"
+msgstr "Возможности PlaylistChecker"
+
+#: templates/about.html:77 templates/index.html:152
+msgid "Автоматический мониторинг"
+msgstr "Автоматический мониторинг"
+
+#: templates/about.html:78
+msgid "Постоянная проверка ваших плейлистов каждые 10 минут без вашего участия"
+msgstr "Постоянная проверка ваших плейлистов каждые 10 минут без вашего участия"
+
+#: templates/about.html:87
+#, fuzzy
+msgid "Мгновенные уведомления"
+msgstr "Уведомления"
+
+#: templates/about.html:88
+msgid ""
+"Получайте уведомления о любых изменениях в ваших плейлистах в реальном "
+"времени"
+msgstr ""
+
+#: templates/about.html:97
+msgid "Множество платформ"
+msgstr "Множество платформ"
+
+#: templates/about.html:98
+msgid "Поддержка Spotify, Apple Music, Yandex Music и других популярных сервисов"
+msgstr "Поддержка Spotify, Apple Music, Yandex Music и других популярных сервисов"
+
+#: templates/base.html:101
+msgid "Главная"
+msgstr "Главная"
+
+#: templates/base.html:111
+msgid "Зачем проверять?"
+msgstr "Зачем проверять?"
+
+#: templates/base.html:117 templates/dashboard.html:99
+#: templates/dashboard.html:168
+msgid "Мои плейлисты"
+msgstr "Мои плейлисты"
+
+#: templates/base.html:153
+msgid "Уведомления"
+msgstr "Уведомления"
+
+#: templates/base.html:157
+msgid "Выйти"
+msgstr "Выйти"
+
+#: templates/base.html:164 templates/base.html:206 templates/index.html:29
+msgid "Войти"
+msgstr "Войти"
+
+#: templates/base.html:169 templates/base.html:207 templates/register.html:3
+#: templates/register.html:11
+msgid "Регистрация"
+msgstr "Регистрация"
+
+#: templates/base.html:198
+msgid ""
+"Профессиональный сервис для мониторинга изменений в плейлистах Spotify, "
+"Apple Music и Yandex Music."
+msgstr ""
+"Профессиональный сервис для мониторинга изменений в плейлистах Spotify, "
+"Apple Music и Yandex Music."
+
+#: templates/base.html:201
+msgid "Полезные ссылки"
+msgstr "Полезные ссылки"
+
+#: templates/base.html:204 templates/why_check.html:3
+#: templates/why_check.html:14
+msgid "Зачем проверять плейлисты?"
+msgstr "Зачем проверять плейлисты?"
+
+#: templates/base.html:214
+msgid "Отслеживайте изменения в ваших плейлистах."
+msgstr "Отслеживайте изменения в ваших плейлистах."
+
+#: templates/dashboard.html:3 templates/dashboard.html:9
+msgid "Панель управления"
+msgstr "Панель управления"
+
+#: templates/dashboard.html:21
+msgid "Новые уведомления"
+msgstr "Уведомления"
+
+#: templates/dashboard.html:45
+msgid "Плейлистов отслеживается"
+msgstr "Плейлистов отслеживается"
+
+#: templates/dashboard.html:54
+msgid "Проверено сегодня"
+msgstr "Проверено сегодня"
+
+#: templates/dashboard.html:63
+msgid "Новых уведомлений"
+msgstr "Настройки уведомлений"
+
+#: templates/dashboard.html:72
+msgid "Следующая проверка"
+msgstr "Следующая проверка"
+
+#: templates/dashboard.html:84
+msgid "Подключенные сервисы"
+msgstr "Полезные ссылки"
+
+#: templates/dashboard.html:96 templates/dashboard.html:116
+#: templates/dashboard.html:131
+msgid "Подключен"
+msgstr "Подключен"
+
+#: templates/dashboard.html:103 templates/dashboard.html:133
+msgid "Подключить"
+msgstr "Подключить"
+
+#: templates/dashboard.html:145
+msgid "Публичные плейлисты"
+msgstr "Мои плейлисты"
+
+#: templates/dashboard.html:147
+msgid "Без авторизации"
+msgstr "Без авторизации"
+
+#: templates/dashboard.html:150 templates/dashboard.html:171
+msgid "Добавить плейлист"
+msgstr "Мои плейлисты"
+
+#: templates/dashboard.html:200
+msgid "Проверен"
+msgstr "Проверен"
+
+#: templates/dashboard.html:202
+msgid "Не проверялся"
+msgstr "Зачем проверять?"
+
+#: templates/dashboard.html:205
+msgid "треков"
+msgstr "треков"
+
+#: templates/dashboard.html:215
+msgid "У вас пока нет плейлистов"
+msgstr "У вас пока нет плейлистов"
+
+#: templates/dashboard.html:216
+msgid "Добавьте плейлисты для отслеживания изменений"
+msgstr "Добавьте плейлисты для отслеживания изменений"
+
+#: templates/dashboard.html:218
+msgid "Добавить первый плейлист"
+msgstr "Добавить первый плейлист"
+
+#: templates/index.html:3
+#, fuzzy
+msgid "Отслеживание изменений в плейлистах Spotify, Apple Music, Yandex Music"
+msgstr "Отслеживание изменений в плейлистах Spotify, Apple Music, Yandex Music"
+
+#: templates/index.html:5
+#, fuzzy
+msgid ""
+"профессиональный сервис для мониторинга плейлистов. Отслеживайте "
+"исчезновение песен из ваших плейлистов Spotify, Apple Music и Yandex "
+"Music. Получайте уведомления о любых изменениях в режиме реального "
+"времени."
+msgstr ""
+"Профессиональный сервис для мониторинга изменений в плейлистах Spotify, "
+"Apple Music и Yandex Music."
+
+#: templates/index.html:7
+msgid ""
+"плейлист, музыка, spotify, apple music, yandex music, отслеживание, "
+"мониторинг, песни, треки, исчезновение, уведомления, музыкальные сервисы"
+msgstr ""
+"плейлист, музыка, spotify, apple music, yandex music, отслеживание, "
+"мониторинг, песни, треки, исчезновение, уведомления, музыкальные сервисы"
+
+#: templates/index.html:16
+#, fuzzy
+msgid ""
+"Отслеживайте изменения в ваших плейлистах на всех популярных музыкальных "
+"платформах"
+msgstr "Отслеживайте изменения в ваших плейлистах."
+
+#: templates/index.html:17
+#, fuzzy
+msgid ""
+"Профессиональный мониторинг плейлистов Spotify, Apple Music и Yandex "
+"Music. Узнайте первыми, когда песни исчезают из ваших коллекций."
+msgstr ""
+"Профессиональный сервис для мониторинга изменений в плейлистах Spotify, "
+"Apple Music и Yandex Music."
+
+#: templates/index.html:26
+msgid "Уже есть аккаунт?"
+msgstr "Уже есть аккаунт?"
+
+#: templates/index.html:27
+msgid "Войдите в систему, чтобы начать отслеживать свои плейлисты"
+msgstr "Войдите в систему, чтобы начать отслеживать свои плейлисты"
+
+#: templates/index.html:38
+msgid "Новый пользователь?"
+msgstr "Новый пользователь?"
+
+#: templates/index.html:39
+msgid "Зарегистрируйтесь, чтобы создать свой аккаунт"
+msgstr "Зарегистрируйтесь, чтобы создать свой аккаунт"
+
+#: templates/index.html:41 templates/login.html:47
+msgid "Зарегистрироваться"
+msgstr "Регистрация"
+
+#: templates/index.html:51
+msgid "Поддерживаемые сервисы"
+msgstr "Поддерживаемые сервисы"
+
+#: templates/index.html:61
+#, fuzzy
+msgid "Отслеживайте изменения в ваших плейлистах Spotify"
+msgstr "Отслеживайте изменения в ваших плейлистах."
+
+#: templates/index.html:83
+msgid "Контроль плейлистов в Apple Music"
+msgstr "Контроль плейлистов в Apple Music"
+
+#: templates/index.html:93
+msgid "Отслеживание плейлистов Яндекс.Музыки"
+msgstr "Отслеживание плейлистов Яндекс.Музыки"
+
+#: templates/index.html:104
+msgid "Как это работает?"
+msgstr "Как это работает?"
+
+#: templates/index.html:111
+msgid "Подключите сервисы"
+msgstr "Подключите сервисы"
+
+#: templates/index.html:112
+msgid "Авторизуйтесь в ваших музыкальных сервисах"
+msgstr "Авторизуйтесь в ваших музыкальных сервисах"
+
+#: templates/index.html:118
+msgid "Добавьте плейлисты"
+msgstr "Мои плейлисты"
+
+#: templates/index.html:119
+msgid "Выберите плейлисты для мониторинга"
+msgstr "Выберите плейлисты для мониторинга"
+
+#: templates/index.html:125
+msgid "Получайте уведомления"
+msgstr "Уведомления"
+
+#: templates/index.html:126
+msgid "Мы уведомим вас о любых изменениях"
+msgstr "Мы уведомим вас о любых изменениях"
+
+#: templates/index.html:139
+#, fuzzy
+msgid "Почему важно отслеживать изменения в плейлистах?"
+msgstr "Отслеживайте изменения в ваших плейлистах."
+
+#: templates/index.html:143
+msgid ""
+"Музыкальные сервисы регулярно удаляют треки из своих каталогов из-за "
+"истечения лицензий, проблем с авторскими правами или изменений в политике"
+" платформы. Ваши любимые песни могут исчезнуть без предупреждения."
+msgstr ""
+"Музыкальные сервисы регулярно удаляют треки из своих каталогов из-за "
+"истечения лицензий, проблем с авторскими правами или изменений в политике"
+" платформы. Ваши любимые песни могут исчезнуть без предупреждения."
+
+#: templates/index.html:146
+msgid "Защита ваших коллекций"
+msgstr "Защита ваших коллекций"
+
+#: templates/index.html:147
+msgid ""
+"PlaylistChecker помогает сохранить целостность ваших музыкальных "
+"коллекций, уведомляя о любых изменениях в режиме реального времени. Вы "
+"всегда будете знать, что происходит с вашими плейлистами."
+msgstr ""
+"PlaylistChecker помогает сохранить целостность ваших музыкальных "
+"коллекций, уведомляя о любых изменениях в режиме реального времени. Вы "
+"всегда будете знать, что происходит с вашими плейлистами."
+
+#: templates/index.html:153
+msgid ""
+"Наш сервис проверяет ваши плейлисты каждые 10 минут, обеспечивая "
+"максимально быстрое обнаружение изменений. Больше не нужно вручную "
+"проверять каждый плейлист."
+msgstr ""
+"Наш сервис проверяет ваши плейлисты каждые 10 минут, обеспечивая "
+"максимально быстрое обнаружение изменений. Больше не нужно вручную "
+"проверять каждый плейлист."
+
+#: templates/index.html:156
+msgid "Удобные уведомления"
+msgstr "Уведомления"
+
+#: templates/index.html:157
+msgid ""
+"Получайте мгновенные уведомления о любых изменениях в ваших плейлистах. "
+"Узнайте, какие песни исчезли, и примите меры для восстановления вашей "
+"коллекции."
+msgstr ""
+"Получайте мгновенные уведомления о любых изменениях в ваших плейлистах. "
+"Узнайте, какие песни исчезли, и примите меры для восстановления вашей "
+"коллекции."
+
+#: templates/index.html:174
+msgid "Автоматическая синхронизация"
+msgstr "Автоматическая синхронизация"
+
+#: templates/index.html:175
+msgid "Постоянный мониторинг всех ваших плейлистов"
+msgstr "Постоянный мониторинг всех ваших плейлистов"
+
+#: templates/index.html:179
+msgid "Детальная статистика"
+msgstr "Детальная статистика"
+
+#: templates/index.html:180
+msgid "Анализ изменений и трендов в ваших коллекциях"
+msgstr "Анализ изменений и трендов в ваших коллекциях"
+
+#: templates/index.html:184
+msgid "Безопасность данных"
+msgstr "Безопасность данных"
+
+#: templates/index.html:185
+msgid "Ваши данные защищены современными методами шифрования"
+msgstr "Ваши данные защищены современными методами шифрования"
+
+#: templates/login.html:3
+msgid "Вход"
+msgstr "Вход"
+
+#: templates/login.html:11
+msgid "Вход в систему"
+msgstr "Вход в систему"
+
+#: templates/login.html:47
+msgid "Нет аккаунта?"
+msgstr "Уже есть аккаунт?"
+
+#: templates/notification_settings.html:3
+#: templates/notification_settings.html:9
+msgid "Настройки уведомлений"
+msgstr "Настройки уведомлений"
+
+#: templates/notification_settings.html:19
+msgid "Управление уведомлениями"
+msgstr "Управление уведомлениями"
+
+#: templates/why_check.html:3
+msgid "Важность мониторинга музыкальных коллекций"
+msgstr "Важность мониторинга музыкальных коллекций"
+
+#: templates/why_check.html:5
+msgid ""
+"Узнайте, почему важно отслеживать изменения в плейлистах. Подробное "
+"объяснение проблем исчезающих песен, их влияния на музыкальные коллекции "
+"и способов защиты ваших плейлистов."
+msgstr ""
+
+#: templates/why_check.html:7
+msgid ""
+"зачем проверять плейлисты, исчезающие песни, мониторинг плейлистов, "
+"проблемы музыкальных сервисов, защита коллекций, spotify, apple music"
+msgstr ""
+
+#: templates/why_check.html:16
+msgid "Понимание важности мониторинга ваших музыкальных коллекций"
+msgstr "Понимание важности мониторинга ваших музыкальных коллекций"
+
+#: templates/why_check.html:24
+msgid "Реальная проблема цифровой музыки"
+msgstr "Реальная проблема цифровой музыки"
+
+#: templates/why_check.html:38
+msgid "Статистика проблемы"
+msgstr "Статистика проблемы"
+
+#: templates/why_check.html:44
+msgid "Пользователей теряют песни"
+msgstr "Пользователей теряют песни"
+

@@ -1,8 +1,9 @@
-from flask import Flask, render_template, redirect, url_for, flash, request
+from flask import Flask, render_template, redirect, url_for, flash, request, session
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import (LoginManager, UserMixin, login_user, logout_user,
                          login_required, current_user)
+from flask_babel import Babel, gettext, lazy_gettext, get_locale
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, BooleanField
 from wtforms.validators import DataRequired, Email
@@ -30,6 +31,12 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.environ.get(
 )
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
+# Конфигурация для переводов
+app.config['LANGUAGES'] = {
+    'ru': 'Русский',
+    'en': 'English'
+}
+
 # Инициализация расширений
 db = SQLAlchemy()
 db.init_app(app)
@@ -37,6 +44,33 @@ migrate = Migrate(app, db)
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = 'login'
+
+# Инициализация Babel
+babel = Babel(app)
+
+def get_locale():
+    # 1. Если язык выбран пользователем, используем его
+    if 'language' in session:
+        return session['language']
+    
+    # 2. Если пользователь авторизован и у него есть предпочтения языка
+    if current_user.is_authenticated and hasattr(current_user, 'language'):
+        return current_user.language
+    
+    # 3. Используем язык браузера, если он поддерживается
+    return request.accept_languages.best_match(app.config['LANGUAGES'].keys()) or 'ru'
+
+babel.init_app(app, locale_selector=get_locale)
+
+# Добавляем функции перевода в контекст шаблонов
+@app.context_processor
+def inject_conf_vars():
+    return {
+        'LANGUAGES': app.config['LANGUAGES'],
+        'CURRENT_LANGUAGE': session.get('language', get_locale()),
+        '_': gettext,
+        '_l': lazy_gettext
+    }
 
 
 # Модели базы данных
@@ -55,6 +89,9 @@ class User(UserMixin, db.Model):
     # Telegram интеграция
     telegram_chat_id = db.Column(db.String(50))
     telegram_username = db.Column(db.String(100))
+    
+    # Настройки языка
+    language = db.Column(db.String(5), default='ru')
     
     # Связи с музыкальными сервисами
     spotify_tokens = db.relationship('SpotifyToken', backref='user', lazy=True)
@@ -146,34 +183,57 @@ class PushSubscription(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_used = db.Column(db.DateTime, default=datetime.utcnow)
 
+class NotificationHistory(db.Model):
+    """Модель для хранения истории отправленных уведомлений"""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    playlist_id = db.Column(db.Integer, db.ForeignKey('playlist.id'), nullable=False)
+    notification_type = db.Column(db.String(20), nullable=False)  # 'track_added', 'track_removed'
+    track_service_id = db.Column(db.String(255))  # ID трека в сервисе для уникальности
+    track_name = db.Column(db.String(255))
+    artist_name = db.Column(db.String(255))
+    playlist_name = db.Column(db.String(255))
+    message = db.Column(db.Text, nullable=False)
+    sent_via = db.Column(db.String(50))  # 'email', 'telegram', 'browser', 'all'
+    sent_at = db.Column(db.DateTime, default=datetime.utcnow)
+    
+    # Связи
+    user = db.relationship('User', backref='notification_history', lazy=True)
+    playlist = db.relationship('Playlist', backref='notification_history', lazy=True)
+    
+    # Индекс для быстрого поиска уникальных уведомлений
+    __table_args__ = (
+        db.Index('idx_unique_notification', 'user_id', 'playlist_id', 'track_service_id', 'notification_type'),
+    )
+
 # Формы
 class LoginForm(FlaskForm):
-    username = StringField('Имя пользователя', validators=[DataRequired()])
-    password = PasswordField('Пароль', validators=[DataRequired()])
-    submit = SubmitField('Войти')
+    username = StringField(lazy_gettext('Имя пользователя'), validators=[DataRequired()])
+    password = PasswordField(lazy_gettext('Пароль'), validators=[DataRequired()])
+    submit = SubmitField(lazy_gettext('Войти'))
 
 class RegisterForm(FlaskForm):
-    username = StringField('Имя пользователя', validators=[DataRequired()])
+    username = StringField(lazy_gettext('Имя пользователя'), validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField('Пароль', validators=[DataRequired()])
-    submit = SubmitField('Зарегистрироваться')
+    password = PasswordField(lazy_gettext('Пароль'), validators=[DataRequired()])
+    submit = SubmitField(lazy_gettext('Зарегистрироваться'))
 
 class PlaylistForm(FlaskForm):
-    service = SelectField('Сервис', choices=[
+    service = SelectField(lazy_gettext('Сервис'), choices=[
         ('spotify', 'Spotify'),
         # ('deezer', 'Deezer'),  # Временно скрыт
         ('apple_music', 'Apple Music'),
         ('yandex_music', 'Yandex Music')
     ], validators=[DataRequired()])
-    playlist_url = StringField('URL плейлиста', validators=[DataRequired()])
-    submit = SubmitField('Добавить плейлист')
+    playlist_url = StringField(lazy_gettext('URL плейлиста'), validators=[DataRequired()])
+    submit = SubmitField(lazy_gettext('Добавить плейлист'))
 
 class NotificationSettingsForm(FlaskForm):
     """Форма настроек уведомлений"""
-    email_notifications_enabled = BooleanField('Email уведомления')
-    telegram_notifications_enabled = BooleanField('Telegram уведомления')
-    browser_notifications_enabled = BooleanField('Браузерные уведомления')
-    submit = SubmitField('Сохранить настройки')
+    email_notifications_enabled = BooleanField(lazy_gettext('Email уведомления'))
+    telegram_notifications_enabled = BooleanField(lazy_gettext('Telegram уведомления'))
+    browser_notifications_enabled = BooleanField(lazy_gettext('Браузерные уведомления'))
+    submit = SubmitField(lazy_gettext('Сохранить настройки'))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -288,7 +348,7 @@ def login():
         if user and check_password_hash(user.password_hash, form.password.data):
             login_user(user)
             return redirect(url_for('index'))
-        flash('Неверное имя пользователя или пароль')
+        flash(gettext('Неверное имя пользователя или пароль'))
     return render_template('login.html', form=form)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -331,6 +391,21 @@ def clear_session():
     from flask import session
     session.clear()
     return redirect(url_for('index'))
+
+@app.route('/set_language/<language>')
+def set_language(language=None):
+    """Установить язык интерфейса"""
+    if language not in app.config['LANGUAGES']:
+        return redirect(request.referrer or url_for('index'))
+    
+    session['language'] = language
+    
+    # Если пользователь авторизован, сохраняем его предпочтения
+    if current_user.is_authenticated:
+        current_user.language = language
+        db.session.commit()
+    
+    return redirect(request.referrer or url_for('index'))
 
 # Управление плейлистами
 @app.route('/playlists')
@@ -543,6 +618,21 @@ def notification_settings():
     
     return render_template('notification_settings.html', form=form)
 
+@app.route('/notification_history')
+@login_required
+def notification_history():
+    """История уведомлений пользователя"""
+    page = request.args.get('page', 1, type=int)
+    per_page = 20  # Количество уведомлений на страницу
+    
+    # Получаем историю уведомлений пользователя с пагинацией
+    history_pagination = NotificationHistory.query.filter_by(user_id=current_user.id)\
+        .order_by(NotificationHistory.sent_at.desc())\
+        .paginate(page=page, per_page=per_page, error_out=False)
+    
+    return render_template('notification_history.html', 
+                         history_pagination=history_pagination)
+
 # Telegram интеграция
 @app.route('/telegram/connect')
 @login_required
@@ -693,9 +783,9 @@ def check_playlists():
 scheduler = BackgroundScheduler()
 scheduler.add_job(
     func=check_playlists,
-    trigger="interval",
-    minutes=10,  # Проверяем каждые 10 минут
-    
+    trigger="cron",
+    hour=9,  # Проверяем каждый день в 9:00 утра
+    minute=0,
     id='playlist_checker'
 )
 scheduler.start()

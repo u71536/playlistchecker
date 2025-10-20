@@ -1,12 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %}Настройки уведомлений - PlaylistChecker{% endblock %}
+{% block title %}{{ _('Настройки уведомлений') }} - PlaylistChecker{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-12">
         <h1 class="mb-4">
-            <i class="fas fa-bell"></i> Настройки уведомлений
+            <i class="fas fa-bell"></i> {{ _('Настройки уведомлений') }}
         </h1>
     </div>
 </div>
@@ -16,7 +16,7 @@
         <div class="card">
             <div class="card-header">
                 <h5 class="mb-0">
-                    <i class="fas fa-cog"></i> Управление уведомлениями
+                    <i class="fas fa-cog"></i> {{ _('Управление уведомлениями') }}
                 </h5>
             </div>
             <div class="card-body">
@@ -61,7 +61,7 @@
                             <div class="alert alert-warning mt-2">
                                 <i class="fas fa-exclamation-triangle"></i>
                                 Telegram не подключен. 
-                                <a href="{{ url_for('telegram_connect') }}" class="btn btn-sm btn-primary ms-2">
+                                <a href="{{ url_for('telegram_connect') }}" target="_blank" class="btn btn-sm btn-primary ms-2">
                                     <i class="fab fa-telegram"></i> Подключить
                                 </a>
                             </div>
