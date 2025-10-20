@@ -548,7 +548,7 @@ def notification_settings():
 @login_required
 def telegram_connect():
     """Подключение Telegram бота"""
-    bot_username = os.environ.get('TELEGRAM_BOT_USERNAME', 'PlaylistCheckerBot')
+    bot_username = os.environ.get('TELEGRAM_BOT_USERNAME', 'checkingplaylistbot')
     telegram_url = f"https://t.me/{bot_username}?start={current_user.id}"
     return redirect(telegram_url)
 

@@ -19,6 +19,8 @@ services:
       - .env
     volumes:
       - ./instance:/app/instance
+    ports:
+      - "5000:5000"  # Временно для отладки
     networks:
       - traefik-network
     labels:
