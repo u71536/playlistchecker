@@ -336,6 +336,22 @@ class PlaylistMonitor:
                     )
                     db.session.add(notification)
                     
+                    # Отправляем уведомления по всем каналам
+                    try:
+                        from services.notification_service import notification_service
+                        
+                        notification_data = {
+                            'message': f"Трек '{track.name}' от {track.artist} был удален из плейлиста '{playlist.name}'",
+                            'track_name': f"{track.name} - {track.artist}",
+                            'playlist_name': playlist.name
+                        }
+                        
+                        notification_service.send_all_notifications(playlist.user, notification_data)
+                        logger.info(f"Уведомления отправлены для пользователя {playlist.user.username}")
+                        
+                    except Exception as notification_error:
+                        logger.error(f"Ошибка отправки уведомлений: {str(notification_error)}")
+                    
                     logger.info(f"Трек {track.name} отмечен как удаленный из плейлиста {playlist.name}")
                     
                     # Принудительно сохраняем изменения для каждого трека

@@ -4,7 +4,7 @@ from flask_migrate import Migrate
 from flask_login import (LoginManager, UserMixin, login_user, logout_user,
                          login_required, current_user)
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField, SelectField
+from wtforms import StringField, PasswordField, SubmitField, SelectField, BooleanField
 from wtforms.validators import DataRequired, Email
 from werkzeug.security import generate_password_hash, check_password_hash
 import os
@@ -12,7 +12,11 @@ from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
+import logging
 from playlist_monitor import PlaylistMonitor
+
+# Настройка логирования
+logger = logging.getLogger(__name__)
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -43,6 +47,15 @@ class User(UserMixin, db.Model):
     password_hash = db.Column(db.String(120), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    # Настройки уведомлений
+    email_notifications_enabled = db.Column(db.Boolean, default=True)
+    telegram_notifications_enabled = db.Column(db.Boolean, default=False)
+    browser_notifications_enabled = db.Column(db.Boolean, default=True)
+    
+    # Telegram интеграция
+    telegram_chat_id = db.Column(db.String(50))
+    telegram_username = db.Column(db.String(100))
+    
     # Связи с музыкальными сервисами
     spotify_tokens = db.relationship('SpotifyToken', backref='user', lazy=True)
     deezer_tokens = db.relationship('DeezerToken', backref='user', lazy=True)
@@ -51,6 +64,9 @@ class User(UserMixin, db.Model):
     
     # Плейлисты пользователя
     playlists = db.relationship('Playlist', backref='user', lazy=True)
+    
+    # Push-подписки для браузерных уведомлений
+    push_subscriptions = db.relationship('PushSubscription', backref='user', lazy=True, cascade='all, delete-orphan')
 
 class SpotifyToken(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -119,6 +135,17 @@ class Notification(db.Model):
     playlist = db.relationship('Playlist', backref='notifications', lazy=True)
     track = db.relationship('Track', backref='notifications', lazy=True)
 
+class PushSubscription(db.Model):
+    """Модель для хранения push-подписок браузерных уведомлений"""
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    endpoint = db.Column(db.Text, nullable=False)
+    p256dh_key = db.Column(db.Text, nullable=False)
+    auth_key = db.Column(db.Text, nullable=False)
+    user_agent = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    last_used = db.Column(db.DateTime, default=datetime.utcnow)
+
 # Формы
 class LoginForm(FlaskForm):
     username = StringField('Имя пользователя', validators=[DataRequired()])
@@ -140,6 +167,13 @@ class PlaylistForm(FlaskForm):
     ], validators=[DataRequired()])
     playlist_url = StringField('URL плейлиста', validators=[DataRequired()])
     submit = SubmitField('Добавить плейлист')
+
+class NotificationSettingsForm(FlaskForm):
+    """Форма настроек уведомлений"""
+    email_notifications_enabled = BooleanField('Email уведомления')
+    telegram_notifications_enabled = BooleanField('Telegram уведомления')
+    browser_notifications_enabled = BooleanField('Браузерные уведомления')
+    submit = SubmitField('Сохранить настройки')
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -485,6 +519,157 @@ def yandex_music_auth():
     # Здесь будет логика авторизации Yandex Music
     flash('Авторизация Yandex Music будет реализована в скором времени')
     return redirect(url_for('index'))
+
+# Настройки уведомлений
+@app.route('/settings/notifications', methods=['GET', 'POST'])
+@login_required
+def notification_settings():
+    """Настройки уведомлений пользователя"""
+    form = NotificationSettingsForm()
+    
+    if form.validate_on_submit():
+        current_user.email_notifications_enabled = form.email_notifications_enabled.data
+        current_user.telegram_notifications_enabled = form.telegram_notifications_enabled.data
+        current_user.browser_notifications_enabled = form.browser_notifications_enabled.data
+        
+        db.session.commit()
+        flash('Настройки уведомлений сохранены!')
+        return redirect(url_for('notification_settings'))
+    
+    # Заполняем форму текущими настройками
+    form.email_notifications_enabled.data = current_user.email_notifications_enabled
+    form.telegram_notifications_enabled.data = current_user.telegram_notifications_enabled
+    form.browser_notifications_enabled.data = current_user.browser_notifications_enabled
+    
+    return render_template('notification_settings.html', form=form)
+
+# Telegram интеграция
+@app.route('/telegram/connect')
+@login_required
+def telegram_connect():
+    """Подключение Telegram бота"""
+    bot_username = os.environ.get('TELEGRAM_BOT_USERNAME', 'PlaylistCheckerBot')
+    telegram_url = f"https://t.me/{bot_username}?start={current_user.id}"
+    return redirect(telegram_url)
+
+@app.route('/api/telegram/webhook', methods=['POST'])
+def telegram_webhook():
+    """Webhook для обработки сообщений от Telegram бота"""
+    try:
+        data = request.get_json()
+        
+        if 'message' in data:
+            message = data['message']
+            chat_id = message['chat']['id']
+            text = message.get('text', '')
+            
+            # Обрабатываем команду /start с параметром user_id
+            if text.startswith('/start'):
+                parts = text.split()
+                if len(parts) > 1:
+                    try:
+                        user_id = int(parts[1])
+                        user = User.query.get(user_id)
+                        
+                        if user:
+                            user.telegram_chat_id = str(chat_id)
+                            if 'username' in message['chat']:
+                                user.telegram_username = message['chat']['username']
+                            
+                            db.session.commit()
+                            
+                            # Отправляем подтверждение
+                            from services.notification_service import notification_service
+                            notification_service.send_telegram_notification(
+                                chat_id,
+                                f"✅ Telegram успешно подключен к аккаунту {user.username}!\n\nТеперь вы будете получать уведомления об изменениях в ваших плейлистах."
+                            )
+                            
+                            return {'status': 'ok'}
+                    except ValueError:
+                        pass
+            
+            # Отправляем справку для неизвестных команд
+            from services.notification_service import notification_service
+            notification_service.send_telegram_notification(
+                chat_id,
+                "🤖 Привет! Я бот PlaylistChecker.\n\nДля подключения перейдите в настройки уведомлений на сайте и нажмите 'Подключить Telegram'."
+            )
+        
+        return {'status': 'ok'}
+        
+    except Exception as e:
+        logger.error(f"Ошибка обработки Telegram webhook: {str(e)}")
+        return {'status': 'error'}, 500
+
+# API для браузерных push-уведомлений
+@app.route('/api/push/subscribe', methods=['POST'])
+@login_required
+def push_subscribe():
+    """Подписка на push-уведомления"""
+    try:
+        data = request.get_json()
+        
+        # Проверяем, есть ли уже такая подписка
+        existing = PushSubscription.query.filter_by(
+            user_id=current_user.id,
+            endpoint=data['endpoint']
+        ).first()
+        
+        if existing:
+            # Обновляем существующую подписку
+            existing.p256dh_key = data['keys']['p256dh']
+            existing.auth_key = data['keys']['auth']
+            existing.user_agent = request.headers.get('User-Agent', '')
+            existing.last_used = datetime.utcnow()
+        else:
+            # Создаем новую подписку
+            subscription = PushSubscription(
+                user_id=current_user.id,
+                endpoint=data['endpoint'],
+                p256dh_key=data['keys']['p256dh'],
+                auth_key=data['keys']['auth'],
+                user_agent=request.headers.get('User-Agent', '')
+            )
+            db.session.add(subscription)
+        
+        db.session.commit()
+        return {'status': 'success'}
+        
+    except Exception as e:
+        logger.error(f"Ошибка подписки на push-уведомления: {str(e)}")
+        return {'status': 'error', 'message': str(e)}, 500
+
+@app.route('/api/push/unsubscribe', methods=['POST'])
+@login_required
+def push_unsubscribe():
+    """Отписка от push-уведомлений"""
+    try:
+        data = request.get_json()
+        
+        subscription = PushSubscription.query.filter_by(
+            user_id=current_user.id,
+            endpoint=data['endpoint']
+        ).first()
+        
+        if subscription:
+            db.session.delete(subscription)
+            db.session.commit()
+        
+        return {'status': 'success'}
+        
+    except Exception as e:
+        logger.error(f"Ошибка отписки от push-уведомлений: {str(e)}")
+        return {'status': 'error', 'message': str(e)}, 500
+
+@app.route('/api/push/vapid-public-key')
+def get_vapid_public_key():
+    """Получить публичный VAPID ключ для push-уведомлений"""
+    public_key = os.environ.get('VAPID_PUBLIC_KEY')
+    if not public_key:
+        return {'error': 'VAPID ключ не настроен'}, 500
+    
+    return {'publicKey': public_key}
 
 # Создаем глобальный экземпляр монитора
 monitor = PlaylistMonitor(app)

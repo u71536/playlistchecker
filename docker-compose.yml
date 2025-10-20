@@ -2,7 +2,14 @@ version: '3.8'
 
 services:
   web:
-    build: .
+    # Вариант 1: Сборка из GitHub (раскомментировать если нужно)
+    # build:
+    #   context: https://github.com/u71536/playlistchecker.git
+    #   dockerfile: Dockerfile
+    
+    # Вариант 2: Готовый образ из GitHub Container Registry
+    image: ghcr.io/u71536/playlistchecker:latest
+    
     container_name: playlistchecker-web
     restart: unless-stopped
     env_file:

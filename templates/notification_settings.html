@@ -1,0 +1,288 @@
+{% extends "base.html" %}
+
+{% block title %}Настройки уведомлений - PlaylistChecker{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12">
+        <h1 class="mb-4">
+            <i class="fas fa-bell"></i> Настройки уведомлений
+        </h1>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-cog"></i> Управление уведомлениями
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-4">
+                        <h6 class="text-primary">
+                            <i class="fas fa-envelope"></i> Email уведомления
+                        </h6>
+                        <div class="form-check form-switch">
+                            {{ form.email_notifications_enabled(class="form-check-input", id="emailNotifications") }}
+                            <label class="form-check-label" for="emailNotifications">
+                                Получать уведомления на email
+                            </label>
+                        </div>
+                        <small class="text-muted">
+                            Уведомления будут отправляться на {{ current_user.email }}
+                        </small>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="text-primary">
+                            <i class="fab fa-telegram"></i> Telegram уведомления
+                        </h6>
+                        <div class="form-check form-switch">
+                            {{ form.telegram_notifications_enabled(class="form-check-input", id="telegramNotifications") }}
+                            <label class="form-check-label" for="telegramNotifications">
+                                Получать уведомления в Telegram
+                            </label>
+                        </div>
+                        
+                        {% if current_user.telegram_chat_id %}
+                            <div class="alert alert-success mt-2">
+                                <i class="fas fa-check-circle"></i>
+                                Telegram подключен
+                                {% if current_user.telegram_username %}
+                                    (@{{ current_user.telegram_username }})
+                                {% endif %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning mt-2">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Telegram не подключен. 
+                                <a href="{{ url_for('telegram_connect') }}" class="btn btn-sm btn-primary ms-2">
+                                    <i class="fab fa-telegram"></i> Подключить
+                                </a>
+                            </div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h6 class="text-primary">
+                            <i class="fas fa-desktop"></i> Браузерные уведомления
+                        </h6>
+                        <div class="form-check form-switch">
+                            {{ form.browser_notifications_enabled(class="form-check-input", id="browserNotifications") }}
+                            <label class="form-check-label" for="browserNotifications">
+                                Получать push-уведомления в браузере
+                            </label>
+                        </div>
+                        
+                        <div id="pushNotificationStatus" class="mt-2">
+                            <!-- Статус будет обновлен через JavaScript -->
+                        </div>
+                        
+                        <button type="button" id="enablePushBtn" class="btn btn-sm btn-primary mt-2" style="display: none;">
+                            <i class="fas fa-bell"></i> Разрешить уведомления
+                        </button>
+                    </div>
+                    
+                    <div class="d-grid">
+                        {{ form.submit(class="btn btn-primary") }}
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-lg-4">
+        <div class="card">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle"></i> Информация
+                </h6>
+            </div>
+            <div class="card-body">
+                <h6>Типы уведомлений:</h6>
+                <ul class="list-unstyled">
+                    <li><i class="fas fa-minus text-danger"></i> Удаление треков из плейлистов</li>
+                    <li><i class="fas fa-plus text-success"></i> Добавление новых треков</li>
+                    <li><i class="fas fa-edit text-info"></i> Изменения в плейлистах</li>
+                </ul>
+                
+                <hr>
+                
+                <h6>Частота проверки:</h6>
+                <p class="text-muted">Каждые 10 минут</p>
+                
+                <hr>
+                
+                <h6>Конфиденциальность:</h6>
+                <p class="text-muted small">
+                    Мы не передаем ваши данные третьим лицам. 
+                    Уведомления отправляются только вам.
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JavaScript для браузерных push-уведомлений -->
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const browserNotificationsSwitch = document.getElementById('browserNotifications');
+    const pushNotificationStatus = document.getElementById('pushNotificationStatus');
+    const enablePushBtn = document.getElementById('enablePushBtn');
+    
+    // Проверяем поддержку Service Worker и Push API
+    if ('serviceWorker' in navigator && 'PushManager' in window) {
+        checkPushPermission();
+        
+        enablePushBtn.addEventListener('click', function() {
+            requestPushPermission();
+        });
+        
+        browserNotificationsSwitch.addEventListener('change', function() {
+            if (this.checked) {
+                checkPushPermission();
+            }
+        });
+    } else {
+        pushNotificationStatus.innerHTML = `
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                Ваш браузер не поддерживает push-уведомления
+            </div>
+        `;
+    }
+    
+    function checkPushPermission() {
+        if (Notification.permission === 'granted') {
+            pushNotificationStatus.innerHTML = `
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    Push-уведомления разрешены
+                </div>
+            `;
+            enablePushBtn.style.display = 'none';
+            registerServiceWorker();
+        } else if (Notification.permission === 'denied') {
+            pushNotificationStatus.innerHTML = `
+                <div class="alert alert-danger">
+                    <i class="fas fa-times-circle"></i>
+                    Push-уведомления заблокированы. Разрешите их в настройках браузера.
+                </div>
+            `;
+            enablePushBtn.style.display = 'none';
+        } else {
+            pushNotificationStatus.innerHTML = `
+                <div class="alert alert-info">
+                    <i class="fas fa-info-circle"></i>
+                    Нажмите кнопку ниже, чтобы разрешить push-уведомления
+                </div>
+            `;
+            enablePushBtn.style.display = 'block';
+        }
+    }
+    
+    function requestPushPermission() {
+        Notification.requestPermission().then(function(permission) {
+            checkPushPermission();
+        });
+    }
+    
+    function registerServiceWorker() {
+        navigator.serviceWorker.register('/static/sw.js')
+            .then(function(registration) {
+                console.log('Service Worker зарегистрирован:', registration);
+                return registration.pushManager.getSubscription();
+            })
+            .then(function(subscription) {
+                if (subscription) {
+                    console.log('Уже подписан на push-уведомления');
+                    return;
+                }
+                
+                // Получаем публичный VAPID ключ
+                return fetch('/api/push/vapid-public-key')
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.publicKey) {
+                            return subscribeToPush(data.publicKey);
+                        }
+                    });
+            })
+            .catch(function(error) {
+                console.error('Ошибка регистрации Service Worker:', error);
+            });
+    }
+    
+    function subscribeToPush(vapidPublicKey) {
+        return navigator.serviceWorker.ready
+            .then(function(registration) {
+                const applicationServerKey = urlBase64ToUint8Array(vapidPublicKey);
+                
+                return registration.pushManager.subscribe({
+                    userVisibleOnly: true,
+                    applicationServerKey: applicationServerKey
+                });
+            })
+            .then(function(subscription) {
+                console.log('Подписка на push-уведомления успешна:', subscription);
+                
+                // Отправляем подписку на сервер
+                return fetch('/api/push/subscribe', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        endpoint: subscription.endpoint,
+                        keys: {
+                            p256dh: arrayBufferToBase64(subscription.getKey('p256dh')),
+                            auth: arrayBufferToBase64(subscription.getKey('auth'))
+                        }
+                    })
+                });
+            })
+            .then(function(response) {
+                return response.json();
+            })
+            .then(function(data) {
+                if (data.status === 'success') {
+                    console.log('Подписка сохранена на сервере');
+                }
+            })
+            .catch(function(error) {
+                console.error('Ошибка подписки на push-уведомления:', error);
+            });
+    }
+    
+    // Утилиты для конвертации ключей
+    function urlBase64ToUint8Array(base64String) {
+        const padding = '='.repeat((4 - base64String.length % 4) % 4);
+        const base64 = (base64String + padding)
+            .replace(/-/g, '+')
+            .replace(/_/g, '/');
+        
+        const rawData = window.atob(base64);
+        const outputArray = new Uint8Array(rawData.length);
+        
+        for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+        }
+        return outputArray;
+    }
+    
+    function arrayBufferToBase64(buffer) {
+        const bytes = new Uint8Array(buffer);
+        let binary = '';
+        for (let i = 0; i < bytes.byteLength; i++) {
+            binary += String.fromCharCode(bytes[i]);
+        }
+        return window.btoa(binary);
+    }
+});
+</script>
+{% endblock %}
