@@ -22,13 +22,19 @@ def show_database_stats():
         
         # Пользователи
         users_count = User.query.count()
+        telegram_connected = User.query.filter(User.telegram_chat_id.isnot(None)).count()
+        telegram_enabled = User.query.filter_by(telegram_notifications_enabled=True).count()
+        
         print(f"👥 Пользователей: {users_count}")
+        print(f"   📱 Telegram подключен: {telegram_connected}")
+        print(f"   🔔 Telegram уведомления включены: {telegram_enabled}")
         
         if users_count > 0:
             print("   Последние пользователи:")
             recent_users = User.query.order_by(User.created_at.desc()).limit(5).all()
             for user in recent_users:
-                print(f"   - {user.username} ({user.email}) - {user.created_at.strftime('%Y-%m-%d %H:%M')}")
+                tg_status = "📱" if user.telegram_chat_id else "❌"
+                print(f"   - {user.username} ({user.email}) {tg_status} - {user.created_at.strftime('%Y-%m-%d %H:%M')}")
         
         print()
         
@@ -120,6 +126,21 @@ def show_user_details(user_id=None):
             print(f"\n👤 ПОЛЬЗОВАТЕЛЬ: {user.username} (ID: {user.id})")
             print(f"   Email: {user.email}")
             print(f"   Зарегистрирован: {user.created_at.strftime('%Y-%m-%d %H:%M')}")
+            
+            # Telegram интеграция
+            print(f"   📱 Telegram:")
+            if user.telegram_chat_id:
+                print(f"      Chat ID: {user.telegram_chat_id}")
+                print(f"      Username: {user.telegram_username or 'Не указан'}")
+                print(f"      Уведомления: {'✅ Включены' if user.telegram_notifications_enabled else '❌ Отключены'}")
+            else:
+                print(f"      ❌ Не подключен")
+            
+            # Настройки уведомлений
+            print(f"   🔔 Уведомления:")
+            print(f"      Email: {'✅' if user.email_notifications_enabled else '❌'}")
+            print(f"      Telegram: {'✅' if user.telegram_notifications_enabled else '❌'}")
+            print(f"      Браузер: {'✅' if user.browser_notifications_enabled else '❌'}")
             
             # Плейлисты пользователя
             playlists = Playlist.query.filter_by(user_id=user.id).all()
