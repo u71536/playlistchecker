@@ -1,32 +1,164 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Панель управления') }} - PlaylistChecker{% endblock %}
+{% block title %}{{ _('dashboard.dashboard') }} - PlaylistChecker{% endblock %}
 
 {% block content %}
-<div class="row">
+<style>
+    .stat-card {
+        border-radius: 20px;
+        padding: 2rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(30%, -30%);
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        opacity: 0.9;
+    }
+    
+    .stat-number {
+        font-size: 2.5rem;
+        font-weight: 800;
+        margin: 0.5rem 0;
+    }
+    
+    .service-connection-card {
+        border-radius: 20px;
+        background: white;
+        padding: 2rem;
+        text-align: center;
+        transition: all 0.3s ease;
+        border: 2px solid #f1f5f9;
+        height: 100%;
+    }
+    
+    .service-connection-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-light);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .service-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1.5rem;
+    }
+    
+    .playlist-card-modern {
+        border-radius: 16px;
+        border: 2px solid #f1f5f9;
+        transition: all 0.3s ease;
+        background: white;
+        overflow: hidden;
+    }
+    
+    .playlist-card-modern:hover {
+        transform: translateY(-5px);
+        border-color: var(--primary-light);
+        box-shadow: 0 10px 30px rgba(99, 102, 241, 0.15);
+    }
+    
+    .playlist-header {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        padding: 1.25rem;
+        border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+    }
+    
+    .notification-card {
+        border-left: 4px solid #f59e0b;
+        border-radius: 12px;
+        background: #fffbeb;
+        padding: 1.5rem;
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .notification-card:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(245, 158, 11, 0.2);
+    }
+    
+    .track-stat {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        border-right: 1px solid rgba(99, 102, 241, 0.2);
+    }
+    
+    .track-stat:last-child {
+        border-right: none;
+    }
+    
+    .track-stat-number {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: var(--primary-color);
+    }
+</style>
+
+<div class="row mb-4">
     <div class="col-12">
-        <h1 class="mb-4">
-            <i class="fas fa-tachometer-alt"></i> {{ _('Панель управления') }}
-        </h1>
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h1 class="display-5 fw-bold mb-2">
+                    <i class="fas fa-tachometer-alt text-primary"></i> {{ _('dashboard.dashboard') }}
+                </h1>
+                <p class="text-muted">Welcome back! Here's your playlist overview</p>
+            </div>
+        </div>
     </div>
 </div>
 
-<!-- Уведомления -->
+<!-- Notifications -->
 {% if notifications %}
-<div class="row mb-4">
+<div class="row mb-4 fade-in-up">
     <div class="col-12">
-        <div class="card border-warning">
-            <div class="card-header bg-warning text-dark">
-                <h5 class="mb-0">
-                    <i class="fas fa-bell"></i> {{ _('Новые уведомления') }}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white border-bottom-0">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-bell text-warning"></i> {{ _('dashboard.new_notification') }}
                 </h5>
             </div>
             <div class="card-body">
                 {% for notification in notifications %}
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    <strong>{{ notification.playlist.name }}</strong>: {{ notification.message }}
-                    <small class="text-muted">({{ notification.created_at.strftime('%d.%m.%Y %H:%M') }})</small>
-                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                <div class="notification-card">
+                    <div class="d-flex justify-content-between align-items-start">
+                        <div>
+                            <strong class="text-dark">{{ notification.playlist.name }}</strong>
+                            <p class="mb-0 mt-1 text-muted">{{ notification.message }}</p>
+                            <small class="text-muted">
+                                <i class="fas fa-clock me-1"></i>
+                                {{ notification.created_at.strftime('%d.%m.%Y %H:%M') }}
+                            </small>
+                        </div>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    </div>
                 </div>
                 {% endfor %}
             </div>
@@ -35,122 +167,117 @@
 </div>
 {% endif %}
 
-<!-- Статистика -->
-<div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body text-center">
-                <i class="fas fa-list fa-2x mb-2"></i>
-                <h4>{{ playlists|length }}</h4>
-                <p class="mb-0">{{ _('Плейлистов отслеживается') }}</p>
+<!-- Statistics -->
+<div class="row g-4 mb-4">
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="position-relative">
+                <div class="stat-icon">
+                    <i class="fas fa-list"></i>
+                </div>
+                <div class="stat-number">{{ playlists|length }}</div>
+                <p class="mb-0 opacity-90">{{ _('dashboard.playlists_being_tracked') }}</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body text-center">
-                <i class="fas fa-check-circle fa-2x mb-2"></i>
-                <h4>{{ playlists|selectattr('last_checked')|list|length }}</h4>
-                <p class="mb-0">{{ _('Проверено сегодня') }}</p>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <div class="position-relative">
+                <div class="stat-icon">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <div class="stat-number">{{ playlists|selectattr('last_checked')|list|length }}</div>
+                <p class="mb-0 opacity-90">{{ _('dashboard.checked_today') }}</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card bg-warning text-white">
-            <div class="card-body text-center">
-                <i class="fas fa-exclamation-triangle fa-2x mb-2"></i>
-                <h4>{{ notifications|length }}</h4>
-                <p class="mb-0">{{ _('Новых уведомлений') }}</p>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+            <div class="position-relative">
+                <div class="stat-icon">
+                    <i class="fas fa-exclamation-triangle"></i>
+                </div>
+                <div class="stat-number">{{ notifications|length }}</div>
+                <p class="mb-0 opacity-90">{{ _('dashboard.new_notifications') }}</p>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body text-center">
-                <i class="fas fa-clock fa-2x mb-2"></i>
-                <h4>9:00</h4>
-                <p class="mb-0">{{ _('Следующая проверка') }}</p>
+    <div class="col-md-6 col-lg-3">
+        <div class="stat-card" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+            <div class="position-relative">
+                <div class="stat-icon">
+                    <i class="fas fa-clock"></i>
+                </div>
+                <div class="stat-number">9:00</div>
+                <p class="mb-0 opacity-90">{{ _('dashboard.next_check') }}</p>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Подключенные сервисы -->
+<!-- Connected Services -->
 <div class="row mb-4">
     <div class="col-12">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-plug"></i> {{ _('Подключенные сервисы') }}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-plug text-primary"></i> {{ _('dashboard.connected_services') }}
                 </h5>
             </div>
-            <div class="card-body">
-                <div class="row">
-                    <div class="col-md-3 text-center mb-3">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <i class="fab fa-spotify fa-3x text-success mb-3"></i>
-                                <h6>Spotify</h6>
-                                {% if current_user.spotify_tokens %}
-                                    <div>
-                                        <span class="badge bg-success mb-2">{{ _('Подключен') }}</span>
-                                        <br>
-                                        <a href="{{ url_for('spotify_playlists') }}" class="btn btn-outline-success btn-sm">
-                                            <i class="fas fa-list"></i> {{ _('Мои плейлисты') }}
-                                        </a>
-                                    </div>
-                                {% else %}
-                                    <a href="{{ url_for('spotify_auth') }}" class="btn btn-outline-success btn-sm">{{ _('Подключить') }}</a>
-                                {% endif %}
+            <div class="card-body p-4">
+                <div class="row g-4">
+                    <div class="col-md-4">
+                        <div class="service-connection-card">
+                            <div class="service-icon-wrapper" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));">
+                                <i class="fab fa-spotify fa-3x text-success"></i>
                             </div>
+                            <h6 class="fw-bold mb-3">Spotify</h6>
+                            {% if current_user.spotify_tokens %}
+                                <span class="badge bg-success mb-3">
+                                    <i class="fas fa-check-circle me-1"></i>{{ _('dashboard.connected') }}
+                                </span>
+                                <br>
+                                <a href="{{ url_for('spotify_playlists') }}" class="btn btn-success">
+                                    <i class="fas fa-list me-2"></i>{{ _('base.my_playlists') }}
+                                </a>
+                            {% else %}
+                                <a href="{{ url_for('spotify_auth') }}" class="btn btn-outline-success">
+                                    <i class="fas fa-plug me-2"></i>{{ _('notification_settings.connect_telegram') }}
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                     
-                    <!-- Deezer временно скрыт
-                    <div class="col-md-3 text-center mb-3">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <i class="fas fa-music fa-3x text-primary mb-3"></i>
-                                <h6>Deezer</h6>
-                                {% if current_user.deezer_tokens %}
-                                    <span class="badge bg-success">{{ _('Подключен') }}</span>
-                                {% else %}
-                                    <a href="{{ url_for('deezer_auth') }}" class="btn btn-outline-primary btn-sm">Подключить</a>
-                                {% endif %}
+                    <div class="col-md-4">
+                        <div class="service-connection-card">
+                            <div class="service-icon-wrapper" style="background: linear-gradient(135deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1));">
+                                <i class="fab fa-apple fa-3x text-dark"></i>
                             </div>
-                        </div>
-                    </div>
-                    -->
-                    
-                    <div class="col-md-3 text-center mb-3">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <i class="fab fa-apple fa-3x text-dark mb-3"></i>
-                                <h6>Apple Music</h6>
-                                {% if current_user.apple_music_tokens %}
-                                    <span class="badge bg-success">{{ _('Подключен') }}</span>
-                                {% else %}
-                                    <a href="{{ url_for('apple_music_auth') }}" class="btn btn-outline-dark btn-sm">{{ _('Подключить') }}</a>
-                                {% endif %}
-                            </div>
+                            <h6 class="fw-bold mb-3">Apple Music</h6>
+                            {% if current_user.apple_music_tokens %}
+                                <span class="badge bg-dark mb-3">
+                                    <i class="fas fa-check-circle me-1"></i>{{ _('dashboard.connected') }}
+                                </span>
+                            {% else %}
+                                <a href="{{ url_for('apple_music_auth') }}" class="btn btn-outline-dark">
+                                    <i class="fas fa-plug me-2"></i>{{ _('notification_settings.connect_telegram') }}
+                                </a>
+                            {% endif %}
                         </div>
                     </div>
                     
-                    <div class="col-md-3 text-center mb-3">
-                        <div class="card h-100">
-                            <div class="card-body">
-                                <i class="fas fa-music fa-3x text-danger mb-3"></i>
-                                <h6>Yandex Music</h6>
-                                <div>
-                                    <span class="badge bg-info mb-2">{{ _('Публичные плейлисты') }}</span>
-                                    <br>
-                                    <small class="text-muted">{{ _('Без авторизации') }}</small>
-                                    <br>
-                                    <a href="{{ url_for('add_playlist') }}" class="btn btn-outline-danger btn-sm mt-2">
-                                        <i class="fas fa-plus"></i> {{ _('Добавить плейлист') }}
-                                    </a>
-                                </div>
+                    <div class="col-md-4">
+                        <div class="service-connection-card">
+                            <div class="service-icon-wrapper" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));">
+                                <i class="fas fa-music fa-3x text-danger"></i>
                             </div>
+                            <h6 class="fw-bold mb-3">Yandex Music</h6>
+                            <span class="badge bg-info mb-2">{{ _('dashboard.public_playlists') }}</span>
+                            <br>
+                            <small class="text-muted d-block mb-3">{{ _('dashboard.without_authorization') }}</small>
+                            <a href="{{ url_for('add_playlist') }}" class="btn btn-outline-danger">
+                                <i class="fas fa-plus me-2"></i>{{ _('add_playlist.add_playlist') }}
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -159,50 +286,77 @@
     </div>
 </div>
 
-<!-- Мои плейлисты -->
+<!-- My Playlists -->
 <div class="row">
     <div class="col-12">
-        <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                    <i class="fas fa-list"></i> {{ _('Мои плейлисты') }}
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-white d-flex justify-content-between align-items-center">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-list text-primary"></i> {{ _('base.my_playlists') }}
                 </h5>
                 <a href="{{ url_for('add_playlist') }}" class="btn btn-primary">
-                    <i class="fas fa-plus"></i> {{ _('Добавить плейлист') }}
+                    <i class="fas fa-plus me-2"></i>{{ _('add_playlist.add_playlist') }}
                 </a>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 {% if playlists %}
-                    <div class="row">
+                    <div class="row g-4">
                         {% for playlist in playlists %}
-                        <div class="col-md-6 col-lg-4 mb-3">
-                            <div class="card playlist-card h-100">
-                                <div class="card-body">
-                                    <div class="d-flex align-items-center mb-2">
-                                        {% if playlist.service == 'spotify' %}
-                                            <i class="fab fa-spotify text-success me-2"></i>
-                                        {% elif playlist.service == 'deezer' %}
-                                            <i class="fas fa-music text-primary me-2"></i>
-                                        {% elif playlist.service == 'apple_music' %}
-                                            <i class="fab fa-apple text-dark me-2"></i>
-                                        {% elif playlist.service == 'yandex_music' %}
-                                            <i class="fas fa-music text-danger me-2"></i>
-                                        {% endif %}
-                                        <span class="badge bg-secondary">{{ playlist.service|title }}</span>
+                        <div class="col-md-6 col-lg-4">
+                            <div class="playlist-card-modern h-100">
+                                <div class="playlist-header">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            {% if playlist.service == 'spotify' %}
+                                                <i class="fab fa-spotify text-success me-2 fa-lg"></i>
+                                            {% elif playlist.service == 'deezer' %}
+                                                <i class="fas fa-music text-primary me-2 fa-lg"></i>
+                                            {% elif playlist.service == 'apple_music' %}
+                                                <i class="fab fa-apple text-dark me-2 fa-lg"></i>
+                                            {% elif playlist.service == 'yandex_music' %}
+                                                <i class="fas fa-music text-danger me-2 fa-lg"></i>
+                                            {% endif %}
+                                            <span class="badge bg-secondary">{{ playlist.service|title }}</span>
+                                        </div>
                                     </div>
-                                    <h6 class="card-title">{{ playlist.name }}</h6>
+                                </div>
+                                <div class="card-body p-3">
+                                    <h6 class="fw-bold mb-2">{{ playlist.name }}</h6>
                                     {% if playlist.description %}
-                                        <p class="card-text text-muted small">{{ playlist.description[:100] }}{% if playlist.description|length > 100 %}...{% endif %}</p>
+                                        <p class="card-text text-muted small mb-3">
+                                            {{ playlist.description[:100] }}{% if playlist.description|length > 100 %}...{% endif %}
+                                        </p>
                                     {% endif %}
+                                    
+                                    <div class="row g-2 mb-3">
+                                        <div class="col-4">
+                                            <div class="track-stat">
+                                                <div class="track-stat-number">{{ playlist.tracks|length }}</div>
+                                                <small class="text-muted">Tracks</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="track-stat">
+                                                <div class="track-stat-number text-danger">{{ playlist.tracks|selectattr('is_removed', 'equalto', true)|list|length }}</div>
+                                                <small class="text-muted">Removed</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-4">
+                                            <div class="track-stat">
+                                                <div class="track-stat-number text-success">{{ playlist.tracks|selectattr('is_removed', 'equalto', false)|list|length }}</div>
+                                                <small class="text-muted">Active</small>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
                                     <div class="d-flex justify-content-between align-items-center">
                                         <small class="text-muted">
                                             {% if playlist.last_checked %}
-                                                {{ _('Проверен') }}: {{ playlist.last_checked.strftime('%d.%m.%Y %H:%M') }}
+                                                <i class="fas fa-clock me-1"></i>{{ playlist.last_checked.strftime('%d.%m.%Y %H:%M') }}
                                             {% else %}
-                                                {{ _('Не проверялся') }}
+                                                <i class="fas fa-exclamation-circle text-warning me-1"></i>{{ _('dashboard.not_checked') }}
                                             {% endif %}
                                         </small>
-                                        <span class="badge bg-info">{{ playlist.tracks|length }} {{ _('треков') }}</span>
                                     </div>
                                 </div>
                             </div>
@@ -211,11 +365,13 @@
                     </div>
                 {% else %}
                     <div class="text-center py-5">
-                        <i class="fas fa-music fa-3x text-muted mb-3"></i>
-                        <h5 class="text-muted">{{ _('У вас пока нет плейлистов') }}</h5>
-                        <p class="text-muted">{{ _('Добавьте плейлисты для отслеживания изменений') }}</p>
-                        <a href="{{ url_for('add_playlist') }}" class="btn btn-primary">
-                            <i class="fas fa-plus"></i> {{ _('Добавить первый плейлист') }}
+                        <div class="mb-4">
+                            <i class="fas fa-music fa-4x text-muted opacity-50"></i>
+                        </div>
+                        <h5 class="fw-bold mb-2">{{ _('dashboard.no_playlists') }}</h5>
+                        <p class="text-muted mb-4">{{ _('dashboard.add_playlists_for_tracking') }}</p>
+                        <a href="{{ url_for('add_playlist') }}" class="btn btn-primary btn-lg">
+                            <i class="fas fa-plus me-2"></i>{{ _('add_playlist.add_new_playlist') }}
                         </a>
                     </div>
                 {% endif %}

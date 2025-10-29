@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('О сервисе') }} PlaylistChecker - {{ _('Мониторинг плейлистов Spotify, Apple Music, Yandex Music') }}{% endblock %}
+{% block title %}{{ _('base.about') }} PlaylistChecker - {{ _('page.about.monitoring_description') }}{% endblock %}
 
-{% block description %}{{ _('Узнайте больше о PlaylistChecker - профессиональном сервисе для отслеживания изменений в плейлистах. Подробное описание функций, возможностей и преимуществ нашего сервиса мониторинга музыкальных коллекций.') }}{% endblock %}
+{% block description %}{{ _('page.about.monitoring_description') }}{% endblock %}
 
-{% block keywords %}{{ _('о сервисе, playlistchecker, мониторинг плейлистов, функции, возможности, spotify, apple music, yandex music, музыкальные сервисы') }}{% endblock %}
+{% block keywords %}{{ _('page.about.keywords') }}{% endblock %}
 
 {% block content %}
 <div class="row">
     <div class="col-lg-10 mx-auto">
         <div class="text-center mb-5">
             <h1 class="display-4 fw-bold text-primary">
-                <i class="fas fa-info-circle"></i> {{ _('О сервисе') }} PlaylistChecker
+                <i class="fas fa-info-circle"></i> {{ _('base.about') }} PlaylistChecker
             </h1>
-            <p class="lead">{{ _('Профессиональное решение для мониторинга ваших музыкальных коллекций') }}</p>
+            <p class="lead">{{ _('page.about.subtitle') }}</p>
         </div>
 
         <!-- Основная информация -->
@@ -21,40 +21,177 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">
-                        <h2 class="mb-4">{{ _('Что такое PlaylistChecker?') }}</h2>
-                        <p class="lead">{{ _('PlaylistChecker — это инновационный веб-сервис, созданный для решения проблемы исчезающих песен из музыкальных плейлистов. Мы понимаем, как важно сохранить целостность ваших музыкальных коллекций, и предлагаем автоматизированное решение для мониторинга изменений.') }}</p>
+                        <h2 class="mb-4">{{ _('page.about.title') }}</h2>
+                        <p class="lead">{{ _('page.about.description') }}</p>
                         
-                        <p>{{ _('Наш сервис работает 24/7, отслеживая ваши плейлисты на популярных музыкальных платформах и уведомляя вас о любых изменениях в режиме реального времени. Больше не нужно вручную проверять каждый плейлист — мы сделаем это за вас!') }}</p>
+                        <p>{{ _('page.about.work') }}</p>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- Проблема, которую мы решаем -->
+        <!-- Статистика проблемы -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card bg-danger bg-opacity-10">
+                    <div class="card-body">
+                        <h2 class="text-center mb-4"><i class="fas fa-chart-bar text-danger"></i> {{ _('why_check.stats_title') }}</h2>
+                        <div class="row text-center">
+                            <div class="col-md-3 mb-3">
+                                <div class="bg-danger text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                    <span class="fw-bold fs-4">73%</span>
+                                </div>
+                                <h5 class="mt-2">{{ _('why_check.stats.users_lose_songs') }}</h5>
+                                <p class="text-muted">{{ _('why_check.stats.due_to_licensing') }}</p>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="bg-warning text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                    <span class="fw-bold fs-4">45%</span>
+                                </div>
+                                <h5 class="mt-2">{{ _('why_check.stats.playlists_compromised') }}</h5>
+                                <p class="text-muted">{{ _('why_check.stats.due_to_catalog_changes') }}</p>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="bg-info text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                    <span class="fw-bold fs-4">2-3</span>
+                                </div>
+                                <h5 class="mt-2">{{ _('why_check.stats.weeks_average') }}</h5>
+                                <p class="text-muted">{{ _('why_check.stats.until_detection') }}</p>
+                            </div>
+                            <div class="col-md-3 mb-3">
+                                <div class="bg-success text-white rounded-circle d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
+                                    <span class="fw-bold fs-4">90%</span>
+                                </div>
+                                <h5 class="mt-2">{{ _('why_check.stats.can_prevent') }}</h5>
+                                <p class="text-muted">{{ _('why_check.stats.with_monitoring') }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Основные причины исчезновения песен -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="text-center mb-4">{{ _('why_check.reasons_title') }}</h2>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-danger">
+                    <div class="card-body">
+                        <i class="fas fa-file-contract fa-3x text-danger mb-3"></i>
+                        <h5 class="card-title">{{ _('why_check.reason.license_expiration') }}</h5>
+                        <p class="card-text">{{ _('why_check.reason.license_expiration_desc') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-warning">
+                    <div class="card-body">
+                        <i class="fas fa-gavel fa-3x text-warning mb-3"></i>
+                        <h5 class="card-title">{{ _('why_check.reason.copyright_disputes') }}</h5>
+                        <p class="card-text">{{ _('why_check.reason.copyright_disputes_desc') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-info">
+                    <div class="card-body">
+                        <i class="fas fa-globe fa-3x text-info mb-3"></i>
+                        <h5 class="card-title">{{ _('why_check.reason.regional_restrictions') }}</h5>
+                        <p class="card-text">{{ _('why_check.reason.regional_restrictions_desc') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-secondary">
+                    <div class="card-body">
+                        <i class="fas fa-cog fa-3x text-secondary mb-3"></i>
+                        <h5 class="card-title">{{ _('why_check.reason.technical_failures') }}</h5>
+                        <p class="card-text">{{ _('why_check.reason.technical_failures_desc') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-primary">
+                    <div class="card-body">
+                        <i class="fas fa-edit fa-3x text-primary mb-3"></i>
+                        <h5 class="card-title">{{ _('why_check.reason.metadata_changes') }}</h5>
+                        <p class="card-text">{{ _('why_check.reason.metadata_changes_desc') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6 col-lg-4">
+                <div class="card h-100 border-success">
+                    <div class="card-body">
+                        <i class="fas fa-ban fa-3x text-success mb-3"></i>
+                        <h5 class="card-title">{{ _('why_check.reason.platform_policy') }}</h5>
+                        <p class="card-text">{{ _('why_check.reason.platform_policy_desc') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Последствия для пользователей -->
         <div class="row mb-5">
             <div class="col-12">
                 <div class="card bg-warning bg-opacity-10">
                     <div class="card-body">
-                        <h2 class="mb-4"><i class="fas fa-exclamation-triangle text-warning"></i> {{ _('Проблема исчезающих песен') }}</h2>
+                        <h2 class="mb-4"><i class="fas fa-exclamation-triangle text-warning"></i> {{ _('why_check.consequences_title') }}</h2>
                         <div class="row">
                             <div class="col-md-6">
-                                <h4>{{ _('Почему песни исчезают?') }}</h4>
+                                <h4>{{ _('why_check.consequences.emotional_title') }}</h4>
                                 <ul class="list-unstyled">
-                                    <li><i class="fas fa-check text-danger"></i> {{ _('Истечение лицензионных соглашений') }}</li>
-                                    <li><i class="fas fa-check text-danger"></i> {{ _('Изменения в политике платформ') }}</li>
-                                    <li><i class="fas fa-check text-danger"></i> {{ _('Проблемы с авторскими правами') }}</li>
-                                    <li><i class="fas fa-check text-danger"></i> {{ _('Технические сбои сервисов') }}</li>
-                                    <li><i class="fas fa-check text-danger"></i> {{ _('Региональные ограничения') }}</li>
+                                    <li><i class="fas fa-heart-broken text-danger"></i>{{ _('page.about.problem.consequence1') }}</li>
+                                    <li><i class="fas fa-sad-tear text-danger"></i>{{ _('page.about.problem.consequence2') }}</li>
+                                    <li><i class="fas fa-clock text-warning"></i>{{ _('page.about.problem.consequence3') }}</li>
+                                    <li><i class="fas fa-frown text-warning"></i>{{ _('page.about.problem.consequence4') }}</li>
                                 </ul>
                             </div>
                             <div class="col-md-6">
-                                <h4>{{ _('Последствия для пользователей') }}</h4>
+                                <h4>{{ _('why_check.consequences.practical_title') }}</h4>
                                 <ul class="list-unstyled">
-                                    <li><i class="fas fa-times text-danger"></i> {{ _('Потеря любимых композиций') }}</li>
-                                    <li><i class="fas fa-times text-danger"></i> {{ _('Нарушение целостности плейлистов') }}</li>
-                                    <li><i class="fas fa-times text-danger"></i> {{ _('Необходимость ручной проверки') }}</li>
-                                    <li><i class="fas fa-times text-danger"></i> {{ _('Потеря времени на восстановление') }}</li>
+                                    <li><i class="fas fa-list text-danger"></i>{{ _('page.about.problem.consequence2') }}</li>
+                                    <li><i class="fas fa-search text-warning"></i>{{ _('page.about.problem.consequence3') }}</li>
+                                    <li><i class="fas fa-time text-warning"></i>{{ _('page.about.problem.consequence4') }}</li>
+                                    <li><i class="fas fa-mobile-alt text-info"></i>{{ _('page.about.problem.consequence5') }}</li>
                                 </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Решение проблемы -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="card bg-success bg-opacity-10">
+                    <div class="card-body">
+                        <h2 class="mb-4"><i class="fas fa-shield-alt text-success"></i> {{ _('why_check.solutions_title') }}</h2>
+                        <div class="row">
+                            <div class="col-md-4 text-center mb-4">
+                                <i class="fas fa-eye fa-3x text-success mb-3"></i>
+                                <h4>{{ _('why_check.solution.constant_monitoring') }}</h4>
+                                <p>{{ _('why_check.solution.constant_monitoring_desc') }}</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-4">
+                                <i class="fas fa-bell fa-3x text-primary mb-3"></i>
+                                <h4>{{ _('why_check.solution.instant_notifications') }}</h4>
+                                <p>{{ _('why_check.solution.instant_notifications_desc') }}</p>
+                            </div>
+                            <div class="col-md-4 text-center mb-4">
+                                <i class="fas fa-chart-line fa-3x text-info mb-3"></i>
+                                <h4>{{ _('why_check.solution.detailed_analytics') }}</h4>
+                                <p>{{ _('why_check.solution.detailed_analytics_desc') }}</p>
                             </div>
                         </div>
                     </div>
@@ -65,7 +202,7 @@
         <!-- Наши возможности -->
         <div class="row mb-5">
             <div class="col-12">
-                <h2 class="text-center mb-4">{{ _('Возможности PlaylistChecker') }}</h2>
+                <h2 class="text-center mb-4">{{ _('page.about.features.title') }}</h2>
             </div>
         </div>
 
@@ -74,8 +211,8 @@
                 <div class="card h-100">
                     <div class="card-body text-center">
                         <i class="fas fa-sync-alt fa-3x text-primary mb-3"></i>
-                        <h5 class="card-title">{{ _('Автоматический мониторинг') }}</h5>
-                        <p class="card-text">{{ _('Постоянная проверка ваших плейлистов каждые 10 минут без вашего участия') }}</p>
+                        <h5 class="card-title">{{ _('page.about.features.monitoring') }}</h5>
+                        <p class="card-text">{{ _('page.about.features.monitoring.description') }}</p>
                     </div>
                 </div>
             </div>
@@ -84,8 +221,8 @@
                 <div class="card h-100">
                     <div class="card-body text-center">
                         <i class="fas fa-bell fa-3x text-success mb-3"></i>
-                        <h5 class="card-title">{{ _('Мгновенные уведомления') }}</h5>
-                        <p class="card-text">{{ _('Получайте уведомления о любых изменениях в ваших плейлистах в реальном времени') }}</p>
+                        <h5 class="card-title">{{ _('page.about.features.notifications') }}</h5>
+                        <p class="card-text">{{ _('page.about.features.notifications.description') }}</p>
                     </div>
                 </div>
             </div>
@@ -94,8 +231,8 @@
                 <div class="card h-100">
                     <div class="card-body text-center">
                         <i class="fas fa-music fa-3x text-info mb-3"></i>
-                        <h5 class="card-title">{{ _('Множество платформ') }}</h5>
-                        <p class="card-text">{{ _('Поддержка Spotify, Apple Music, Yandex Music и других популярных сервисов') }}</p>
+                        <h5 class="card-title">{{ _('page.about.features.platforms') }}</h5>
+                        <p class="card-text">{{ _('page.about.features.platforms.description') }}</p>
                     </div>
                 </div>
             </div>
@@ -104,8 +241,8 @@
                 <div class="card h-100">
                     <div class="card-body text-center">
                         <i class="fas fa-chart-line fa-3x text-warning mb-3"></i>
-                        <h5 class="card-title">Детальная статистика</h5>
-                        <p class="card-text">Анализ изменений, история модификаций и тренды в ваших коллекциях</p>
+                        <h5 class="card-title">{{ _('page.about.features.stats') }}</h5>
+                        <p class="card-text">{{ _('page.about.features.stats.description') }}</p>
                     </div>
                 </div>
             </div>
@@ -114,8 +251,8 @@
                 <div class="card h-100">
                     <div class="card-body text-center">
                         <i class="fas fa-lock fa-3x text-danger mb-3"></i>
-                        <h5 class="card-title">Безопасность данных</h5>
-                        <p class="card-text">Ваши данные защищены современными методами шифрования и аутентификации</p>
+                        <h5 class="card-title">{{ _('page.about.features.security') }}</h5>
+                        <p class="card-text">{{ _('page.about.features.security.description') }}</p>
                     </div>
                 </div>
             </div>
@@ -124,8 +261,53 @@
                 <div class="card h-100">
                     <div class="card-body text-center">
                         <i class="fas fa-mobile-alt fa-3x text-secondary mb-3"></i>
-                        <h5 class="card-title">Удобный интерфейс</h5>
-                        <p class="card-text">Адаптивный дизайн для комфортного использования на любых устройствах</p>
+                        <h5 class="card-title">{{ _('page.about.features.interface') }}</h5>
+                        <p class="card-text">{{ _('page.about.features.interface.description') }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Преимущества мониторинга -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <h2 class="text-center mb-4">{{ _('why_check.benefits_title') }}</h2>
+            </div>
+        </div>
+
+        <div class="row g-4 mb-5">
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4><i class="fas fa-check-circle text-success"></i> {{ _('why_check.benefit.preserve_integrity') }}</h4>
+                        <p>{{ _('why_check.benefit.preserve_integrity_desc') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4><i class="fas fa-clock text-primary"></i> {{ _('why_check.benefit.save_time') }}</h4>
+                        <p>{{ _('why_check.benefit.save_time_desc') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4><i class="fas fa-heart text-danger"></i> {{ _('why_check.benefit.protect_memories') }}</h4>
+                        <p>{{ _('why_check.benefit.protect_memories_desc') }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-6">
+                <div class="card h-100">
+                    <div class="card-body">
+                        <h4><i class="fas fa-chart-bar text-info"></i> {{ _('why_check.benefit.understand_trends') }}</h4>
+                        <p>{{ _('why_check.benefit.understand_trends_desc') }}</p>
                     </div>
                 </div>
             </div>
@@ -136,53 +318,22 @@
             <div class="col-12">
                 <div class="card bg-light">
                     <div class="card-body">
-                        <h2 class="text-center mb-4">Поддерживаемые музыкальные сервисы</h2>
+                        <h2 class="text-center mb-4">{{ _('page.about.features.supported.title') }}</h2>
                         <div class="row">
                             <div class="col-md-4 text-center mb-4">
                                 <i class="fab fa-spotify fa-4x text-success mb-3"></i>
                                 <h4>Spotify</h4>
-                                <p>Полная поддержка всех функций Spotify, включая публичные и приватные плейлисты</p>
+                                <p>{{ _('page.about.features.supported.spotify.description') }}</p>
                             </div>
                             <div class="col-md-4 text-center mb-4">
                                 <i class="fab fa-apple fa-4x text-dark mb-3"></i>
                                 <h4>Apple Music</h4>
-                                <p>Мониторинг плейлистов Apple Music с сохранением всех метаданных</p>
+                                <p>{{ _('page.about.features.supported.apple_music.description') }}</p>
                             </div>
                             <div class="col-md-4 text-center mb-4">
                                 <i class="fas fa-music fa-4x text-danger mb-3"></i>
                                 <h4>Yandex Music</h4>
-                                <p>Отслеживание изменений в плейлистах Яндекс.Музыки</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Технические детали -->
-        <div class="row mb-5">
-            <div class="col-12">
-                <div class="card">
-                    <div class="card-body">
-                        <h2 class="mb-4">Технические особенности</h2>
-                        <div class="row">
-                            <div class="col-md-6">
-                                <h4><i class="fas fa-cog text-primary"></i> Архитектура</h4>
-                                <ul>
-                                    <li>Современный веб-фреймворк Flask</li>
-                                    <li>Надежная база данных SQLite/PostgreSQL</li>
-                                    <li>Асинхронная обработка задач</li>
-                                    <li>RESTful API для интеграций</li>
-                                </ul>
-                            </div>
-                            <div class="col-md-6">
-                                <h4><i class="fas fa-shield-alt text-success"></i> Безопасность</h4>
-                                <ul>
-                                    <li>OAuth 2.0 аутентификация</li>
-                                    <li>Шифрование токенов доступа</li>
-                                    <li>Защита от CSRF атак</li>
-                                    <li>Регулярные обновления безопасности</li>
-                                </ul>
+                                <p>{{ _('page.about.features.supported.yandex_music.description') }}</p>
                             </div>
                         </div>
                     </div>
@@ -195,18 +346,18 @@
             <div class="col-12">
                 <div class="card bg-primary text-white text-center">
                     <div class="card-body">
-                        <h2 class="mb-4">Готовы начать?</h2>
-                        <p class="lead mb-4">Присоединяйтесь к тысячам пользователей, которые уже защищают свои музыкальные коллекции с помощью PlaylistChecker</p>
+                        <h2 class="mb-4">{{ _('why_check.cta_title') }}</h2>
+                        <p class="lead mb-4">{{ _('why_check.cta_description') }}</p>
                         {% if not current_user.is_authenticated %}
                         <a href="{{ url_for('register') }}" class="btn btn-light btn-lg me-3">
-                            <i class="fas fa-user-plus"></i> Зарегистрироваться
+                            <i class="fas fa-user-plus"></i> {{ _('why_check.cta.start_monitoring') }}
                         </a>
                         <a href="{{ url_for('login') }}" class="btn btn-outline-light btn-lg">
-                            <i class="fas fa-sign-in-alt"></i> Войти
+                            <i class="fas fa-sign-in-alt"></i> {{ _('base.login') }}
                         </a>
                         {% else %}
                         <a href="{{ url_for('playlists') }}" class="btn btn-light btn-lg">
-                            <i class="fas fa-list"></i> Мои плейлисты
+                            <i class="fas fa-list"></i> {{ _('why_check.cta.my_playlists') }}
                         </a>
                         {% endif %}
                     </div>

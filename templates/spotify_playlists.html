@@ -1,58 +1,230 @@
 {% extends "base.html" %}
 
-{% block title %}Мои плейлисты Spotify - PlaylistChecker{% endblock %}
+{% block title %}{{ _('spotify_playlists.title') }} - PlaylistChecker{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
-            <h1>
-                <i class="fab fa-spotify text-success"></i> Мои плейлисты Spotify
-            </h1>
-            <a href="{{ url_for('add_playlist') }}" class="btn btn-outline-primary">
-                <i class="fas fa-plus"></i> Добавить вручную
-            </a>
+<style>
+    .spotify-header {
+        background: linear-gradient(135deg, rgba(30, 215, 96, 0.1), rgba(5, 150, 105, 0.1));
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .spotify-header::before {
+        content: '';
+        position: absolute;
+        top: -50px;
+        right: -50px;
+        width: 200px;
+        height: 200px;
+        background: rgba(30, 215, 96, 0.1);
+        border-radius: 50%;
+    }
+    
+    .spotify-icon-large {
+        width: 80px;
+        height: 80px;
+        background: linear-gradient(135deg, #1DB954, #1ed760);
+        border-radius: 20px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1.5rem;
+        box-shadow: 0 10px 30px rgba(29, 185, 84, 0.3);
+    }
+    
+    .spotify-icon-large i {
+        font-size: 2.5rem;
+        color: white;
+    }
+    
+    .spotify-card {
+        border-radius: 20px;
+        border: 2px solid #f1f5f9;
+        background: white;
+        transition: all 0.3s ease;
+        overflow: hidden;
+    }
+    
+    .spotify-card:hover {
+        transform: translateY(-8px);
+        border-color: #1DB954;
+        box-shadow: 0 15px 35px rgba(29, 185, 84, 0.2);
+    }
+    
+    .playlist-card-header {
+        background: linear-gradient(135deg, rgba(29, 185, 84, 0.08), rgba(30, 215, 96, 0.08));
+        padding: 1.5rem;
+        border-bottom: 2px solid rgba(29, 185, 84, 0.15);
+    }
+    
+    .playlist-title {
+        font-size: 1.25rem;
+        font-weight: 700;
+        color: #1e293b;
+        margin-bottom: 0.5rem;
+    }
+    
+    .visibility-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .stats-container {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1rem;
+        margin: 1.5rem 0;
+    }
+    
+    .stat-item {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+        border-radius: 12px;
+        padding: 1rem;
+        text-align: center;
+        border: 1px solid rgba(99, 102, 241, 0.1);
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+        font-weight: 800;
+        color: var(--primary-color);
+        line-height: 1;
+        margin-bottom: 0.25rem;
+    }
+    
+    .stat-text {
+        font-size: 0.75rem;
+        color: #64748b;
+        text-transform: uppercase;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+    }
+    
+    .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 0.75rem;
+    }
+    
+    .btn-spotify-primary {
+        background: linear-gradient(135deg, #1DB954, #1ed760);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-spotify-primary:hover {
+        background: linear-gradient(135deg, #1ed760, #1DB954);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(29, 185, 84, 0.3);
+        color: white;
+    }
+    
+    .btn-spotify-outline {
+        border: 2px solid #1DB954;
+        color: #1DB954;
+        background: white;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-spotify-outline:hover {
+        background: #1DB954;
+        color: white;
+        transform: translateY(-2px);
+    }
+    
+    .info-banner {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+        border-radius: 16px;
+        padding: 1.5rem;
+        border-left: 4px solid #3b82f6;
+    }
+    
+    .empty-state-icon {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, rgba(29, 185, 84, 0.1), rgba(30, 215, 96, 0.1));
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+    }
+    
+    .empty-state-icon i {
+        font-size: 4rem;
+        color: #1DB954;
+        opacity: 0.6;
+    }
+</style>
+
+<div class="spotify-header fade-in-up">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center position-relative">
+            <div class="spotify-icon-large">
+                <i class="fab fa-spotify"></i>
+            </div>
+            <div>
+                <h1 class="display-6 fw-bold mb-1">
+                    {{ _('spotify_playlists.title') }}
+                </h1>
+                <p class="text-muted mb-0">{{ _('spotify_playlists.subtitle') }}</p>
+            </div>
         </div>
+        <a href="{{ url_for('add_playlist') }}" class="btn btn-outline-success">
+            <i class="fas fa-plus me-2"></i>{{ _('spotify_playlists.add_manually') }}
+        </a>
     </div>
 </div>
 
 {% if playlists %}
-<div class="row">
+<div class="row g-4 mb-4">
     {% for playlist in playlists %}
-    <div class="col-md-6 col-lg-4 mb-4">
-        <div class="card h-100">
-            <div class="card-body">
-                <div class="d-flex justify-content-between align-items-start mb-3">
-                    <h5 class="card-title">{{ playlist.name }}</h5>
-                    <span class="badge bg-{% if playlist.public %}success{% else %}secondary{% endif %}">
-                        {% if playlist.public %}Публичный{% else %}Приватный{% endif %}
+    <div class="col-md-6 col-lg-4">
+        <div class="spotify-card h-100">
+            <div class="playlist-card-header">
+                <div class="d-flex justify-content-between align-items-start mb-2">
+                    <h5 class="playlist-title flex-grow-1">{{ playlist.name }}</h5>
+                    <span class="visibility-badge {% if playlist.public %}bg-success-subtle text-success{% else %}bg-secondary-subtle text-secondary{% endif %}">
+                        <i class="fas {% if playlist.public %}fa-globe{% else %}fa-lock{% endif %}"></i>
+                        <span>{% if playlist.public %}{{ _('spotify_playlists.public') }}{% else %}{{ _('spotify_playlists.private') }}{% endif %}</span>
                     </span>
                 </div>
-                
                 {% if playlist.description %}
-                    <p class="card-text text-muted small">{{ playlist.description[:100] }}{% if playlist.description|length > 100 %}...{% endif %}</p>
+                    <p class="text-muted small mb-0">
+                        {{ playlist.description[:100] }}{% if playlist.description|length > 100 %}...{% endif %}
+                    </p>
                 {% endif %}
-                
-                <div class="row text-center mb-3">
-                    <div class="col-6">
-                        <div class="border-end">
-                            <h6 class="text-primary">{{ playlist.tracks_count }}</h6>
-                            <small class="text-muted">Треков</small>
-                        </div>
+            </div>
+            
+            <div class="card-body p-4">
+                <div class="stats-container">
+                    <div class="stat-item">
+                        <div class="stat-number">{{ playlist.tracks_count }}</div>
+                        <div class="stat-text">{{ _('spotify_playlists.tracks') }}</div>
                     </div>
-                    <div class="col-6">
-                        <h6 class="text-info">{{ playlist.owner }}</h6>
-                        <small class="text-muted">Владелец</small>
+                    <div class="stat-item">
+                        <div class="stat-number" style="font-size: 0.875rem;">{{ playlist.owner }}</div>
+                        <div class="stat-text">{{ _('spotify_playlists.owner') }}</div>
                     </div>
                 </div>
                 
-                <div class="d-grid gap-2">
+                <div class="action-buttons">
                     <a href="{{ url_for('add_spotify_playlist', playlist_id=playlist.id) }}" 
-                       class="btn btn-success">
-                        <i class="fas fa-plus"></i> Добавить для мониторинга
+                       class="btn btn-spotify-primary">
+                        <i class="fas fa-plus me-2"></i>{{ _('spotify_playlists.add_for_monitoring') }}
                     </a>
-                    <a href="{{ playlist.url }}" target="_blank" class="btn btn-outline-success">
-                        <i class="fab fa-spotify"></i> Открыть в Spotify
+                    <a href="{{ playlist.url }}" target="_blank" class="btn btn-spotify-outline">
+                        <i class="fab fa-spotify me-2"></i>{{ _('spotify_playlists.open_in_spotify') }}
                     </a>
                 </div>
             </div>
@@ -61,27 +233,28 @@
     {% endfor %}
 </div>
 
-<div class="row mt-4">
-    <div class="col-12">
-        <div class="alert alert-info">
-            <h5><i class="fas fa-info-circle"></i> Как это работает?</h5>
-            <p class="mb-0">
-                Выберите плейлисты, которые хотите отслеживать. Мы будем проверять их каждый день 
-                и уведомлять вас, если какие-то треки будут удалены.
-            </p>
-        </div>
-    </div>
+<div class="info-banner">
+    <h5 class="fw-bold mb-2">
+        <i class="fas fa-info-circle text-primary me-2"></i>{{ _('spotify_playlists.how_it_works') }}
+    </h5>
+    <p class="mb-0 text-muted">
+        {{ _('spotify_playlists.how_it_works_description') }}
+    </p>
 </div>
 
 {% else %}
-<div class="row">
-    <div class="col-12">
+<div class="card border-0 shadow-sm">
+    <div class="card-body">
         <div class="text-center py-5">
-            <i class="fab fa-spotify fa-4x text-muted mb-4"></i>
-            <h3 class="text-muted">Плейлисты не найдены</h3>
-            <p class="text-muted mb-4">У вас пока нет плейлистов в Spotify или произошла ошибка при их получении</p>
-            <a href="{{ url_for('add_playlist') }}" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Добавить плейлист вручную
+            <div class="empty-state-icon">
+                <i class="fab fa-spotify"></i>
+            </div>
+            <h3 class="fw-bold mb-3">{{ _('spotify_playlists.no_playlists_found') }}</h3>
+            <p class="text-muted mb-4 fs-5">
+                {{ _('spotify_playlists.no_playlists_description') }}
+            </p>
+            <a href="{{ url_for('add_playlist') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>{{ _('spotify_playlists.add_playlist_manually') }}
             </a>
         </div>
     </div>

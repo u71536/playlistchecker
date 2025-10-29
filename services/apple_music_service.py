@@ -4,6 +4,7 @@ import jwt
 import time
 from datetime import datetime, timedelta
 import json
+from flask_babel import gettext
 
 class AppleMusicService:
     def __init__(self, team_id=None, key_id=None, private_key=None):
@@ -15,7 +16,7 @@ class AppleMusicService:
     def get_developer_token(self):
         """Получить developer token для Apple Music API"""
         if not all([self.team_id, self.key_id, self.private_key]):
-            raise Exception("Не настроены учетные данные Apple Music")
+            raise Exception(gettext('service.apple_music.credentials_not_configured'))
         
         # Создаем JWT токен
         headers = {
@@ -33,13 +34,13 @@ class AppleMusicService:
             token = jwt.encode(payload, self.private_key, algorithm='ES256', headers=headers)
             return token
         except Exception as e:
-            raise Exception(f"Ошибка создания developer token: {str(e)}")
+            raise Exception(gettext('service.apple_music.developer_token_error', error=str(e)))
     
     def get_playlist_info(self, user_token, playlist_url):
         """Получить информацию о плейлисте"""
         playlist_id = self._extract_playlist_id(playlist_url)
         if not playlist_id:
-            raise ValueError("Неверный URL плейлиста Apple Music")
+            raise ValueError(gettext('service.apple_music.invalid_playlist_url'))
         
         developer_token = self.get_developer_token()
         headers = {
@@ -62,7 +63,7 @@ class AppleMusicService:
                 'public': True
             }
         else:
-            raise Exception(f"Ошибка получения информации о плейлисте: {response.status_code}")
+            raise Exception(gettext('service.apple_music.playlist_info_error', status_code=response.status_code))
     
     def get_playlist_tracks(self, user_token, playlist_id):
         """Получить треки плейлиста"""

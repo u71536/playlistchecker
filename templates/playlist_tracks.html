@@ -1,102 +1,274 @@
 {% extends "base.html" %}
 
-{% block title %}{{ playlist.name }} - Треки - PlaylistChecker{% endblock %}
+{% block title %}{{ playlist.name }} - {{ _('playlist_tracks.tracks') }} - PlaylistChecker{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <div class="d-flex justify-content-between align-items-center mb-4">
+<style>
+    .playlist-header {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .service-icon-large {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+    }
+    
+    .service-icon-large i {
+        font-size: 2rem;
+    }
+    
+    .stat-card-modern {
+        border-radius: 20px;
+        padding: 2rem;
+        color: white;
+        position: relative;
+        overflow: hidden;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+    
+    .stat-card-modern:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+    
+    .stat-card-modern::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100px;
+        height: 100px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
+        transform: translate(30%, -30%);
+    }
+    
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 800;
+        line-height: 1;
+        margin: 0.5rem 0;
+    }
+    
+    .stat-label {
+        font-size: 0.875rem;
+        opacity: 0.9;
+    }
+    
+    .filter-btn-group {
+        display: inline-flex;
+        gap: 0.5rem;
+        padding: 0.5rem;
+        background: white;
+        border-radius: 16px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .filter-btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        border: 2px solid transparent;
+        background: transparent;
+        font-weight: 600;
+        transition: all 0.3s ease;
+        cursor: pointer;
+    }
+    
+    .filter-btn:hover {
+        background: rgba(99, 102, 241, 0.1);
+        color: var(--primary-color);
+    }
+    
+    .filter-btn.active {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+    }
+    
+    .tracks-table {
+        border-radius: 16px;
+        overflow: hidden;
+        border: 2px solid #f1f5f9;
+    }
+    
+    .table thead th {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
+        color: #1e293b;
+        font-weight: 600;
+        text-transform: uppercase;
+        font-size: 0.75rem;
+        letter-spacing: 0.5px;
+        padding: 1.25rem 1rem;
+        border: none;
+    }
+    
+    .table tbody tr {
+        border-bottom: 1px solid #f1f5f9;
+        transition: all 0.3s ease;
+    }
+    
+    .table tbody tr:hover {
+        background: rgba(99, 102, 241, 0.02);
+        transform: scale(1.01);
+    }
+    
+    .table tbody td {
+        padding: 1.25rem 1rem;
+        vertical-align: middle;
+    }
+    
+    .track-icon {
+        width: 40px;
+        height: 40px;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+        flex-shrink: 0;
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.875rem;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .empty-state-icon {
+        width: 120px;
+        height: 120px;
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        border-radius: 30px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 2rem;
+    }
+    
+    .empty-state-icon i {
+        font-size: 4rem;
+        color: var(--primary-color);
+        opacity: 0.6;
+    }
+</style>
+
+<div class="playlist-header fade-in-up">
+    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+        <div class="d-flex align-items-center">
+            <div class="service-icon-large 
+                {% if playlist.service == 'spotify' %}bg-success-subtle
+                {% elif playlist.service == 'apple_music' %}bg-dark-subtle
+                {% elif playlist.service == 'yandex_music' %}bg-danger-subtle
+                {% else %}bg-primary-subtle{% endif %}">
+                {% if playlist.service == 'spotify' %}
+                    <i class="fab fa-spotify text-success"></i>
+                {% elif playlist.service == 'deezer' %}
+                    <i class="fas fa-music text-primary"></i>
+                {% elif playlist.service == 'apple_music' %}
+                    <i class="fab fa-apple text-dark"></i>
+                {% elif playlist.service == 'yandex_music' %}
+                    <i class="fas fa-music text-danger"></i>
+                {% endif %}
+            </div>
             <div>
-                <h1>
-                    {% if playlist.service == 'spotify' %}
-                        <i class="fab fa-spotify text-success"></i>
-                    {% elif playlist.service == 'deezer' %}
-                        <i class="fas fa-music text-primary"></i>
-                    {% elif playlist.service == 'apple_music' %}
-                        <i class="fab fa-apple text-dark"></i>
-                    {% elif playlist.service == 'yandex_music' %}
-                        <i class="fas fa-music text-danger"></i>
-                    {% endif %}
-                    {{ playlist.name }}
-                </h1>
+                <h1 class="display-6 fw-bold mb-1">{{ playlist.name }}</h1>
                 <p class="text-muted mb-0">{{ playlist.description }}</p>
             </div>
-            <a href="{{ url_for('playlists') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left"></i> Назад к плейлистам
-            </a>
+        </div>
+        <a href="{{ url_for('playlists') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>{{ _('playlist_tracks.back_to_playlists') }}
+        </a>
+    </div>
+</div>
+
+<!-- Statistics -->
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="stat-card-modern" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div class="position-relative">
+                <i class="fas fa-list fa-2x opacity-75 mb-2"></i>
+                <div class="stat-value">{{ tracks|length }}</div>
+                <p class="stat-label mb-0">{{ _('playlist_tracks.total_tracks') }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card-modern" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+            <div class="position-relative">
+                <i class="fas fa-check-circle fa-2x opacity-75 mb-2"></i>
+                <div class="stat-value">{{ tracks|selectattr('is_removed', 'equalto', false)|list|length }}</div>
+                <p class="stat-label mb-0">{{ _('playlist_tracks.active_tracks') }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card-modern" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+            <div class="position-relative">
+                <i class="fas fa-exclamation-triangle fa-2x opacity-75 mb-2"></i>
+                <div class="stat-value">{{ tracks|selectattr('is_removed', 'equalto', true)|list|length }}</div>
+                <p class="stat-label mb-0">{{ _('playlist_tracks.removed_tracks') }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="stat-card-modern" style="background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);">
+            <div class="position-relative">
+                <i class="fas fa-clock fa-2x opacity-75 mb-2"></i>
+                <div class="stat-value">{{ playlist.last_checked.strftime('%d.%m') if playlist.last_checked else 'Never' }}</div>
+                <p class="stat-label mb-0">{{ _('playlist_tracks.last_check') }}</p>
+            </div>
         </div>
     </div>
 </div>
 
-<!-- Статистика -->
+<!-- Filters -->
 <div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card bg-primary text-white">
-            <div class="card-body text-center">
-                <h4>{{ tracks|length }}</h4>
-                <p class="mb-0">Всего треков</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-success text-white">
-            <div class="card-body text-center">
-                <h4>{{ tracks|selectattr('is_removed', 'equalto', false)|list|length }}</h4>
-                <p class="mb-0">Активных</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-warning text-white">
-            <div class="card-body text-center">
-                <h4>{{ tracks|selectattr('is_removed', 'equalto', true)|list|length }}</h4>
-                <p class="mb-0">Удалено</p>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-3">
-        <div class="card bg-info text-white">
-            <div class="card-body text-center">
-                <h4>{{ playlist.last_checked.strftime('%d.%m') if playlist.last_checked else 'Никогда' }}</h4>
-                <p class="mb-0">Последняя проверка</p>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Фильтры -->
-<div class="row mb-3">
     <div class="col-12">
-        <div class="btn-group" role="group">
-            <button type="button" class="btn btn-outline-primary active" onclick="filterTracks('all')">
-                Все треки
+        <div class="filter-btn-group">
+            <button type="button" class="filter-btn active" onclick="filterTracks('all')">
+                <i class="fas fa-list me-2"></i>{{ _('playlist_tracks.all_tracks') }}
             </button>
-            <button type="button" class="btn btn-outline-success" onclick="filterTracks('active')">
-                Активные
+            <button type="button" class="filter-btn" onclick="filterTracks('active')">
+                <i class="fas fa-check-circle me-2"></i>{{ _('playlist_tracks.active_tracks') }}
             </button>
-            <button type="button" class="btn btn-outline-warning" onclick="filterTracks('removed')">
-                Удаленные
+            <button type="button" class="filter-btn" onclick="filterTracks('removed')">
+                <i class="fas fa-times-circle me-2"></i>{{ _('playlist_tracks.removed_tracks') }}
             </button>
         </div>
     </div>
 </div>
 
-<!-- Список треков -->
+<!-- Tracks List -->
 <div class="row">
     <div class="col-12">
         {% if tracks %}
-            <div class="card">
-                <div class="card-body">
+            <div class="card tracks-table border-0 shadow-sm">
+                <div class="card-body p-0">
                     <div class="table-responsive">
-                        <table class="table table-hover">
+                        <table class="table mb-0">
                             <thead>
                                 <tr>
-                                    <th>Трек</th>
-                                    <th>Исполнитель</th>
-                                    <th>Альбом</th>
-                                    <th>Длительность</th>
-                                    <th>Статус</th>
-                                    <th>Добавлен</th>
+                                    <th>{{ _('notification_history.track') }}</th>
+                                    <th>{{ _('playlist_tracks.artist') }}</th>
+                                    <th>{{ _('playlist_tracks.album') }}</th>
+                                    <th>{{ _('playlist_tracks.duration') }}</th>
+                                    <th>{{ _('playlist_tracks.status') }}</th>
+                                    <th>{{ _('playlist_tracks.added_at') }}</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -104,7 +276,9 @@
                                 <tr class="track-row" data-status="{% if track.is_removed %}removed{% else %}active{% endif %}">
                                     <td>
                                         <div class="d-flex align-items-center">
-                                            <i class="fas fa-music text-muted me-2"></i>
+                                            <div class="track-icon">
+                                                <i class="fas fa-music text-primary"></i>
+                                            </div>
                                             <strong>{{ track.name }}</strong>
                                         </div>
                                     </td>
@@ -112,27 +286,36 @@
                                     <td>{{ track.album or '-' }}</td>
                                     <td>
                                         {% if track.duration %}
-                                            {{ (track.duration // 60) }}:{{ "%02d"|format(track.duration % 60) }}
+                                            <span class="badge bg-secondary-subtle text-secondary">
+                                                {{ (track.duration // 60) }}:{{ "%02d"|format(track.duration % 60) }}
+                                            </span>
                                         {% else %}
                                             -
                                         {% endif %}
                                     </td>
                                     <td>
                                         {% if track.is_removed %}
-                                            <span class="badge bg-warning">
-                                                <i class="fas fa-times"></i> Удален
-                                            </span>
-                                            {% if track.removed_at %}
-                                                <br><small class="text-muted">{{ track.removed_at.strftime('%d.%m.%Y %H:%M') }}</small>
-                                            {% endif %}
+                                            <div>
+                                                <span class="status-badge bg-danger-subtle text-danger">
+                                                    <i class="fas fa-times"></i>
+                                                    <span>{{ _('playlist_tracks.removed') }}</span>
+                                                </span>
+                                                {% if track.removed_at %}
+                                                    <br><small class="text-muted mt-1">{{ track.removed_at.strftime('%d.%m.%Y %H:%M') }}</small>
+                                                {% endif %}
+                                            </div>
                                         {% else %}
-                                            <span class="badge bg-success">
-                                                <i class="fas fa-check"></i> Активен
+                                            <span class="status-badge bg-success-subtle text-success">
+                                                <i class="fas fa-check"></i>
+                                                <span>{{ _('playlist_tracks.active') }}</span>
                                             </span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <small class="text-muted">{{ track.added_at.strftime('%d.%m.%Y %H:%M') }}</small>
+                                        <small class="text-muted">
+                                            <i class="fas fa-calendar-alt me-1"></i>
+                                            {{ track.added_at.strftime('%d.%m.%Y %H:%M') }}
+                                        </small>
                                     </td>
                                 </tr>
                                 {% endfor %}
@@ -142,10 +325,16 @@
                 </div>
             </div>
         {% else %}
-            <div class="text-center py-5">
-                <i class="fas fa-music fa-4x text-muted mb-3"></i>
-                <h5 class="text-muted">Треки не найдены</h5>
-                <p class="text-muted">В этом плейлисте пока нет треков</p>
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <div class="text-center py-5">
+                        <div class="empty-state-icon">
+                            <i class="fas fa-music"></i>
+                        </div>
+                        <h5 class="fw-bold mb-3">{{ _('playlist_tracks.tracks_not_found') }}</h5>
+                        <p class="text-muted mb-0">{{ _('playlist_tracks.no_tracks_in_playlist') }}</p>
+                    </div>
+                </div>
             </div>
         {% endif %}
     </div>
@@ -154,13 +343,13 @@
 <script>
 function filterTracks(status) {
     const rows = document.querySelectorAll('.track-row');
-    const buttons = document.querySelectorAll('.btn-group button');
+    const buttons = document.querySelectorAll('.filter-btn');
     
-    // Обновляем активную кнопку
+    // Update active button
     buttons.forEach(btn => btn.classList.remove('active'));
     event.target.classList.add('active');
     
-    // Фильтруем строки
+    // Filter rows
     rows.forEach(row => {
         if (status === 'all') {
             row.style.display = '';

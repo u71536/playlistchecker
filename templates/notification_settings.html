@@ -1,95 +1,222 @@
 {% extends "base.html" %}
 
-{% block title %}{{ _('Настройки уведомлений') }} - PlaylistChecker{% endblock %}
+{% block title %}{{ _('notification_settings.title') }} - PlaylistChecker{% endblock %}
 
 {% block content %}
-<div class="row">
-    <div class="col-12">
-        <h1 class="mb-4">
-            <i class="fas fa-bell"></i> {{ _('Настройки уведомлений') }}
-        </h1>
-    </div>
+<style>
+    .settings-header {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+        border-radius: 20px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    .settings-card {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        overflow: hidden;
+    }
+    
+    .notification-section {
+        padding: 1.5rem;
+        border-bottom: 2px solid #f1f5f9;
+        transition: all 0.3s ease;
+    }
+    
+    .notification-section:last-child {
+        border-bottom: none;
+    }
+    
+    .notification-section:hover {
+        background: rgba(99, 102, 241, 0.02);
+    }
+    
+    .section-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 1rem;
+    }
+    
+    .section-icon i {
+        font-size: 1.75rem;
+    }
+    
+    .form-check-input {
+        width: 3rem;
+        height: 1.5rem;
+        border-radius: 2rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .form-check-input:checked {
+        background-color: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+    
+    .form-check-input:focus {
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+        border-color: var(--primary-color);
+    }
+    
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        font-weight: 600;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    
+    .info-card {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+        border-radius: 16px;
+        padding: 1.5rem;
+        border: 2px solid rgba(99, 102, 241, 0.1);
+    }
+    
+    .info-list {
+        list-style: none;
+        padding: 0;
+    }
+    
+    .info-list li {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid rgba(99, 102, 241, 0.1);
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+    
+    .info-list li:last-child {
+        border-bottom: none;
+        padding-bottom: 0;
+    }
+    
+    .info-icon {
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+    }
+</style>
+
+<div class="settings-header fade-in-up">
+    <h1 class="display-6 fw-bold mb-2">
+        <i class="fas fa-bell text-primary"></i> {{ _('notification_settings.title') }}
+    </h1>
+    <p class="text-muted mb-0">Configure how you want to receive playlist change notifications</p>
 </div>
 
-<div class="row">
+<div class="row g-4">
     <div class="col-lg-8">
-        <div class="card">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-cog"></i> {{ _('Управление уведомлениями') }}
+        <div class="settings-card">
+            <div class="card-header bg-white border-bottom-0 p-4">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-cog text-primary me-2"></i>{{ _('notification_settings.manage_notifications') }}
                 </h5>
             </div>
-            <div class="card-body">
+            <div class="card-body p-0">
                 <form method="POST">
                     {{ form.hidden_tag() }}
                     
-                    <div class="mb-4">
-                        <h6 class="text-primary">
-                            <i class="fas fa-envelope"></i> Email уведомления
-                        </h6>
-                        <div class="form-check form-switch">
-                            {{ form.email_notifications_enabled(class="form-check-input", id="emailNotifications") }}
-                            <label class="form-check-label" for="emailNotifications">
-                                Получать уведомления на email
-                            </label>
+                    <!-- Email Notifications -->
+                    <div class="notification-section">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="section-icon bg-primary-subtle">
+                                <i class="fas fa-envelope text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-2">{{ _('notification_settings.email_notifications') }}</h6>
+                                <p class="text-muted mb-3">{{ _('notification_settings.receive_email_notifications') }}</p>
+                                <div class="form-check form-switch mb-3">
+                                    {{ form.email_notifications_enabled(class="form-check-input", id="emailNotifications", role="switch") }}
+                                    <label class="form-check-label ms-2" for="emailNotifications">
+                                        Enable email notifications
+                                    </label>
+                                </div>
+                                <small class="text-muted">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    {{ _('notification_settings.notifications_will_be_sent_to') }} <strong>{{ current_user.email }}</strong>
+                                </small>
+                            </div>
                         </div>
-                        <small class="text-muted">
-                            Уведомления будут отправляться на {{ current_user.email }}
-                        </small>
                     </div>
                     
-                    <div class="mb-4">
-                        <h6 class="text-primary">
-                            <i class="fab fa-telegram"></i> Telegram уведомления
-                        </h6>
-                        <div class="form-check form-switch">
-                            {{ form.telegram_notifications_enabled(class="form-check-input", id="telegramNotifications") }}
-                            <label class="form-check-label" for="telegramNotifications">
-                                Получать уведомления в Telegram
-                            </label>
-                        </div>
-                        
-                        {% if current_user.telegram_chat_id %}
-                            <div class="alert alert-success mt-2">
-                                <i class="fas fa-check-circle"></i>
-                                Telegram подключен
-                                {% if current_user.telegram_username %}
-                                    (@{{ current_user.telegram_username }})
+                    <!-- Telegram Notifications -->
+                    <div class="notification-section">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="section-icon bg-info-subtle">
+                                <i class="fab fa-telegram text-info"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-2">{{ _('notification_settings.telegram_notifications') }}</h6>
+                                <p class="text-muted mb-3">{{ _('notification_settings.receive_telegram_notifications') }}</p>
+                                <div class="form-check form-switch mb-3">
+                                    {{ form.telegram_notifications_enabled(class="form-check-input", id="telegramNotifications", role="switch") }}
+                                    <label class="form-check-label ms-2" for="telegramNotifications">
+                                        Enable Telegram notifications
+                                    </label>
+                                </div>
+                                
+                                {% if current_user.telegram_chat_id %}
+                                    <div class="status-badge bg-success-subtle text-success">
+                                        <i class="fas fa-check-circle"></i>
+                                        <span>{{ _('notification_settings.telegram_connected') }}</span>
+                                        {% if current_user.telegram_username %}
+                                            <span>(@{{ current_user.telegram_username }})</span>
+                                        {% endif %}
+                                    </div>
+                                {% else %}
+                                    <div class="status-badge bg-warning-subtle text-warning mb-2">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        <span>{{ _('notification_settings.telegram_not_connected') }}</span>
+                                    </div>
+                                    <a href="{{ url_for('telegram_connect') }}" target="_blank" class="btn btn-info">
+                                        <i class="fab fa-telegram me-2"></i>{{ _('notification_settings.connect_telegram') }}
+                                    </a>
                                 {% endif %}
                             </div>
-                        {% else %}
-                            <div class="alert alert-warning mt-2">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                Telegram не подключен. 
-                                <a href="{{ url_for('telegram_connect') }}" target="_blank" class="btn btn-sm btn-primary ms-2">
-                                    <i class="fab fa-telegram"></i> Подключить
-                                </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Browser Notifications -->
+                    <div class="notification-section">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="section-icon bg-secondary-subtle">
+                                <i class="fas fa-desktop text-secondary"></i>
                             </div>
-                        {% endif %}
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-2">{{ _('notification_settings.browser_notifications') }}</h6>
+                                <p class="text-muted mb-3">{{ _('notification_settings.receive_browser_notifications') }}</p>
+                                <div class="form-check form-switch mb-3">
+                                    {{ form.browser_notifications_enabled(class="form-check-input", id="browserNotifications", role="switch") }}
+                                    <label class="form-check-label ms-2" for="browserNotifications">
+                                        Enable browser notifications
+                                    </label>
+                                </div>
+                                
+                                <div id="pushNotificationStatus" class="mb-2"></div>
+                                
+                                <button type="button" id="enablePushBtn" class="btn btn-secondary" style="display: none;">
+                                    <i class="fas fa-bell me-2"></i>{{ _('notification_settings.allow_notifications') }}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     
-                    <div class="mb-4">
-                        <h6 class="text-primary">
-                            <i class="fas fa-desktop"></i> Браузерные уведомления
-                        </h6>
-                        <div class="form-check form-switch">
-                            {{ form.browser_notifications_enabled(class="form-check-input", id="browserNotifications") }}
-                            <label class="form-check-label" for="browserNotifications">
-                                Получать push-уведомления в браузере
-                            </label>
+                    <div class="p-4">
+                        <div class="d-grid">
+                            {{ form.submit(class="btn btn-primary btn-lg") }}
                         </div>
-                        
-                        <div id="pushNotificationStatus" class="mt-2">
-                            <!-- Статус будет обновлен через JavaScript -->
-                        </div>
-                        
-                        <button type="button" id="enablePushBtn" class="btn btn-sm btn-primary mt-2" style="display: none;">
-                            <i class="fas fa-bell"></i> Разрешить уведомления
-                        </button>
-                    </div>
-                    
-                    <div class="d-grid">
-                        {{ form.submit(class="btn btn-primary") }}
                     </div>
                 </form>
             </div>
@@ -97,45 +224,57 @@
     </div>
     
     <div class="col-lg-4">
-        <div class="card">
-            <div class="card-header">
-                <h6 class="mb-0">
-                    <i class="fas fa-info-circle"></i> Информация
-                </h6>
-            </div>
-            <div class="card-body">
-                <h6>Типы уведомлений:</h6>
-                <ul class="list-unstyled">
-                    <li><i class="fas fa-minus text-danger"></i> Удаление треков из плейлистов</li>
-                    <li><i class="fas fa-plus text-success"></i> Добавление новых треков</li>
-                    <li><i class="fas fa-edit text-info"></i> Изменения в плейлистах</li>
-                </ul>
-                
-                <hr>
-                
-                <h6>Частота проверки:</h6>
-                <p class="text-muted">Каждые 10 минут</p>
-                
-                <hr>
-                
-                <h6>Конфиденциальность:</h6>
-                <p class="text-muted small">
-                    Мы не передаем ваши данные третьим лицам. 
-                    Уведомления отправляются только вам.
-                </p>
-            </div>
+        <div class="info-card mb-4">
+            <h6 class="fw-bold mb-3">
+                <i class="fas fa-info-circle text-primary me-2"></i>{{ _('notification_settings.notification_types') }}
+            </h6>
+            <ul class="info-list">
+                <li>
+                    <div class="info-icon bg-danger-subtle">
+                        <i class="fas fa-minus text-danger"></i>
+                    </div>
+                    <span>{{ _('notification_settings.track_removed') }}</span>
+                </li>
+                <li>
+                    <div class="info-icon bg-success-subtle">
+                        <i class="fas fa-plus text-success"></i>
+                    </div>
+                    <span>{{ _('notification_settings.track_added') }}</span>
+                </li>
+                <li>
+                    <div class="info-icon bg-info-subtle">
+                        <i class="fas fa-edit text-info"></i>
+                    </div>
+                    <span>{{ _('notification_settings.playlist_changes') }}</span>
+                </li>
+            </ul>
+        </div>
+        
+        <div class="info-card mb-4">
+            <h6 class="fw-bold mb-2">
+                <i class="fas fa-clock text-primary me-2"></i>{{ _('notification_settings.check_frequency') }}
+            </h6>
+            <p class="text-muted mb-0">{{ _('notification_settings.every_10_minutes') }}</p>
+        </div>
+        
+        <div class="info-card">
+            <h6 class="fw-bold mb-2">
+                <i class="fas fa-shield-alt text-primary me-2"></i>{{ _('notification_settings.privacy') }}
+            </h6>
+            <p class="text-muted small mb-0">
+                {{ _('notification_settings.we_do_not_share_your_data') }}
+            </p>
         </div>
     </div>
 </div>
 
-<!-- JavaScript для браузерных push-уведомлений -->
+<!-- JavaScript for push notifications -->
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     const browserNotificationsSwitch = document.getElementById('browserNotifications');
     const pushNotificationStatus = document.getElementById('pushNotificationStatus');
     const enablePushBtn = document.getElementById('enablePushBtn');
     
-    // Проверяем поддержку Service Worker и Push API
     if ('serviceWorker' in navigator && 'PushManager' in window) {
         checkPushPermission();
         
@@ -150,9 +289,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     } else {
         pushNotificationStatus.innerHTML = `
-            <div class="alert alert-warning">
+            <div class="status-badge bg-warning-subtle text-warning">
                 <i class="fas fa-exclamation-triangle"></i>
-                Ваш браузер не поддерживает push-уведомления
+                <span>{{ _('notification_settings.browser_does_not_support_push_notifications') }}</span>
             </div>
         `;
     }
@@ -160,26 +299,26 @@ document.addEventListener('DOMContentLoaded', function() {
     function checkPushPermission() {
         if (Notification.permission === 'granted') {
             pushNotificationStatus.innerHTML = `
-                <div class="alert alert-success">
+                <div class="status-badge bg-success-subtle text-success">
                     <i class="fas fa-check-circle"></i>
-                    Push-уведомления разрешены
+                    <span>{{ _('notification_settings.push_notifications_are_allowed') }}</span>
                 </div>
             `;
             enablePushBtn.style.display = 'none';
             registerServiceWorker();
         } else if (Notification.permission === 'denied') {
             pushNotificationStatus.innerHTML = `
-                <div class="alert alert-danger">
+                <div class="status-badge bg-danger-subtle text-danger">
                     <i class="fas fa-times-circle"></i>
-                    Push-уведомления заблокированы. Разрешите их в настройках браузера.
+                    <span>Push notifications blocked</span>
                 </div>
             `;
             enablePushBtn.style.display = 'none';
         } else {
             pushNotificationStatus.innerHTML = `
-                <div class="alert alert-info">
+                <div class="status-badge bg-info-subtle text-info">
                     <i class="fas fa-info-circle"></i>
-                    Нажмите кнопку ниже, чтобы разрешить push-уведомления
+                    <span>{{ _('notification_settings.click_button_to_allow_push_notifications') }}</span>
                 </div>
             `;
             enablePushBtn.style.display = 'block';
@@ -195,16 +334,15 @@ document.addEventListener('DOMContentLoaded', function() {
     function registerServiceWorker() {
         navigator.serviceWorker.register('/static/sw.js')
             .then(function(registration) {
-                console.log('Service Worker зарегистрирован:', registration);
+                console.log('Service Worker registered:', registration);
                 return registration.pushManager.getSubscription();
             })
             .then(function(subscription) {
                 if (subscription) {
-                    console.log('Уже подписан на push-уведомления');
+                    console.log('Already subscribed to push notifications');
                     return;
                 }
                 
-                // Получаем публичный VAPID ключ
                 return fetch('/api/push/vapid-public-key')
                     .then(response => response.json())
                     .then(data => {
@@ -214,7 +352,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     });
             })
             .catch(function(error) {
-                console.error('Ошибка регистрации Service Worker:', error);
+                console.error('Service Worker registration error:', error);
             });
     }
     
@@ -229,9 +367,8 @@ document.addEventListener('DOMContentLoaded', function() {
                 });
             })
             .then(function(subscription) {
-                console.log('Подписка на push-уведомления успешна:', subscription);
+                console.log('Push notification subscription successful:', subscription);
                 
-                // Отправляем подписку на сервер
                 return fetch('/api/push/subscribe', {
                     method: 'POST',
                     headers: {
@@ -251,15 +388,14 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(function(data) {
                 if (data.status === 'success') {
-                    console.log('Подписка сохранена на сервере');
+                    console.log('Subscription saved on server');
                 }
             })
             .catch(function(error) {
-                console.error('Ошибка подписки на push-уведомления:', error);
+                console.error('Push subscription error:', error);
             });
     }
     
-    // Утилиты для конвертации ключей
     function urlBase64ToUint8Array(base64String) {
         const padding = '='.repeat((4 - base64String.length % 4) % 4);
         const base64 = (base64String + padding)

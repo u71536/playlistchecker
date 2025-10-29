@@ -1,5 +1,6 @@
 import requests
 from datetime import datetime
+from flask_babel import gettext
 
 
 class YandexMusicService:
@@ -31,7 +32,7 @@ class YandexMusicService:
         """Получить информацию о публичном плейлисте без авторизации"""
         playlist_id = self._extract_playlist_id(playlist_url)
         if not playlist_id:
-            raise ValueError("Неверный URL плейлиста Yandex Music")
+            raise ValueError(gettext('service.yandex_music.invalid_playlist_url'))
         
         try:
             # Используем прямой API endpoint для публичных плейлистов
@@ -56,16 +57,16 @@ class YandexMusicService:
                     'public': result.get('visibility') == 'public'
                 }
             else:
-                raise Exception(f"Ошибка API: {response.status_code} - {response.text}")
+                raise Exception(gettext('service.yandex_music.api_error', status_code=response.status_code, response_text=response.text))
                 
         except Exception as e:
-            raise Exception(f"Ошибка получения информации о публичном плейлисте: {str(e)}")
+            raise Exception(gettext('service.yandex_music.playlist_info_error', error=str(e)))
     
     def get_public_playlist_tracks(self, playlist_url):
         """Получить треки публичного плейлиста без авторизации"""
         playlist_id = self._extract_playlist_id(playlist_url)
         if not playlist_id:
-            raise ValueError("Неверный URL плейлиста Yandex Music")
+            raise ValueError(gettext('service.yandex_music.invalid_playlist_url'))
         
         try:
             # Используем прямой API endpoint для публичных плейлистов
@@ -96,8 +97,8 @@ class YandexMusicService:
                 
                 return tracks
             else:
-                raise Exception(f"Ошибка API: {response.status_code} - {response.text}")
+                raise Exception(gettext('service.yandex_music.api_error', status_code=response.status_code, response_text=response.text))
                 
         except Exception as e:
-            raise Exception(f"Ошибка получения треков публичного плейлиста: {str(e)}")
+            raise Exception(gettext('service.yandex_music.playlist_tracks_error', error=str(e)))
     

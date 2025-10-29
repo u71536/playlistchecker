@@ -37,6 +37,19 @@ app.config['LANGUAGES'] = {
     'en': 'English'
 }
 
+# Конфигурация Babel
+app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
+app.config['BABEL_DEFAULT_LOCALE'] = 'ru'
+
+# Настройки для разработки
+if os.environ.get('FLASK_ENV') == 'development' or os.environ.get('FLASK_DEBUG') == '1':
+    app.config['TEMPLATES_AUTO_RELOAD'] = True
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
+# Принудительно отключаем кэширование для разработки
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+
 # Инициализация расширений
 db = SQLAlchemy()
 db.init_app(app)
@@ -208,32 +221,32 @@ class NotificationHistory(db.Model):
 
 # Формы
 class LoginForm(FlaskForm):
-    username = StringField(lazy_gettext('Имя пользователя'), validators=[DataRequired()])
-    password = PasswordField(lazy_gettext('Пароль'), validators=[DataRequired()])
-    submit = SubmitField(lazy_gettext('Войти'))
+    username = StringField(lazy_gettext('login.username'), validators=[DataRequired()])
+    password = PasswordField(lazy_gettext('login.password'), validators=[DataRequired()])
+    submit = SubmitField(lazy_gettext('base.login'))
 
 class RegisterForm(FlaskForm):
-    username = StringField(lazy_gettext('Имя пользователя'), validators=[DataRequired()])
+    username = StringField(lazy_gettext('login.username'), validators=[DataRequired()])
     email = StringField('Email', validators=[DataRequired(), Email()])
-    password = PasswordField(lazy_gettext('Пароль'), validators=[DataRequired()])
-    submit = SubmitField(lazy_gettext('Зарегистрироваться'))
+    password = PasswordField(lazy_gettext('login.password'), validators=[DataRequired()])
+    submit = SubmitField(lazy_gettext('form.register'))
 
 class PlaylistForm(FlaskForm):
-    service = SelectField(lazy_gettext('Сервис'), choices=[
+    service = SelectField(lazy_gettext('form.service'), choices=[
         ('spotify', 'Spotify'),
         # ('deezer', 'Deezer'),  # Временно скрыт
         ('apple_music', 'Apple Music'),
         ('yandex_music', 'Yandex Music')
     ], validators=[DataRequired()])
-    playlist_url = StringField(lazy_gettext('URL плейлиста'), validators=[DataRequired()])
-    submit = SubmitField(lazy_gettext('Добавить плейлист'))
+    playlist_url = StringField(lazy_gettext('form.playlist_url'), validators=[DataRequired()])
+    submit = SubmitField(lazy_gettext('add_playlist.add_playlist'))
 
 class NotificationSettingsForm(FlaskForm):
     """Форма настроек уведомлений"""
-    email_notifications_enabled = BooleanField(lazy_gettext('Email уведомления'))
-    telegram_notifications_enabled = BooleanField(lazy_gettext('Telegram уведомления'))
-    browser_notifications_enabled = BooleanField(lazy_gettext('Браузерные уведомления'))
-    submit = SubmitField(lazy_gettext('Сохранить настройки'))
+    email_notifications_enabled = BooleanField(lazy_gettext('notification_settings.email_notifications'))
+    telegram_notifications_enabled = BooleanField(lazy_gettext('notification_settings.telegram_notifications'))
+    browser_notifications_enabled = BooleanField(lazy_gettext('notification_settings.browser_notifications'))
+    submit = SubmitField(lazy_gettext('form.save_settings'))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -263,8 +276,8 @@ def about():
 
 @app.route('/why-check')
 def why_check():
-    """Страница зачем проверять плейлисты"""
-    return render_template('why_check.html')
+    """Перенаправление на страницу о сервисе"""
+    return redirect(url_for('about'))
 
 
 @app.route('/sitemap.xml')
@@ -348,7 +361,7 @@ def login():
         if user and check_password_hash(user.password_hash, form.password.data):
             login_user(user)
             return redirect(url_for('index'))
-        flash(gettext('Неверное имя пользователя или пароль'))
+        flash(gettext('login.invalid_username_or_password'))
     return render_template('login.html', form=form)
 
 @app.route('/register', methods=['GET', 'POST'])
@@ -359,11 +372,11 @@ def register():
     form = RegisterForm()
     if form.validate_on_submit():
         if User.query.filter_by(username=form.username.data).first():
-            flash('Пользователь с таким именем уже существует')
+            flash(gettext('flash.user_exists_username'))
             return render_template('register.html', form=form)
         
         if User.query.filter_by(email=form.email.data).first():
-            flash('Пользователь с таким email уже существует')
+            flash(gettext('flash.user_exists_email'))
             return render_template('register.html', form=form)
         
         user = User(
@@ -374,7 +387,7 @@ def register():
         db.session.add(user)
         db.session.commit()
         
-        flash('Регистрация успешна! Теперь вы можете войти в систему.')
+        flash(gettext('flash.registration_success'))
         return redirect(url_for('login'))
     
     return render_template('register.html', form=form)
@@ -426,12 +439,12 @@ def add_playlist():
                 playlist_url=form.playlist_url.data
             )
             
-            flash(f'Плейлист "{playlist.name}" успешно добавлен для мониторинга!')
+            flash(gettext('flash.playlist_added_success', playlist_name=playlist.name))
             return redirect(url_for('playlists'))
         except ValueError as e:
-            flash(f'Ошибка: {str(e)}', 'error')
+            flash(gettext('flash.error_generic', error=str(e)), 'error')
         except Exception as e:
-            flash(f'Произошла ошибка при добавлении плейлиста: {str(e)}', 'error')
+            flash(gettext('flash.error_adding_playlist', error=str(e)), 'error')
     return render_template('add_playlist.html', form=form)
 
 @app.route('/spotify_playlists')
@@ -443,13 +456,31 @@ def spotify_playlists():
     # Проверяем, есть ли токен Spotify
     spotify_token = current_user.spotify_tokens[0] if current_user.spotify_tokens else None
     if not spotify_token:
-        flash('Сначала подключите Spotify')
+        flash(gettext('flash.connect_spotify_first'))
         return redirect(url_for('index'))
     
     try:
         service = SpotifyService()
+        
+        # Проверяем и обновляем токен при необходимости
+        new_token_info = service.check_and_refresh_token(
+            spotify_token.access_token, 
+            spotify_token.refresh_token, 
+            spotify_token.expires_at
+        )
+        
+        if new_token_info:
+            # Обновляем токен в базе данных
+            spotify_token.access_token = new_token_info['access_token']
+            if 'refresh_token' in new_token_info:
+                spotify_token.refresh_token = new_token_info['refresh_token']
+            spotify_token.expires_at = datetime.utcnow() + timedelta(seconds=new_token_info['expires_in'])
+            db.session.commit()
+            flash(gettext('flash.spotify_token_updated'), 'info')
+        
         playlists = service.get_user_playlists(spotify_token.access_token, spotify_token.refresh_token)
         return render_template('spotify_playlists.html', playlists=playlists)
+        
     except Exception as e:
         # Импортируем TokenExpiredError локально
         from services.spotify_service import TokenExpiredError
@@ -464,14 +495,14 @@ def spotify_playlists():
             
             # Повторяем запрос с новым токеном
             try:
-                playlists = service.get_user_playlists(spotify_token.access_token)
-                flash('Токен Spotify обновлен автоматически', 'info')
+                playlists = service.get_user_playlists(spotify_token.access_token, spotify_token.refresh_token)
+                flash(gettext('flash.spotify_token_updated'), 'info')
                 return render_template('spotify_playlists.html', playlists=playlists)
             except Exception as retry_e:
-                flash(f'Ошибка получения плейлистов после обновления токена: {str(retry_e)}')
+                flash(gettext('flash.error_getting_playlists_after_token_update', error=str(retry_e)))
                 return redirect(url_for('index'))
         
-        flash(f'Ошибка получения плейлистов: {str(e)}')
+        flash(gettext('flash.error_getting_playlists', error=str(e)))
         return redirect(url_for('index'))
 
 @app.route('/add_spotify_playlist/<playlist_id>')
@@ -482,7 +513,7 @@ def add_spotify_playlist(playlist_id):
     
     spotify_token = current_user.spotify_tokens[0] if current_user.spotify_tokens else None
     if not spotify_token:
-        flash('Сначала подключите Spotify')
+        flash(gettext('flash.connect_spotify_first'))
         return redirect(url_for('index'))
     
     try:
@@ -493,12 +524,12 @@ def add_spotify_playlist(playlist_id):
             service='spotify',
             playlist_url=playlist_url
         )
-        flash(f'Плейлист "{playlist.name}" успешно добавлен для мониторинга!')
+        flash(gettext('flash.playlist_added_success', playlist_name=playlist.name))
         return redirect(url_for('playlists'))
     except ValueError as e:
-        flash(f'Ошибка: {str(e)}')
+        flash(gettext('flash.error_generic', error=str(e)))
     except Exception as e:
-        flash(f'Произошла ошибка: {str(e)}')
+        flash(gettext('flash.error_generic_short', error=str(e)))
     
     return redirect(url_for('spotify_playlists'))
 
@@ -508,9 +539,9 @@ def check_playlists_now():
     """Принудительная проверка плейлистов"""
     try:
         monitor.check_user_playlists(current_user)
-        flash('Плейлисты проверены! Проверьте уведомления.')
+        flash(gettext('flash.playlists_checked'))
     except Exception as e:
-        flash(f'Ошибка при проверке плейлистов: {str(e)}')
+        flash(gettext('flash.error_checking_playlists', error=str(e)))
     return redirect(url_for('playlists'))
 
 @app.route('/playlist/<int:playlist_id>/tracks')
@@ -519,7 +550,7 @@ def playlist_tracks(playlist_id):
     """Показать треки плейлиста"""
     playlist = Playlist.query.filter_by(id=playlist_id, user_id=current_user.id).first()
     if not playlist:
-        flash('Плейлист не найден')
+        flash(gettext('flash.playlist_not_found'))
         return redirect(url_for('playlists'))
     
     tracks = Track.query.filter_by(playlist_id=playlist_id).order_by(Track.added_at.desc()).all()
@@ -544,7 +575,7 @@ def spotify_callback():
     
     code = request.args.get('code')
     if not code:
-        flash('Ошибка авторизации Spotify: код не получен')
+        flash(gettext('flash.spotify_auth_error_no_code'))
         return redirect(url_for('index'))
     
     try:
@@ -567,32 +598,32 @@ def spotify_callback():
         db.session.add(spotify_token)
         db.session.commit()
         
-        flash('Spotify успешно подключен!')
+        flash(gettext('flash.spotify_connected_success'))
         return redirect(url_for('index'))
         
     except Exception as e:
-        flash(f'Ошибка авторизации Spotify: {str(e)}')
+        flash(gettext('flash.spotify_auth_error', error=str(e)))
         return redirect(url_for('index'))
 
 @app.route('/auth/deezer')
 @login_required
 def deezer_auth():
     # Здесь будет логика авторизации Deezer
-    flash('Авторизация Deezer будет реализована')
+    flash(gettext('flash.deezer_auth_coming_soon'))
     return redirect(url_for('index'))
 
 @app.route('/auth/apple_music')
 @login_required
 def apple_music_auth():
     # Здесь будет логика авторизации Apple Music
-    flash('Авторизация Apple Music будет реализована в скором времени')
+    flash(gettext('flash.apple_music_auth_coming_soon'))
     return redirect(url_for('index'))
 
 @app.route('/auth/yandex_music')
 @login_required
 def yandex_music_auth():
     # Здесь будет логика авторизации Yandex Music
-    flash('Авторизация Yandex Music будет реализована в скором времени')
+    flash(gettext('flash.yandex_music_auth_coming_soon'))
     return redirect(url_for('index'))
 
 # Настройки уведомлений
@@ -608,7 +639,7 @@ def notification_settings():
         current_user.browser_notifications_enabled = form.browser_notifications_enabled.data
         
         db.session.commit()
-        flash('Настройки уведомлений сохранены!')
+        flash(gettext('flash.notification_settings_saved'))
         return redirect(url_for('notification_settings'))
     
     # Заполняем форму текущими настройками

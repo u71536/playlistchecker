@@ -1,17 +1,125 @@
 {% extends "base.html" %}
 
-{% block title %}Добавить плейлист - PlaylistChecker{% endblock %}
+{% block title %}{{ _('add_playlist.add_playlist') }} - PlaylistChecker{% endblock %}
 
 {% block content %}
-<div class="row justify-content-center">
-    <div class="col-md-8 col-lg-6">
-        <div class="card">
+<style>
+    .form-card {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .form-card .card-header {
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        border-radius: 20px 20px 0 0 !important;
+        padding: 1.75rem;
+    }
+    
+    .form-control, .form-select {
+        border-radius: 12px;
+        padding: 0.875rem 1.25rem;
+        border: 2px solid #e2e8f0;
+        transition: all 0.3s ease;
+    }
+    
+    .form-control:focus, .form-select:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.1);
+    }
+    
+    .form-label {
+        font-weight: 600;
+        color: #475569;
+        margin-bottom: 0.75rem;
+    }
+    
+    .accordion-item {
+        border: 2px solid #f1f5f9;
+        border-radius: 12px !important;
+        margin-bottom: 1rem;
+        overflow: hidden;
+    }
+    
+    .accordion-button {
+        background: white;
+        font-weight: 600;
+        padding: 1.25rem;
+        border-radius: 12px !important;
+    }
+    
+    .accordion-button:not(.collapsed) {
+        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
+        color: var(--primary-color);
+        box-shadow: none;
+    }
+    
+    .accordion-button:focus {
+        box-shadow: none;
+        border-color: var(--primary-color);
+    }
+    
+    .accordion-button::after {
+        background-size: 1.25rem;
+    }
+    
+    .accordion-body {
+        padding: 1.5rem;
+        background: #fafbfc;
+    }
+    
+    .accordion-body ol {
+        padding-left: 1.5rem;
+    }
+    
+    .accordion-body li {
+        margin-bottom: 0.75rem;
+        color: #475569;
+    }
+    
+    .instructions-card {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .service-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+    }
+    
+    .alert-info-custom {
+        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
+        border: 2px solid rgba(59, 130, 246, 0.2);
+        border-radius: 12px;
+        padding: 1.25rem;
+    }
+    
+    code {
+        background: #1e293b;
+        color: #10b981;
+        padding: 0.25rem 0.5rem;
+        border-radius: 6px;
+        font-size: 0.875rem;
+    }
+</style>
+
+<div class="row justify-content-center fade-in-up">
+    <div class="col-md-10 col-lg-8">
+        <div class="form-card card">
             <div class="card-header">
-                <h4 class="mb-0">
-                    <i class="fas fa-plus"></i> Добавить плейлист
+                <h4 class="mb-0 fw-bold">
+                    <i class="fas fa-plus me-2"></i>{{ _('add_playlist.add_playlist') }}
                 </h4>
+                <p class="mb-0 mt-2 opacity-90">Add a playlist from your favorite music service</p>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <form method="POST">
                     {{ form.hidden_tag() }}
                     
@@ -19,9 +127,9 @@
                         {{ form.service.label(class="form-label") }}
                         {{ form.service(class="form-select") }}
                         {% if form.service.errors %}
-                            <div class="text-danger">
+                            <div class="text-danger mt-2">
                                 {% for error in form.service.errors %}
-                                    <small>{{ error }}</small>
+                                    <small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small>
                                 {% endfor %}
                             </div>
                         {% endif %}
@@ -29,90 +137,75 @@
                     
                     <div class="mb-4">
                         {{ form.playlist_url.label(class="form-label") }}
-                        {{ form.playlist_url(class="form-control", placeholder="Вставьте ссылку на плейлист") }}
+                        {{ form.playlist_url(class="form-control", placeholder=_('add_playlist.paste_playlist_url')) }}
                         {% if form.playlist_url.errors %}
-                            <div class="text-danger">
+                            <div class="text-danger mt-2">
                                 {% for error in form.playlist_url.errors %}
-                                    <small>{{ error }}</small>
+                                    <small><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</small>
                                 {% endfor %}
                             </div>
                         {% endif %}
-                        <div class="form-text">
-                            Скопируйте ссылку на плейлист из вашего музыкального сервиса
+                        <div class="form-text mt-2">
+                            <i class="fas fa-info-circle me-1"></i>{{ _('add_playlist.copy_playlist_url') }}
                         </div>
                     </div>
                     
                     <div class="d-grid">
-                        {{ form.submit(class="btn btn-primary") }}
+                        {{ form.submit(class="btn btn-primary btn-lg") }}
                     </div>
                 </form>
             </div>
         </div>
         
-        <!-- Инструкции по добавлению плейлистов -->
-        <div class="card mt-4">
-            <div class="card-header">
-                <h5 class="mb-0">
-                    <i class="fas fa-info-circle"></i> Как добавить плейлист?
+        <!-- Instructions -->
+        <div class="instructions-card card mt-4">
+            <div class="card-header bg-white">
+                <h5 class="mb-0 fw-bold">
+                    <i class="fas fa-info-circle text-primary me-2"></i>{{ _('add_playlist.how_to_add_playlist') }}
                 </h5>
             </div>
-            <div class="card-body">
+            <div class="card-body p-4">
                 <div class="accordion" id="instructionsAccordion">
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="spotifyInstructions">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseSpotify">
-                                <i class="fab fa-spotify text-success me-2"></i> Spotify
+                                <div class="service-icon bg-success-subtle">
+                                    <i class="fab fa-spotify text-success fa-lg"></i>
+                                </div>
+                                <span class="fw-bold">Spotify</span>
                             </button>
                         </h2>
                         <div id="collapseSpotify" class="accordion-collapse collapse" data-bs-parent="#instructionsAccordion">
                             <div class="accordion-body">
                                 <ol>
-                                    <li>Откройте Spotify (веб-версия или приложение)</li>
-                                    <li>Найдите нужный плейлист</li>
-                                    <li>Нажмите на три точки (...) рядом с названием плейлиста</li>
-                                    <li>Выберите "Поделиться" → "Скопировать ссылку на плейлист"</li>
-                                    <li>Вставьте ссылку в поле выше</li>
+                                    <li>{{ _('add_playlist.open_spotify') }}</li>
+                                    <li>{{ _('add_playlist.find_playlist') }}</li>
+                                    <li>{{ _('add_playlist.click_three_dots') }}</li>
+                                    <li>{{ _('add_playlist.select_share_copy_link') }}</li>
+                                    <li>{{ _('add_playlist.paste_link_field') }}</li>
                                 </ol>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- Deezer временно скрыт
-                    <div class="accordion-item">
-                        <h2 class="accordion-header" id="deezerInstructions">
-                            <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDeezer">
-                                <i class="fas fa-music text-primary me-2"></i> Deezer
-                            </button>
-                        </h2>
-                        <div id="collapseDeezer" class="accordion-collapse collapse" data-bs-parent="#instructionsAccordion">
-                            <div class="accordion-body">
-                                <ol>
-                                    <li>Откройте Deezer в браузере</li>
-                                    <li>Найдите нужный плейлист</li>
-                                    <li>Нажмите на кнопку "Поделиться"</li>
-                                    <li>Скопируйте ссылку</li>
-                                    <li>Вставьте ссылку в поле выше</li>
-                                </ol>
-                            </div>
-                        </div>
-                    </div>
-                    -->
                     
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="appleMusicInstructions">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAppleMusic">
-                                <i class="fab fa-apple text-dark me-2"></i> Apple Music
+                                <div class="service-icon bg-dark-subtle">
+                                    <i class="fab fa-apple text-dark fa-lg"></i>
+                                </div>
+                                <span class="fw-bold">Apple Music</span>
                             </button>
                         </h2>
                         <div id="collapseAppleMusic" class="accordion-collapse collapse" data-bs-parent="#instructionsAccordion">
                             <div class="accordion-body">
                                 <ol>
-                                    <li>Откройте Apple Music</li>
-                                    <li>Найдите нужный плейлист</li>
-                                    <li>Нажмите на три точки (...) рядом с названием</li>
-                                    <li>Выберите "Поделиться плейлистом"</li>
-                                    <li>Скопируйте ссылку</li>
-                                    <li>Вставьте ссылку в поле выше</li>
+                                    <li>{{ _('add_playlist.open_apple_music') }}</li>
+                                    <li>{{ _('add_playlist.find_playlist') }}</li>
+                                    <li>{{ _('add_playlist.click_three_dots') }}</li>
+                                    <li>{{ _('add_playlist.select_share_playlist') }}</li>
+                                    <li>{{ _('add_playlist.copy_link') }}</li>
+                                    <li>{{ _('add_playlist.paste_link_field') }}</li>
                                 </ol>
                             </div>
                         </div>
@@ -121,24 +214,29 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="yandexMusicInstructions">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseYandexMusic">
-                                <i class="fas fa-music text-danger me-2"></i> Yandex Music
+                                <div class="service-icon bg-danger-subtle">
+                                    <i class="fas fa-music text-danger fa-lg"></i>
+                                </div>
+                                <span class="fw-bold">Yandex Music</span>
                             </button>
                         </h2>
                         <div id="collapseYandexMusic" class="accordion-collapse collapse" data-bs-parent="#instructionsAccordion">
                             <div class="accordion-body">
-                                <div class="alert alert-info">
-                                    <strong>Важно:</strong> Для мониторинга плейлистов Яндекс.Музыки они должны быть публичными!
+                                <div class="alert-info-custom mb-3">
+                                    <strong><i class="fas fa-info-circle me-2"></i>{{ _('add_playlist.important') }}</strong> 
+                                    {{ _('add_playlist.yandex_music_public') }}
                                 </div>
                                 <ol>
-                                    <li>Откройте Яндекс.Музыку в браузере</li>
-                                    <li>Найдите нужный плейлист</li>
-                                    <li>Убедитесь, что плейлист публичный (доступен по ссылке)</li>
-                                    <li>Скопируйте ссылку из адресной строки браузера</li>
-                                    <li>Вставьте ссылку в поле выше</li>
+                                    <li>{{ _('add_playlist.open_yandex_music') }}</li>
+                                    <li>{{ _('add_playlist.find_playlist') }}</li>
+                                    <li>{{ _('add_playlist.check_public_playlist') }}</li>
+                                    <li>{{ _('add_playlist.copy_link_from_browser') }}</li>
+                                    <li>{{ _('add_playlist.paste_link_field') }}</li>
                                 </ol>
                                 <p class="mt-3 mb-0">
                                     <small class="text-muted">
-                                        Пример ссылки: <code>https://music.yandex.ru/playlists/1766199b-8355-0677-923c-c65e22382e2f</code>
+                                        {{ _('add_playlist.example_link') }}<br>
+                                        <code>https://music.yandex.ru/playlists/1766199b-8355-0677-923c-c65e22382e2f</code>
                                     </small>
                                 </p>
                             </div>

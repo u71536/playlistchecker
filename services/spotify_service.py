@@ -1,6 +1,7 @@
 import spotipy
 from spotipy.oauth2 import SpotifyOAuth
 import os
+from flask_babel import gettext
 
 
 class TokenExpiredError(Exception):
@@ -61,7 +62,7 @@ class SpotifyService:
         # Извлекаем ID плейлиста из URL
         playlist_id = self._extract_playlist_id(playlist_url)
         if not playlist_id:
-            raise ValueError("Неверный URL плейлиста Spotify")
+            raise ValueError(gettext('service.spotify.invalid_playlist_url'))
         
         try:
             playlist = sp.playlist(playlist_id)
@@ -75,15 +76,16 @@ class SpotifyService:
             }
         except Exception as e:
             # Проверяем, является ли ошибка связанной с истекшим токеном
-            if "401" in str(e) and "access token expired" in str(e).lower() and refresh_token:
+            if (("401" in str(e) or "access token expired" in str(e).lower() or
+                 "invalid access token" in str(e).lower()) and refresh_token):
                 # Пытаемся обновить токен
                 try:
                     new_token_info = self.refresh_access_token(refresh_token)
                     # Возвращаем информацию о новом токене вместе с ошибкой
                     raise TokenExpiredError("Токен истек", new_token_info)
                 except Exception as refresh_error:
-                    raise Exception(f"Ошибка обновления токена: {str(refresh_error)}")
-            raise Exception(f"Ошибка получения информации о плейлисте: {str(e)}")
+                    raise Exception(gettext('service.spotify.token_refresh_error', error=str(refresh_error)))
+            raise Exception(gettext('service.spotify.playlist_info_error', error=str(e)))
     
     def get_playlist_tracks(self, access_token, playlist_id, refresh_token=None):
         """Получить треки плейлиста"""
@@ -117,15 +119,16 @@ class SpotifyService:
                     
             except Exception as e:
                 # Проверяем, является ли ошибка связанной с истекшим токеном
-                if "401" in str(e) and "access token expired" in str(e).lower() and refresh_token:
+                if (("401" in str(e) or "access token expired" in str(e).lower() or
+                     "invalid access token" in str(e).lower()) and refresh_token):
                     # Пытаемся обновить токен
                     try:
                         new_token_info = self.refresh_access_token(refresh_token)
                         # Возвращаем информацию о новом токене вместе с ошибкой
                         raise TokenExpiredError("Токен истек", new_token_info)
                     except Exception as refresh_error:
-                        raise Exception(f"Ошибка обновления токена: {str(refresh_error)}")
-                raise Exception(f"Ошибка получения треков плейлиста: {str(e)}")
+                        raise Exception(gettext('service.spotify.token_refresh_error', error=str(refresh_error)))
+                raise Exception(gettext('service.spotify.playlist_tracks_error', error=str(e)))
         
         return tracks
     
@@ -178,15 +181,16 @@ class SpotifyService:
                     
             except Exception as e:
                 # Проверяем, является ли ошибка связанной с истекшим токеном
-                if "401" in str(e) and "access token expired" in str(e).lower() and refresh_token:
+                if (("401" in str(e) or "access token expired" in str(e).lower() or
+                     "invalid access token" in str(e).lower()) and refresh_token):
                     # Пытаемся обновить токен
                     try:
                         new_token_info = self.refresh_access_token(refresh_token)
                         # Возвращаем информацию о новом токене вместе с ошибкой
                         raise TokenExpiredError("Токен истек", new_token_info)
                     except Exception as refresh_error:
-                        raise Exception(f"Ошибка обновления токена: {str(refresh_error)}")
-                raise Exception(f"Ошибка получения плейлистов пользователя: {str(e)}")
+                        raise Exception(gettext('service.spotify.token_refresh_error', error=str(refresh_error)))
+                raise Exception(gettext('service.spotify.user_playlists_error', error=str(e)))
         
         return playlists
     
@@ -198,3 +202,31 @@ class SpotifyService:
             return True
         except Exception:
             return False
+    
+    def check_and_refresh_token(self, access_token, refresh_token, expires_at=None):
+        """Проверить токен и обновить его при необходимости"""
+        from datetime import datetime
+        
+        # Проверяем, истек ли токен по времени
+        if expires_at and datetime.utcnow() >= expires_at:
+            if refresh_token:
+                try:
+                    new_token_info = self.refresh_access_token(refresh_token)
+                    return new_token_info
+                except Exception as e:
+                    raise Exception(gettext('service.spotify.token_refresh_error', error=str(e)))
+            else:
+                raise Exception(gettext('service.spotify.token_expired_no_refresh'))
+        
+        # Проверяем валидность токена запросом к API
+        if not self.is_token_valid(access_token):
+            if refresh_token:
+                try:
+                    new_token_info = self.refresh_access_token(refresh_token)
+                    return new_token_info
+                except Exception as e:
+                    raise Exception(gettext('service.spotify.token_refresh_error', error=str(e)))
+            else:
+                raise Exception(gettext('service.spotify.token_invalid_no_refresh'))
+        
+        return None  # Токен валиден

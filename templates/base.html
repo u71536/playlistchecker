@@ -28,8 +28,8 @@
     <link rel="canonical" href="{{ request.url }}">
     
     <!-- Additional SEO -->
-    <meta name="theme-color" content="#0d6efd">
-    <meta name="msapplication-TileColor" content="#0d6efd">
+    <meta name="theme-color" content="#6366f1">
+    <meta name="msapplication-TileColor" content="#6366f1">
     
     <!-- Structured Data (JSON-LD) -->
     <script type="application/ld+json">
@@ -59,32 +59,259 @@
         ]
     }
     </script>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Bootstrap 5.3 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" rel="stylesheet">
+    
     <style>
+        :root {
+            --primary-color: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
+            --secondary-color: #8b5cf6;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+            --info-color: #3b82f6;
+            --dark-color: #1e293b;
+            --light-bg: #f8fafc;
+            --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            --card-shadow-hover: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-attachment: fixed;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+        
+        /* Navbar Styles */
+        .navbar {
+            background: rgba(255, 255, 255, 0.95) !important;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.1);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 1rem 0;
+        }
+        
         .navbar-brand {
-            font-weight: bold;
+            font-weight: 800;
+            font-size: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
-        .service-icon {
-            width: 24px;
-            height: 24px;
-            margin-right: 8px;
+        
+        .nav-link {
+            color: #475569 !important;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            border-radius: 8px;
+            padding: 0.5rem 1rem !important;
+            margin: 0 0.2rem;
         }
-        .playlist-card {
-            transition: transform 0.2s;
-        }
-        .playlist-card:hover {
+        
+        .nav-link:hover {
+            color: var(--primary-color) !important;
+            background: rgba(99, 102, 241, 0.1);
             transform: translateY(-2px);
         }
-        .notification-badge {
-            position: absolute;
-            top: -8px;
-            right: -8px;
+        
+        .dropdown-menu {
+            border: none;
+            box-shadow: var(--card-shadow-hover);
+            border-radius: 12px;
+            padding: 0.5rem;
+            margin-top: 0.5rem;
+        }
+        
+        .dropdown-item {
+            border-radius: 8px;
+            padding: 0.6rem 1rem;
+            transition: all 0.2s ease;
+        }
+        
+        .dropdown-item:hover {
+            background: rgba(99, 102, 241, 0.1);
+            color: var(--primary-color);
+        }
+        
+        /* Main Content */
+        main.container {
+            background: white;
+            border-radius: 24px;
+            padding: 2.5rem;
+            margin-top: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow-hover);
+            min-height: 70vh;
+        }
+        
+        /* Cards */
+        .card {
+            border: none;
+            border-radius: 16px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .card:hover {
+            box-shadow: var(--card-shadow-hover);
+            transform: translateY(-4px);
+        }
+        
+        .card-header {
+            background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
+            border-bottom: 2px solid rgba(99, 102, 241, 0.2);
+            padding: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .card-body {
+            padding: 1.5rem;
+        }
+        
+        /* Buttons */
+        .btn {
+            border-radius: 12px;
+            padding: 0.75rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--primary-dark), var(--primary-color));
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .btn-outline-primary {
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            background: transparent;
+        }
+        
+        .btn-outline-primary:hover {
+            background: var(--primary-color);
+            color: white;
+        }
+        
+        /* Alerts */
+        .alert {
+            border-radius: 12px;
+            border: none;
+            box-shadow: var(--card-shadow);
+            padding: 1rem 1.5rem;
+        }
+        
+        /* Badges */
+        .badge {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+        
+        /* Footer */
+        footer {
+            background: rgba(30, 41, 59, 0.95) !important;
+            backdrop-filter: blur(10px);
+            color: #e2e8f0;
+            margin-top: auto;
+        }
+        
+        footer a {
+            color: #e2e8f0;
+            transition: color 0.3s ease;
+        }
+        
+        footer a:hover {
+            color: var(--primary-light);
+        }
+        
+        /* Animations */
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .fade-in-up {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        
+        /* Service Icons */
+        .service-icon {
+            width: 28px;
+            height: 28px;
+            margin-right: 10px;
+        }
+        
+        .playlist-card {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .playlist-card:hover {
+            transform: translateY(-8px);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 10px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
         }
     </style>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <nav class="navbar navbar-expand-lg sticky-top">
         <div class="container">
             <a class="navbar-brand" href="{{ url_for('index') }}">
                 <i class="fas fa-music"></i> PlaylistChecker
@@ -98,23 +325,18 @@
                 <ul class="navbar-nav me-auto">
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('index') }}">
-                            <i class="fas fa-home"></i> {{ _('Главная') }}
+                            <i class="fas fa-home"></i> {{ _('base.home') }}
                         </a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('about') }}">
-                            <i class="fas fa-info-circle"></i> {{ _('О сервисе') }}
-                        </a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('why_check') }}">
-                            <i class="fas fa-question-circle"></i> {{ _('Зачем проверять?') }}
+                            <i class="fas fa-info-circle"></i> {{ _('base.about') }}
                         </a>
                     </li>
                     {% if current_user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('playlists') }}">
-                            <i class="fas fa-list"></i> {{ _('Мои плейлисты') }}
+                            <i class="fas fa-list"></i> {{ _('base.my_playlists') }}
                         </a>
                     </li>
                     {% if current_user.spotify_tokens %}
@@ -128,13 +350,13 @@
                 </ul>
                 
                 <ul class="navbar-nav">
-                    <!-- Переключатель языков -->
+                    <!-- Language Switcher -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown">
                             <i class="fas fa-globe"></i> 
                             {% if CURRENT_LANGUAGE == 'en' %}English{% else %}Русский{% endif %}
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ url_for('set_language', language='ru') }}">
                                 <i class="fas fa-flag"></i> Русский
                             </a></li>
@@ -146,30 +368,30 @@
                     {% if current_user.is_authenticated %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-user"></i> {{ current_user.username }}
+                            <i class="fas fa-user-circle"></i> {{ current_user.username }}
                         </a>
-                        <ul class="dropdown-menu">
+                        <ul class="dropdown-menu dropdown-menu-end">
                             <li><a class="dropdown-item" href="{{ url_for('notification_settings') }}">
-                                <i class="fas fa-bell"></i> {{ _('Настройки уведомлений') }}
+                                <i class="fas fa-bell"></i> {{ _('base.notification_settings') }}
                             </a></li>
                             <li><a class="dropdown-item" href="{{ url_for('notification_history') }}">
-                                <i class="fas fa-history"></i> {{ _('История уведомлений') }}
+                                <i class="fas fa-history"></i> {{ _('base.notification_history') }}
                             </a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><a class="dropdown-item" href="{{ url_for('logout') }}">
-                                <i class="fas fa-sign-out-alt"></i> {{ _('Выйти') }}
+                                <i class="fas fa-sign-out-alt"></i> {{ _('base.logout') }}
                             </a></li>
                         </ul>
                     </li>
                     {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{{ url_for('login') }}">
-                            <i class="fas fa-sign-in-alt"></i> {{ _('Войти') }}
+                            <i class="fas fa-sign-in-alt"></i> {{ _('base.login') }}
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="{{ url_for('register') }}">
-                            <i class="fas fa-user-plus"></i> {{ _('Регистрация') }}
+                        <a class="nav-link btn btn-primary text-white ms-2" href="{{ url_for('register') }}">
+                            <i class="fas fa-user-plus"></i> {{ _('base.register') }}
                         </a>
                     </li>
                     {% endif %}
@@ -182,8 +404,8 @@
         {% with messages = get_flashed_messages() %}
             {% if messages %}
                 {% for message in messages %}
-                    <div class="alert alert-info alert-dismissible fade show" role="alert">
-                        {{ message }}
+                    <div class="alert alert-info alert-dismissible fade show fade-in-up" role="alert">
+                        <i class="fas fa-info-circle me-2"></i>{{ message }}
                         <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                     </div>
                 {% endfor %}
@@ -193,32 +415,64 @@
         {% block content %}{% endblock %}
     </main>
 
-    <footer class="bg-dark text-light py-4 mt-5">
+    <footer class="py-5 mt-5">
         <div class="container">
             <div class="row">
-                <div class="col-md-6">
-                    <h5><i class="fas fa-music"></i> PlaylistChecker</h5>
-                    <p class="text-muted">{{ _('Профессиональный сервис для мониторинга изменений в плейлистах Spotify, Apple Music и Yandex Music.') }}</p>
+                <div class="col-md-6 mb-4">
+                    <h5 class="fw-bold mb-3">
+                        <i class="fas fa-music me-2"></i> PlaylistChecker
+                    </h5>
+                    <p class="text-muted">{{ _('footer.message') }}</p>
+                    <div class="d-flex gap-3 mt-3">
+                        <a href="#" class="text-decoration-none">
+                            <i class="fab fa-twitter fa-lg"></i>
+                        </a>
+                        <a href="#" class="text-decoration-none">
+                            <i class="fab fa-facebook fa-lg"></i>
+                        </a>
+                        <a href="#" class="text-decoration-none">
+                            <i class="fab fa-instagram fa-lg"></i>
+                        </a>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <h6>{{ _('Полезные ссылки') }}</h6>
+                <div class="col-md-3 mb-4">
+                    <h6 class="fw-bold mb-3">{{ _('links') }}</h6>
                     <ul class="list-unstyled">
-                        <li><a href="{{ url_for('about') }}" class="text-light text-decoration-none">{{ _('О сервисе') }}</a></li>
-                        <li><a href="{{ url_for('why_check') }}" class="text-light text-decoration-none">{{ _('Зачем проверять плейлисты?') }}</a></li>
+                        <li class="mb-2">
+                            <a href="{{ url_for('about') }}" class="text-decoration-none">
+                                <i class="fas fa-chevron-right me-2"></i>{{ _('base.about') }}
+                            </a>
+                        </li>
                         {% if not current_user.is_authenticated %}
-                        <li><a href="{{ url_for('login') }}" class="text-light text-decoration-none">{{ _('Войти') }}</a></li>
-                        <li><a href="{{ url_for('register') }}" class="text-light text-decoration-none">{{ _('Регистрация') }}</a></li>
+                        <li class="mb-2">
+                            <a href="{{ url_for('login') }}" class="text-decoration-none">
+                                <i class="fas fa-chevron-right me-2"></i>{{ _('base.login') }}
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{{ url_for('register') }}" class="text-decoration-none">
+                                <i class="fas fa-chevron-right me-2"></i>{{ _('base.register') }}
+                            </a>
+                        </li>
                         {% endif %}
                     </ul>
                 </div>
+                <div class="col-md-3 mb-4">
+                    <h6 class="fw-bold mb-3">Supported Services</h6>
+                    <ul class="list-unstyled">
+                        <li class="mb-2"><i class="fab fa-spotify me-2 text-success"></i> Spotify</li>
+                        <li class="mb-2"><i class="fab fa-apple me-2"></i> Apple Music</li>
+                        <li class="mb-2"><i class="fas fa-music me-2 text-danger"></i> Yandex Music</li>
+                    </ul>
+                </div>
             </div>
-            <hr class="my-3">
+            <hr class="my-4 border-secondary">
             <div class="text-center">
-                <p class="mb-0">&copy; 2024 PlaylistChecker. {{ _('Отслеживайте изменения в ваших плейлистах.') }}</p>
+                <p class="mb-0">&copy; 2024 PlaylistChecker. {{ _('base.follow_changes') }}</p>
             </div>
         </div>
     </footer>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

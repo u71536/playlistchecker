@@ -2,6 +2,7 @@ import requests
 import os
 from datetime import datetime, timedelta
 import json
+from flask_babel import gettext
 
 class DeezerService:
     def __init__(self, app_id=None, app_secret=None, redirect_uri=None):
@@ -41,13 +42,13 @@ class DeezerService:
                     'expires_at': datetime.utcnow() + timedelta(seconds=expires_in)
                 }
         
-        raise Exception("Ошибка получения токена доступа Deezer")
+        raise Exception(gettext('service.deezer.access_token_error'))
     
     def get_playlist_info(self, access_token, playlist_url):
         """Получить информацию о плейлисте"""
         playlist_id = self._extract_playlist_id(playlist_url)
         if not playlist_id:
-            raise ValueError("Неверный URL плейлиста Deezer")
+            raise ValueError(gettext('service.deezer.invalid_playlist_url'))
         
         url = f"{self.base_url}/playlist/{playlist_id}"
         params = {'access_token': access_token}
@@ -64,7 +65,7 @@ class DeezerService:
                 'public': data.get('public', True)
             }
         else:
-            raise Exception(f"Ошибка получения информации о плейлисте: {response.status_code}")
+            raise Exception(gettext('service.deezer.playlist_info_error', status_code=response.status_code))
     
     def get_playlist_tracks(self, access_token, playlist_id):
         """Получить треки плейлиста"""
