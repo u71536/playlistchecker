@@ -11,6 +11,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+import jwt
 from apscheduler.schedulers.background import BackgroundScheduler
 import atexit
 import logging
@@ -248,6 +249,15 @@ class NotificationSettingsForm(FlaskForm):
     browser_notifications_enabled = BooleanField(lazy_gettext('notification_settings.browser_notifications'))
     submit = SubmitField(lazy_gettext('form.save_settings'))
 
+# Формы восстановления пароля
+class ForgotPasswordForm(FlaskForm):
+    email = StringField('Email', validators=[DataRequired(), Email()])
+    submit = SubmitField(lazy_gettext('form.send'))
+
+class ResetPasswordForm(FlaskForm):
+    password = PasswordField(lazy_gettext('login.password'), validators=[DataRequired()])
+    submit = SubmitField(lazy_gettext('form.save'))
+
 @login_manager.user_loader
 def load_user(user_id):
     try:
@@ -397,6 +407,71 @@ def register():
 def logout():
     logout_user()
     return redirect(url_for('index'))
+
+# Восстановление пароля
+@app.route('/forgot_password', methods=['GET', 'POST'])
+def forgot_password():
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    form = ForgotPasswordForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(email=form.email.data.strip()).first()
+
+        # Независимо от наличия пользователя показываем одинаковое сообщение
+        try:
+            if user:
+                payload = {
+                    'sub': user.id,
+                    'exp': datetime.utcnow() + timedelta(hours=1),
+                    'type': 'password_reset'
+                }
+                token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+                reset_url = url_for('reset_password', token=token, _external=True)
+
+                # Отправляем письмо
+                try:
+                    from services.notification_service import notification_service
+                    subject = 'Восстановление пароля'
+                    message = f"Чтобы сбросить пароль, перейдите по ссылке: {reset_url}\n\nСсылка действительна 1 час."
+                    sent = notification_service.send_email_notification(user.email, subject, message)
+                    if not sent:
+                        logger.info(f"[PasswordReset] Ссылка: {reset_url} (email не отправлен, проверьте SMTP настройки)")
+                except Exception as e:
+                    logger.error(f"[PasswordReset] Ошибка отправки письма: {str(e)}")
+                    logger.info(f"[PasswordReset] Ссылка: {reset_url}")
+        finally:
+            flash(gettext('Если такой email существует, мы отправили письмо с инструкциями'))
+            return redirect(url_for('login'))
+
+    return render_template('forgot_password.html', form=form)
+
+@app.route('/reset_password/<token>', methods=['GET', 'POST'])
+def reset_password(token):
+    if current_user.is_authenticated:
+        return redirect(url_for('index'))
+
+    # Валидируем токен
+    try:
+        data = jwt.decode(token, app.config['SECRET_KEY'], algorithms=['HS256'])
+        if data.get('type') != 'password_reset':
+            raise jwt.InvalidTokenError('invalid type')
+        user_id = data.get('sub')
+        user = User.query.get(user_id)
+        if not user:
+            raise jwt.InvalidTokenError('user not found')
+    except Exception:
+        flash(gettext('Ссылка для восстановления недействительна или устарела'))
+        return redirect(url_for('forgot_password'))
+
+    form = ResetPasswordForm()
+    if form.validate_on_submit():
+        user.password_hash = generate_password_hash(form.password.data)
+        db.session.commit()
+        flash(gettext('Пароль успешно обновлён. Войдите с новым паролем.'))
+        return redirect(url_for('login'))
+
+    return render_template('reset_password.html', form=form)
 
 @app.route('/clear_session')
 def clear_session():

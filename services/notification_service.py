@@ -18,7 +18,8 @@ class NotificationService:
             'port': int(os.environ.get('MAIL_PORT', 587)),
             'use_tls': os.environ.get('MAIL_USE_TLS', 'True').lower() == 'true',
             'username': os.environ.get('MAIL_USERNAME'),
-            'password': os.environ.get('MAIL_PASSWORD')
+            'password': os.environ.get('MAIL_PASSWORD'),
+            'default_sender': os.environ.get('MAIL_DEFAULT_SENDER')
         }
         
         self.telegram_config = {
@@ -41,10 +42,16 @@ class NotificationService:
             return False
         
         try:
+            # Определяем адрес отправителя
+            from_address = self.email_config.get('default_sender') or self.email_config.get('username')
+            if not from_address or '@' not in from_address:
+                logger.error("Некорректный адрес отправителя. Задайте MAIL_DEFAULT_SENDER или MAIL_USERNAME в виде полной почты (example@domain.com)")
+                return False
+
             # Создаем сообщение
             msg = MIMEMultipart('alternative')
             msg['Subject'] = subject
-            msg['From'] = self.email_config['username']
+            msg['From'] = from_address
             msg['To'] = user_email
             
             # Текстовая версия

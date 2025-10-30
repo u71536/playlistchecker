@@ -147,7 +147,7 @@
             </div>
             <div class="card-body">
                 {% for notification in notifications %}
-                <div class="notification-card">
+                <div class="notification-card alert alert-warning alert-dismissible fade show" role="alert">
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <strong class="text-dark">{{ notification.playlist.name }}</strong>
@@ -157,7 +157,7 @@
                                 {{ notification.created_at.strftime('%d.%m.%Y %H:%M') }}
                             </small>
                         </div>
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 </div>
                 {% endfor %}
