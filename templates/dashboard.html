@@ -226,7 +226,7 @@
             </div>
             <div class="card-body p-4">
                 <div class="row g-4">
-                    <div class="col-md-4">
+                    <div class="col-md-6 col-lg-3">
                         <div class="service-connection-card">
                             <div class="service-icon-wrapper" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.1), rgba(5, 150, 105, 0.1));">
                                 <i class="fab fa-spotify fa-3x text-success"></i>
@@ -248,7 +248,22 @@
                         </div>
                     </div>
                     
-                    <div class="col-md-4">
+                    <div class="col-md-6 col-lg-3">
+                        <div class="service-connection-card">
+                            <div class="service-icon-wrapper" style="background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));">
+                                <i class="fas fa-music fa-3x text-primary"></i>
+                            </div>
+                            <h6 class="fw-bold mb-3">Deezer</h6>
+                            <span class="badge bg-info mb-2">{{ _('dashboard.public_playlists') }}</span>
+                            <br>
+                            <small class="text-muted d-block mb-3">{{ _('dashboard.without_authorization') }}</small>
+                            <a href="{{ url_for('add_playlist') }}" class="btn btn-outline-primary">
+                                <i class="fas fa-plus me-2"></i>{{ _('add_playlist.add_playlist') }}
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <div class="col-md-6 col-lg-3">
                         <div class="service-connection-card">
                             <div class="service-icon-wrapper" style="background: linear-gradient(135deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.1));">
                                 <i class="fab fa-apple fa-3x text-dark"></i>
@@ -266,7 +281,7 @@
                         </div>
                     </div>
                     
-                    <div class="col-md-4">
+                    <div class="col-md-6 col-lg-3">
                         <div class="service-connection-card">
                             <div class="service-icon-wrapper" style="background: linear-gradient(135deg, rgba(239, 68, 68, 0.1), rgba(220, 38, 38, 0.1));">
                                 <i class="fas fa-music fa-3x text-danger"></i>

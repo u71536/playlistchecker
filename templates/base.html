@@ -1,15 +1,21 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="{{ CURRENT_LANGUAGE or 'ru' }}">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}PlaylistChecker{% endblock %}</title>
+    <title>{% block title %}{{ _('seo.default_title') }}{% endblock %}</title>
     
     <!-- SEO Meta Tags -->
-    <meta name="description" content="{% block description %}PlaylistChecker - сервис для отслеживания изменений в плейлистах Spotify, Apple Music, Yandex Music. Узнайте, когда песни исчезают из ваших плейлистов.{% endblock %}">
-    <meta name="keywords" content="{% block keywords %}плейлист, музыка, spotify, apple music, yandex music, отслеживание, мониторинг, песни, треки{% endblock %}">
+    <meta name="description" content="{% block description %}{{ _('seo.default_description') }}{% endblock %}">
+    <meta name="keywords" content="{% block keywords %}{{ _('seo.default_keywords') }}{% endblock %}">
     <meta name="author" content="PlaylistChecker">
     <meta name="robots" content="index, follow">
+    
+    <!-- Language and Alternate Links -->
+    {% set current_url = request.url.split('?')[0] %}
+    <link rel="alternate" hreflang="ru" href="{{ current_url }}?lang=ru">
+    <link rel="alternate" hreflang="en" href="{{ current_url }}?lang=en">
+    <link rel="alternate" hreflang="x-default" href="{{ current_url }}">
     
     <!-- Open Graph Meta Tags -->
     <meta property="og:title" content="{% block og_title %}{{ self.title() }}{% endblock %}">
@@ -17,7 +23,8 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="{{ request.url }}">
     <meta property="og:site_name" content="PlaylistChecker">
-    <meta property="og:locale" content="ru_RU">
+    <meta property="og:locale" content="{% if CURRENT_LANGUAGE == 'en' %}en_US{% else %}ru_RU{% endif %}">
+    <meta property="og:locale:alternate" content="{% if CURRENT_LANGUAGE == 'en' %}ru_RU{% else %}en_US{% endif %}">
     
     <!-- Twitter Card Meta Tags -->
     <meta name="twitter:card" content="summary_large_image">

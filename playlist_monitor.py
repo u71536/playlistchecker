@@ -121,8 +121,44 @@ class PlaylistMonitor:
             logger.error(f"Сервис {playlist.service} не найден")
             return
         
-        # Для публичных плейлистов Яндекс.Музыки не нужен токен
-        if playlist.service == 'yandex_music' and hasattr(playlist, 'is_public') and playlist.is_public:
+        # Для публичных плейлистов Яндекс.Музыки и Deezer не нужен токен
+        if playlist.service == 'deezer':
+            try:
+                # Получаем треки плейлиста Deezer через RapidAPI
+                playlist_url = f"https://www.deezer.com/playlist/{playlist.service_playlist_id}"
+                current_tracks = service.get_public_playlist_tracks(playlist_url)
+                current_track_ids = {track['id'] for track in current_tracks}
+                
+                # Получаем треки из базы данных
+                db_tracks = Track.query.filter_by(playlist_id=playlist.id, is_removed=False).all()
+                db_track_ids = {track.service_track_id for track in db_tracks}
+                
+                # Находим удаленные треки
+                removed_track_ids = db_track_ids - current_track_ids
+                if removed_track_ids:
+                    self._handle_removed_tracks(playlist, removed_track_ids)
+                
+                # Находим новые треки
+                new_track_ids = current_track_ids - db_track_ids
+                if new_track_ids:
+                    self._handle_new_tracks(playlist, current_tracks, new_track_ids)
+                
+                # Обновляем время последней проверки
+                playlist.last_checked = datetime.utcnow()
+                try:
+                    db.session.commit()
+                    logger.info(f"Время последней проверки плейлиста Deezer {playlist.name} обновлено")
+                except Exception as e:
+                    logger.error(f"Ошибка при обновлении времени проверки плейлиста Deezer {playlist.name}: {str(e)}")
+                    db.session.rollback()
+                    raise
+                
+                logger.info(f"Плейлист Deezer {playlist.name} проверен. Удалено: {len(removed_track_ids)}, добавлено: {len(new_track_ids)}")
+                
+            except Exception as e:
+                logger.error(f"Ошибка при проверке плейлиста Deezer {playlist.name}: {str(e)}")
+                raise
+        elif playlist.service == 'yandex_music' and hasattr(playlist, 'is_public') and playlist.is_public:
             try:
                 # Получаем треки публичного плейлиста
                 playlist_url = f"https://music.yandex.ru/playlists/{playlist.service_playlist_id}"
@@ -386,6 +422,29 @@ class PlaylistMonitor:
         try:
             for track_data in current_tracks:
                 if track_data['id'] in new_track_ids:
+                    # Проверяем, не существует ли уже трек с таким service_track_id
+                    # (может быть добавлен при создании плейлиста или в другой транзакции)
+                    existing_track = Track.query.filter_by(
+                        playlist_id=playlist.id,
+                        service_track_id=track_data['id'],
+                        is_removed=False
+                    ).first()
+                    
+                    if existing_track:
+                        logger.info(f"Трек {track_data['name']} уже существует в плейлисте {playlist.name}, пропускаем")
+                        continue
+                    
+                    # Проверяем, не было ли уже отправлено уведомление для этого трека
+                    from services.notification_service import notification_service
+                    if notification_service.check_notification_already_sent(
+                        playlist.user_id, 
+                        playlist.id, 
+                        track_data['id'], 
+                        'track_added'
+                    ):
+                        logger.info(f"Уведомление для трека {track_data['name']} уже было отправлено, пропускаем")
+                        continue
+                    
                     track = Track(
                         playlist_id=playlist.id,
                         service_track_id=track_data['id'],
@@ -409,8 +468,6 @@ class PlaylistMonitor:
                     
                     # Отправляем уведомления по всем каналам
                     try:
-                        from services.notification_service import notification_service
-                        
                         notification_data = {
                             'type': 'track_added',
                             'message': f"Новый трек '{track.name}' от {track.artist} добавлен в плейлист '{playlist.name}'",
@@ -457,8 +514,57 @@ class PlaylistMonitor:
         if not service_obj:
             raise ValueError(f"Неподдерживаемый сервис: {service}")
         
-        # Для публичных плейлистов Яндекс.Музыки не нужен токен
-        if service == 'yandex_music' and 'music.yandex.ru/playlists/' in playlist_url:
+        # Для публичных плейлистов Яндекс.Музыки и Deezer не нужен токен
+        if service == 'deezer':
+            try:
+                # Получаем информацию о плейлисте Deezer через RapidAPI
+                playlist_info = service_obj.get_public_playlist_info(playlist_url)
+                
+                # Проверяем, не добавлен ли уже этот плейлист
+                existing_playlist = Playlist.query.filter_by(
+                    user_id=user.id,
+                    service=service,
+                    service_playlist_id=playlist_info['id']
+                ).first()
+                
+                if existing_playlist:
+                    raise ValueError("Этот плейлист уже добавлен для мониторинга")
+                
+                # Создаем плейлист в базе данных
+                playlist = Playlist(
+                    user_id=user.id,
+                    service=service,
+                    service_playlist_id=playlist_info['id'],
+                    name=playlist_info['name'],
+                    description=playlist_info.get('description', ''),
+                    last_checked=datetime.utcnow()
+                )
+                db.session.add(playlist)
+                db.session.flush()  # Получаем ID плейлиста
+                
+                # Получаем и сохраняем треки плейлиста Deezer
+                tracks_data = service_obj.get_public_playlist_tracks(playlist_url)
+                for track_data in tracks_data:
+                    track = Track(
+                        playlist_id=playlist.id,
+                        service_track_id=track_data['id'],
+                        name=track_data['name'],
+                        artist=track_data['artist'],
+                        album=track_data.get('album', ''),
+                        duration=track_data.get('duration', 0),
+                        added_at=datetime.utcnow()
+                    )
+                    db.session.add(track)
+                
+                db.session.commit()
+                logger.info(f"Плейлист Deezer {playlist.name} добавлен для пользователя {user.username}")
+                
+                return playlist
+                
+            except Exception as e:
+                logger.error(f"Ошибка при добавлении плейлиста Deezer: {str(e)}")
+                raise
+        elif service == 'yandex_music' and 'music.yandex.ru/playlists/' in playlist_url:
             try:
                 # Получаем информацию о публичном плейлисте
                 playlist_info = service_obj.get_public_playlist_info(playlist_url)

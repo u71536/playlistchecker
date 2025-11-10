@@ -323,6 +323,49 @@ PlaylistChecker - Уведомление
                 'reason': 'already_notified'
             }
         
+        # Сохраняем запись в истории ДО отправки, чтобы предотвратить параллельные отправки
+        # Используем временный статус "sending" для отслеживания процесса
+        try:
+            from app import NotificationHistory, db
+            from sqlalchemy.exc import IntegrityError
+            # Пытаемся создать запись в истории с временным статусом
+            history = NotificationHistory(
+                user_id=user.id,
+                playlist_id=playlist_id,
+                notification_type=notification_type,
+                track_service_id=track_service_id,
+                track_name=notification_data.get('track_name'),
+                artist_name=notification_data.get('artist_name'),
+                playlist_name=notification_data.get('playlist_name'),
+                message=notification_data.get('message', ''),
+                sent_via='sending'  # Временный статус
+            )
+            db.session.add(history)
+            db.session.commit()  # Коммитим сразу, чтобы зафиксировать в БД
+            logger.info(f"Создана запись в истории уведомлений для пользователя {user.username}, трек {track_service_id}")
+        except IntegrityError as e:
+            # Если запись уже существует (race condition или уникальный индекс), пропускаем отправку
+            db.session.rollback()
+            logger.info(f"Уведомление для пользователя {user.username} о треке {track_service_id} уже обрабатывается или отправлено (IntegrityError)")
+            return {
+                'email': False,
+                'telegram': False,
+                'browser': False,
+                'skipped': True,
+                'reason': 'already_processing'
+            }
+        except Exception as e:
+            # Другие ошибки - логируем и пропускаем отправку
+            db.session.rollback()
+            logger.error(f"Ошибка при создании записи в истории уведомлений: {str(e)}")
+            return {
+                'email': False,
+                'telegram': False,
+                'browser': False,
+                'skipped': True,
+                'reason': 'error_creating_history'
+            }
+        
         results = {
             'email': False,
             'telegram': False,
@@ -355,11 +398,20 @@ PlaylistChecker - Уведомление
                 results['browser'] = True
                 sent_channels.append('browser')
         
-        # Сохраняем историю только если хотя бы одно уведомление было отправлено
-        if sent_channels:
-            sent_via = ', '.join(sent_channels)
-            playlist_id = notification_data.get('playlist_id')
-            self.save_notification_history(user.id, playlist_id, notification_data, sent_via)
+        # Обновляем историю с реальными каналами отправки
+        try:
+            from app import db
+            if sent_channels:
+                sent_via = ', '.join(sent_channels)
+            else:
+                sent_via = 'none'  # Если ни одно уведомление не было отправлено
+            
+            history.sent_via = sent_via
+            db.session.commit()
+            logger.info(f"Обновлена история уведомления для пользователя {user.username}, отправлено через: {sent_via}")
+        except Exception as e:
+            logger.error(f"Ошибка обновления истории уведомления: {str(e)}")
+            db.session.rollback()
         
         logger.info(f"Уведомления для пользователя {user.username}: {results}")
         return results

@@ -22,6 +22,9 @@ YANDEX_MUSIC_CLIENT_ID=your_yandex_music_client_id
 YANDEX_MUSIC_CLIENT_SECRET=your_yandex_music_client_secret
 YANDEX_MUSIC_REDIRECT_URI=http://localhost:5000/auth/yandex_music/callback
 
+# RapidAPI (для Deezer)
+RAPIDAPI_KEY=your_rapidapi_key
+
 # Email настройки (для уведомлений)
 MAIL_SERVER=smtp.gmail.com
 MAIL_PORT=587

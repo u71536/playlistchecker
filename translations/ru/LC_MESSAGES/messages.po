@@ -26,13 +26,13 @@ msgstr "О сервисе"
 
 #: templates/about.html:3 templates/about.html:5
 msgid "page.about.monitoring_description"
-msgstr "Мониторинг плейлистов Spotify, Apple Music, Yandex Music"
+msgstr "Мониторинг плейлистов Spotify, Deezer, Apple Music, Yandex Music"
 
 #: templates/about.html:7
 msgid "page.about.keywords"
 msgstr ""
 "о сервисе, playlistchecker, мониторинг плейлистов, функции, возможности, "
-"spotify, apple music, yandex music, музыкальные сервисы"
+"spotify, deezer, apple music, yandex music, музыкальные сервисы"
 
 #: templates/about.html:16
 msgid "page.about.subtitle"
@@ -1223,6 +1223,9 @@ msgstr "Ошибка получения информации о плейлист
 msgid "service.deezer.invalid_playlist_url"
 msgstr "Неверный URL плейлиста Deezer"
 
+msgid "service.deezer.playlist_tracks_error"
+msgstr "Ошибка получения треков плейлиста: {error}"
+
 msgid "service.spotify.token_refresh_error"
 msgstr "Ошибка обновления токена: {error}"
 
@@ -1255,4 +1258,26 @@ msgstr "Токен истек и нет refresh_token для обновлени�
 
 msgid "service.spotify.token_invalid_no_refresh"
 msgstr "Токен недействителен и нет refresh_token для обновления"
+
+# SEO Meta Tags
+msgid "seo.default_title"
+msgstr "PlaylistChecker - Мониторинг плейлистов Spotify, Apple Music, Yandex Music"
+
+msgid "seo.default_description"
+msgstr "PlaylistChecker - профессиональный сервис для мониторинга плейлистов. Отслеживайте исчезновение песен из ваших плейлистов Spotify, Apple Music и Yandex Music. Получайте уведомления о любых изменениях в режиме реального времени."
+
+msgid "seo.default_keywords"
+msgstr "плейлист, музыка, spotify, apple music, yandex music, отслеживание, мониторинг, песни, треки, исчезновение, уведомления, музыкальные сервисы, мониторинг плейлистов, отслеживание изменений"
+
+msgid "seo.login.description"
+msgstr "Войдите в PlaylistChecker для мониторинга ваших плейлистов Spotify, Apple Music и Yandex Music. Отслеживайте изменения в ваших музыкальных коллекциях."
+
+msgid "seo.login.keywords"
+msgstr "войти, вход, авторизация, playlistchecker, мониторинг плейлистов, spotify, apple music, yandex music"
+
+msgid "seo.register.description"
+msgstr "Зарегистрируйтесь в PlaylistChecker - профессиональном сервисе для мониторинга плейлистов. Начните отслеживать изменения в ваших музыкальных коллекциях уже сегодня."
+
+msgid "seo.register.keywords"
+msgstr "регистрация, создать аккаунт, playlistchecker, мониторинг плейлистов, spotify, apple music, yandex music, отслеживание изменений"
 

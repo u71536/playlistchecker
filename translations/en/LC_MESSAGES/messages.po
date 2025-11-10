@@ -25,13 +25,13 @@ msgstr "About"
 
 #: templates/about.html:3 templates/about.html:5
 msgid "page.about.monitoring_description"
-msgstr "Monitoring playlists on Spotify, Apple Music, Yandex Music"
+msgstr "Monitoring playlists on Spotify, Deezer, Apple Music, Yandex Music"
 
 #: templates/about.html:7
 msgid "page.about.keywords"
 msgstr ""
 "about, playlistchecker, playlist monitoring, features, capabilities, "
-"spotify, apple music, yandex music, music services"
+"spotify, deezer, apple music, yandex music, music services"
 
 #: templates/about.html:16
 msgid "page.about.subtitle"
@@ -1120,6 +1120,9 @@ msgstr "Error getting playlist information: {status_code}"
 msgid "service.deezer.invalid_playlist_url"
 msgstr "Invalid Deezer playlist URL"
 
+msgid "service.deezer.playlist_tracks_error"
+msgstr "Error getting playlist tracks: {error}"
+
 msgid "service.spotify.token_refresh_error"
 msgstr "Error refreshing token: {error}"
 
@@ -1152,6 +1155,28 @@ msgstr "Token expired and no refresh_token available for renewal"
 
 msgid "service.spotify.token_invalid_no_refresh"
 msgstr "Token is invalid and no refresh_token available for renewal"
+
+# SEO Meta Tags
+msgid "seo.default_title"
+msgstr "PlaylistChecker - Monitor Spotify, Apple Music, Yandex Music Playlists"
+
+msgid "seo.default_description"
+msgstr "PlaylistChecker - professional service for monitoring playlists. Track songs disappearing from your Spotify, Apple Music, and Yandex Music playlists. Receive notifications about any changes in real time."
+
+msgid "seo.default_keywords"
+msgstr "playlist, music, spotify, apple music, yandex music, tracking, monitoring, songs, tracks, disappearance, notifications, music services, playlist monitoring, track changes"
+
+msgid "seo.login.description"
+msgstr "Login to PlaylistChecker to monitor your Spotify, Apple Music, and Yandex Music playlists. Track changes in your music collections."
+
+msgid "seo.login.keywords"
+msgstr "login, sign in, authentication, playlistchecker, playlist monitoring, spotify, apple music, yandex music"
+
+msgid "seo.register.description"
+msgstr "Register for PlaylistChecker - professional service for monitoring playlists. Start tracking changes in your music collections today."
+
+msgid "seo.register.keywords"
+msgstr "register, create account, playlistchecker, playlist monitoring, spotify, apple music, yandex music, track changes"
 
 #~ msgid "nav.home"
 #~ msgstr "Home"

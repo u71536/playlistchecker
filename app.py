@@ -235,7 +235,7 @@ class RegisterForm(FlaskForm):
 class PlaylistForm(FlaskForm):
     service = SelectField(lazy_gettext('form.service'), choices=[
         ('spotify', 'Spotify'),
-        # ('deezer', 'Deezer'),  # Временно скрыт
+        ('deezer', 'Deezer'),
         ('apple_music', 'Apple Music'),
         ('yandex_music', 'Yandex Music')
     ], validators=[DataRequired()])
@@ -292,43 +292,40 @@ def why_check():
 
 @app.route('/sitemap.xml')
 def sitemap():
-    """Sitemap для поисковых систем"""
+    """Sitemap для поисковых систем с поддержкой двух языков"""
     from flask import Response
     from datetime import datetime
     
-    sitemap_content = f'''<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-    <url>
-        <loc>{request.url_root}</loc>
-        <lastmod>{datetime.now().strftime('%Y-%m-%d')}</lastmod>
-        <changefreq>daily</changefreq>
-        <priority>1.0</priority>
-    </url>
-    <url>
-        <loc>{request.url_root}about</loc>
-        <lastmod>{datetime.now().strftime('%Y-%m-%d')}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    <url>
-        <loc>{request.url_root}why-check</loc>
-        <lastmod>{datetime.now().strftime('%Y-%m-%d')}</lastmod>
-        <changefreq>weekly</changefreq>
-        <priority>0.8</priority>
-    </url>
-    <url>
-        <loc>{request.url_root}login</loc>
-        <lastmod>{datetime.now().strftime('%Y-%m-%d')}</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.6</priority>
-    </url>
-    <url>
-        <loc>{request.url_root}register</loc>
-        <lastmod>{datetime.now().strftime('%Y-%m-%d')}</lastmod>
-        <changefreq>monthly</changefreq>
-        <priority>0.6</priority>
-    </url>
-</urlset>'''
+    base_url = request.url_root.rstrip('/')
+    lastmod = datetime.now().strftime('%Y-%m-%d')
+    
+    # Основные страницы с поддержкой языков
+    pages = [
+        {'path': '', 'changefreq': 'daily', 'priority': '1.0'},
+        {'path': 'about', 'changefreq': 'weekly', 'priority': '0.8'},
+        {'path': 'login', 'changefreq': 'monthly', 'priority': '0.6'},
+        {'path': 'register', 'changefreq': 'monthly', 'priority': '0.6'},
+    ]
+    
+    sitemap_content = '<?xml version="1.0" encoding="UTF-8"?>\n'
+    sitemap_content += '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" '
+    sitemap_content += 'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
+    
+    for page in pages:
+        url_path = page['path']
+        page_url = f'{base_url}/{url_path}' if url_path else base_url
+        sitemap_content += '    <url>\n'
+        sitemap_content += f'        <loc>{page_url}</loc>\n'
+        sitemap_content += f'        <lastmod>{lastmod}</lastmod>\n'
+        sitemap_content += f'        <changefreq>{page["changefreq"]}</changefreq>\n'
+        sitemap_content += f'        <priority>{page["priority"]}</priority>\n'
+        # Добавляем альтернативные языковые версии
+        sitemap_content += f'        <xhtml:link rel="alternate" hreflang="ru" href="{page_url}?lang=ru" />\n'
+        sitemap_content += f'        <xhtml:link rel="alternate" hreflang="en" href="{page_url}?lang=en" />\n'
+        sitemap_content += f'        <xhtml:link rel="alternate" hreflang="x-default" href="{page_url}" />\n'
+        sitemap_content += '    </url>\n'
+    
+    sitemap_content += '</urlset>'
     
     return Response(sitemap_content, mimetype='application/xml')
 
@@ -338,24 +335,28 @@ def robots_txt():
     """Robots.txt для поисковых систем"""
     from flask import Response
     
-    robots_content = '''User-agent: *
+    base_url = request.url_root.rstrip('/')
+    
+    robots_content = f'''User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://yourdomain.com/sitemap.xml
+Sitemap: {base_url}/sitemap.xml
 
 # Disallow private areas
 Disallow: /instance/
 Disallow: /migrations/
 Disallow: /__pycache__/
 Disallow: /services/__pycache__/
+Disallow: /api/
 
 # Allow important pages
 Allow: /
 Allow: /about
-Allow: /why-check
 Allow: /login
-Allow: /register'''
+Allow: /register
+Allow: /sitemap.xml
+Allow: /robots.txt'''
     
     return Response(robots_content, mimetype='text/plain')
 
