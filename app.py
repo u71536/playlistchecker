@@ -3,7 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import (LoginManager, UserMixin, login_user, logout_user,
                          login_required, current_user)
-from flask_babel import Babel, gettext, lazy_gettext, get_locale
+from flask_babel import Babel, gettext, lazy_gettext
 from flask_wtf import FlaskForm
 from wtforms import StringField, PasswordField, SubmitField, SelectField, BooleanField
 from wtforms.validators import DataRequired, Email
@@ -46,6 +46,8 @@ app.config['BABEL_DEFAULT_LOCALE'] = 'ru'
 if os.environ.get('FLASK_ENV') == 'development' or os.environ.get('FLASK_DEBUG') == '1':
     app.config['TEMPLATES_AUTO_RELOAD'] = True
     app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0
+    # Перезагружаем переводы в режиме разработки
+    app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 
 # Принудительно отключаем кэширование для разработки
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -60,8 +62,6 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # Инициализация Babel
-babel = Babel(app)
-
 def get_locale():
     # 1. Если язык выбран пользователем, используем его
     if 'language' in session:
@@ -74,7 +74,7 @@ def get_locale():
     # 3. Используем язык браузера, если он поддерживается
     return request.accept_languages.best_match(app.config['LANGUAGES'].keys()) or 'ru'
 
-babel.init_app(app, locale_selector=get_locale)
+babel = Babel(app, locale_selector=get_locale)
 
 # Добавляем функции перевода в контекст шаблонов
 @app.context_processor
