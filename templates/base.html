@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{{ _('seo.default_title') }}{% endblock %}</title>
     
+    <!-- Favicon -->
+    <link rel="icon" type="image/svg+xml" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="alternate icon" href="{{ url_for('static', filename='favicon.svg') }}">
+    <link rel="apple-touch-icon" href="{{ url_for('static', filename='favicon.svg') }}">
+    
     <!-- SEO Meta Tags -->
     <meta name="description" content="{% block description %}{{ _('seo.default_description') }}{% endblock %}">
     <meta name="keywords" content="{% block keywords %}{{ _('seo.default_keywords') }}{% endblock %}">

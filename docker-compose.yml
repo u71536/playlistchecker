@@ -42,6 +42,8 @@ services:
       POSTGRES_PASSWORD: playlistcheckerQp9)3ni~
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"  # Проброс порта для доступа из pgAdmin/HeidiSQL
     networks:
       - traefik-network
 
