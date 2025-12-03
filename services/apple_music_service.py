@@ -2,16 +2,59 @@ import requests
 import os
 import jwt
 import time
-from datetime import datetime, timedelta
-import json
+from datetime import datetime
 from flask_babel import gettext
+
 
 class AppleMusicService:
     def __init__(self, team_id=None, key_id=None, private_key=None):
         self.team_id = team_id or os.environ.get('APPLE_MUSIC_TEAM_ID')
         self.key_id = key_id or os.environ.get('APPLE_MUSIC_KEY_ID')
-        self.private_key = private_key or os.environ.get('APPLE_MUSIC_PRIVATE_KEY')
+        private_key_env = (
+            private_key or os.environ.get('APPLE_MUSIC_PRIVATE_KEY')
+        )
+        self.private_key = self._load_private_key(private_key_env)
         self.base_url = "https://api.music.apple.com"
+    
+    def _load_private_key(self, key_source):
+        """Загрузить приватный ключ из файла или переменной окружения"""
+        if not key_source:
+            return None
+
+        # Если ключ содержит BEGIN PRIVATE KEY, обрабатываем как строку
+        if 'BEGIN PRIVATE KEY' in key_source:
+            # Заменяем \n на реальные переносы строк
+            return key_source.replace('\\n', '\n')
+
+        # Проверяем, является ли это путем к файлу
+        # Сначала проверяем указанный путь
+        if os.path.isfile(key_source):
+            try:
+                with open(key_source, 'r', encoding='utf-8') as f:
+                    return f.read()
+            except Exception as e:
+                raise Exception(
+                    f"Ошибка чтения файла ключа: {e}"
+                )
+
+        # Если файл не найден, пробуем найти относительно корня проекта
+        # (где обычно находится app.py)
+        project_root = os.path.dirname(
+            os.path.dirname(os.path.abspath(__file__))
+        )
+        key_path = os.path.join(project_root, key_source)
+        if os.path.isfile(key_path):
+            try:
+                with open(key_path, 'r', encoding='utf-8') as f:
+                    return f.read()
+            except Exception as e:
+                raise Exception(
+                    f"Ошибка чтения файла ключа: {e}"
+                )
+
+        # Если это не файл и не ключ, возвращаем как есть
+        # (может быть это уже сам ключ в неправильном формате)
+        return key_source
     
     def get_developer_token(self):
         """Получить developer token для Apple Music API"""
@@ -140,5 +183,5 @@ class AppleMusicService:
             url = f"{self.base_url}/v1/me"
             response = requests.get(url, headers=headers)
             return response.status_code == 200
-        except:
+        except Exception:
             return False
