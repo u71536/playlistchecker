@@ -79,7 +79,7 @@ class AppleMusicService:
         except Exception as e:
             raise Exception(gettext('service.apple_music.developer_token_error', error=str(e)))
     
-    def get_playlist_info(self, user_token, playlist_url):
+    def get_playlist_info(self, playlist_url, user_token=None):
         """Получить информацию о плейлисте"""
         playlist_id = self._extract_playlist_id(playlist_url)
         if not playlist_id:
@@ -87,9 +87,12 @@ class AppleMusicService:
         
         developer_token = self.get_developer_token()
         headers = {
-            'Authorization': f'Bearer {developer_token}',
-            'Music-User-Token': user_token
+            'Authorization': f'Bearer {developer_token}'
         }
+        
+        # User Token опционален - нужен только для приватных плейлистов
+        if user_token:
+            headers['Music-User-Token'] = user_token
         
         url = f"{self.base_url}/v1/catalog/us/playlists/{playlist_id}"
         
@@ -97,24 +100,37 @@ class AppleMusicService:
         if response.status_code == 200:
             data = response.json()
             playlist = data['data'][0]
+            tracks_data = playlist['relationships'].get('tracks', {}).get('data', [])
             return {
                 'id': playlist['id'],
                 'name': playlist['attributes']['name'],
                 'description': playlist['attributes'].get('description', {}).get('standard', ''),
-                'tracks_count': playlist['relationships']['tracks']['data'],
+                'tracks_count': len(tracks_data),
                 'owner': playlist['attributes'].get('curatorName', 'Unknown'),
                 'public': True
             }
         else:
-            raise Exception(gettext('service.apple_music.playlist_info_error', status_code=response.status_code))
+            raise Exception(
+                gettext(
+                    'service.apple_music.playlist_info_error',
+                    status_code=response.status_code
+                )
+            )
     
-    def get_playlist_tracks(self, user_token, playlist_id):
+    def get_public_playlist_info(self, playlist_url):
+        """Получить информацию о публичном плейлисте (без user token)"""
+        return self.get_playlist_info(playlist_url, user_token=None)
+    
+    def get_playlist_tracks(self, playlist_id, user_token=None):
         """Получить треки плейлиста"""
         developer_token = self.get_developer_token()
         headers = {
-            'Authorization': f'Bearer {developer_token}',
-            'Music-User-Token': user_token
+            'Authorization': f'Bearer {developer_token}'
         }
+        
+        # User Token опционален - нужен только для приватных плейлистов
+        if user_token:
+            headers['Music-User-Token'] = user_token
         
         tracks = []
         url = f"{self.base_url}/v1/catalog/us/playlists/{playlist_id}/tracks"
@@ -153,6 +169,13 @@ class AppleMusicService:
         
         return tracks
     
+    def get_public_playlist_tracks(self, playlist_url):
+        """Получить треки публичного плейлиста (без user token)"""
+        playlist_id = self._extract_playlist_id(playlist_url)
+        if not playlist_id:
+            raise ValueError(gettext('service.apple_music.invalid_playlist_url'))
+        return self.get_playlist_tracks(playlist_id, user_token=None)
+    
     def _extract_playlist_id(self, url):
         """Извлечь ID плейлиста из URL"""
         import re
@@ -173,6 +196,8 @@ class AppleMusicService:
     
     def is_token_valid(self, user_token):
         """Проверить валидность пользовательского токена"""
+        if not user_token:
+            return False
         try:
             developer_token = self.get_developer_token()
             headers = {

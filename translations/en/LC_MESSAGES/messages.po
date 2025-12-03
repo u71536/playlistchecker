@@ -107,6 +107,54 @@ msgstr "Deezer authorization will be implemented"
 msgid "flash.apple_music_auth_coming_soon"
 msgstr "Apple Music authorization will be implemented soon"
 
+#: app.py:695
+msgid "flash.apple_music_public_only"
+msgstr "Apple Music: public playlists available without authorization"
+
+#: templates/dashboard.html
+msgid "dashboard.apple_music_auth"
+msgstr "Apple Music Authorization"
+
+#: templates/dashboard.html
+msgid "dashboard.connect"
+msgstr "Connect"
+
+#: templates/dashboard.html
+msgid "dashboard.private_playlists_available"
+msgstr "Private playlists available"
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.initializing"
+msgstr "Initializing Apple Music..."
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.authorize"
+msgstr "Authorize with Apple Music"
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.description"
+msgstr "To access private playlists, you need to authorize with your Apple ID. You must have an active Apple Music subscription."
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.init_error"
+msgstr "Initialization error"
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.authorizing"
+msgstr "Authorizing..."
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.auth_error"
+msgstr "Authorization error"
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.success"
+msgstr "Authorization successful! You can now track private playlists."
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.save_error"
+msgstr "Token save error"
+
 #: app.py:702
 msgid "flash.yandex_music_auth_coming_soon"
 msgstr "Yandex Music authorization will be implemented soon"

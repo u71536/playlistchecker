@@ -108,6 +108,54 @@ msgstr "Авторизация Deezer будет реализована"
 msgid "flash.apple_music_auth_coming_soon"
 msgstr "Авторизация Apple Music будет реализована в скором времени"
 
+#: app.py:695
+msgid "flash.apple_music_public_only"
+msgstr "Apple Music: работа с публичными плейлистами доступна без авторизации"
+
+#: templates/dashboard.html
+msgid "dashboard.apple_music_auth"
+msgstr "Авторизация Apple Music"
+
+#: templates/dashboard.html
+msgid "dashboard.connect"
+msgstr "Подключить"
+
+#: templates/dashboard.html
+msgid "dashboard.private_playlists_available"
+msgstr "Доступны приватные плейлисты"
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.initializing"
+msgstr "Инициализация Apple Music..."
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.authorize"
+msgstr "Авторизоваться через Apple Music"
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.description"
+msgstr "Для доступа к приватным плейлистам необходимо авторизоваться через Apple ID. У вас должна быть активная подписка Apple Music."
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.init_error"
+msgstr "Ошибка инициализации"
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.authorizing"
+msgstr "Авторизация..."
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.auth_error"
+msgstr "Ошибка авторизации"
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.success"
+msgstr "Авторизация успешна! Теперь вы можете отслеживать приватные плейлисты."
+
+#: templates/apple_music_auth.html
+msgid "apple_music_auth.save_error"
+msgstr "Ошибка сохранения токена"
+
 #: app.py:702
 msgid "flash.yandex_music_auth_coming_soon"
 msgstr "Авторизация Yandex Music будет реализована в скором времени"

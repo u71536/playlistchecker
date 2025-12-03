@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, url_for, flash, request, session
+from flask import Flask, render_template, redirect, url_for, flash, request, session, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_login import (LoginManager, UserMixin, login_user, logout_user,
@@ -688,12 +688,68 @@ def deezer_auth():
     flash(gettext('flash.deezer_auth_coming_soon'))
     return redirect(url_for('index'))
 
+@app.route('/api/apple_music/developer_token')
+@login_required
+def get_apple_music_developer_token():
+    """Получить Developer Token для Apple Music"""
+    from services.apple_music_service import AppleMusicService
+    try:
+        service = AppleMusicService()
+        token = service.get_developer_token()
+        return jsonify({'token': token})
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+@app.route('/api/apple_music/user_token', methods=['POST'])
+@login_required
+def save_apple_music_user_token():
+    """Сохранить User Token для Apple Music"""
+    from services.apple_music_service import AppleMusicService
+    
+    data = request.json
+    user_token = data.get('user_token')
+    expires_at_str = data.get('expires_at')
+    
+    if not user_token:
+        return jsonify({'error': 'User token required'}), 400
+    
+    try:
+        # Проверяем валидность токена
+        service = AppleMusicService()
+        if not service.is_token_valid(user_token):
+            return jsonify({'error': 'Invalid user token'}), 400
+        
+        # Парсим дату истечения (обычно токен действителен ~6 месяцев)
+        if expires_at_str:
+            expires_at = datetime.fromisoformat(expires_at_str.replace('Z', '+00:00'))
+        else:
+            # По умолчанию 6 месяцев
+            expires_at = datetime.utcnow() + timedelta(days=180)
+        
+        # Удаляем старые токены
+        AppleMusicToken.query.filter_by(user_id=current_user.id).delete()
+        
+        # Сохраняем новый токен
+        apple_music_token = AppleMusicToken(
+            user_id=current_user.id,
+            access_token=user_token,
+            expires_at=expires_at
+        )
+        db.session.add(apple_music_token)
+        db.session.commit()
+        
+        return jsonify({'success': True})
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'error': str(e)}), 500
+
 @app.route('/auth/apple_music')
 @login_required
 def apple_music_auth():
-    # Здесь будет логика авторизации Apple Music
-    flash(gettext('flash.apple_music_auth_coming_soon'))
-    return redirect(url_for('index'))
+    """Авторизация Apple Music через MusicKit JS"""
+    # Авторизация происходит на клиентской стороне через MusicKit JS
+    # Просто рендерим страницу с JavaScript для авторизации
+    return render_template('apple_music_auth.html')
 
 @app.route('/auth/yandex_music')
 @login_required

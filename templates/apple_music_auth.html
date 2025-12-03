@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block title %}{{ _('dashboard.apple_music_auth') }} - PlaylistChecker{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header text-center">
+                <h3 class="mb-0">
+                    <i class="fab fa-apple me-2"></i>{{ _('dashboard.apple_music_auth') }}
+                </h3>
+            </div>
+            <div class="card-body">
+                <div id="auth-status" class="text-center mb-4">
+                    <div class="spinner-border text-primary" role="status" id="loading-spinner">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                    <p class="mt-3" id="status-message">{{ _('apple_music_auth.initializing') }}</p>
+                </div>
+                
+                <div id="auth-button-container" class="text-center" style="display: none;">
+                    <button id="authorize-btn" class="btn btn-dark btn-lg">
+                        <i class="fab fa-apple me-2"></i>{{ _('apple_music_auth.authorize') }}
+                    </button>
+                    <p class="text-muted mt-3 small">
+                        {{ _('apple_music_auth.description') }}
+                    </p>
+                </div>
+                
+                <div id="success-message" class="alert alert-success" style="display: none;">
+                    <i class="fas fa-check-circle me-2"></i>
+                    <span id="success-text"></span>
+                </div>
+                
+                <div id="error-message" class="alert alert-danger" style="display: none;">
+                    <i class="fas fa-exclamation-circle me-2"></i>
+                    <span id="error-text"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://js-cdn.music.apple.com/musickit/v1/musickit.js"></script>
+<script>
+let musicKitInstance;
+
+async function initAppleMusic() {
+    try {
+        // Получаем Developer Token с сервера
+        const response = await fetch('/api/apple_music/developer_token');
+        if (!response.ok) {
+            throw new Error('Failed to get developer token');
+        }
+        
+        const data = await response.json();
+        
+        // Инициализируем MusicKit
+        musicKitInstance = await window.MusicKit.configure({
+            developerToken: data.token,
+            app: {
+                name: 'PlaylistChecker',
+                build: '1.0.0'
+            }
+        });
+        
+        // Проверяем, авторизован ли уже пользователь
+        if (musicKitInstance.isAuthorized) {
+            await saveUserToken(musicKitInstance.musicUserToken);
+        } else {
+            // Показываем кнопку авторизации
+            document.getElementById('loading-spinner').style.display = 'none';
+            document.getElementById('status-message').style.display = 'none';
+            document.getElementById('auth-button-container').style.display = 'block';
+        }
+        
+    } catch (error) {
+        console.error('Ошибка инициализации Apple Music:', error);
+        document.getElementById('loading-spinner').style.display = 'none';
+        document.getElementById('status-message').style.display = 'none';
+        showError('{{ _("apple_music_auth.init_error") }}: ' + error.message);
+    }
+}
+
+async function authorizeUser() {
+    try {
+        const authorizeBtn = document.getElementById('authorize-btn');
+        authorizeBtn.disabled = true;
+        authorizeBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>{{ _("apple_music_auth.authorizing") }}';
+        
+        // Авторизуем пользователя
+        const userToken = await musicKitInstance.authorize();
+        
+        // Сохраняем токен на сервере
+        await saveUserToken(userToken);
+        
+    } catch (error) {
+        console.error('Ошибка авторизации:', error);
+        authorizeBtn.disabled = false;
+        authorizeBtn.innerHTML = '<i class="fab fa-apple me-2"></i>{{ _("apple_music_auth.authorize") }}';
+        showError('{{ _("apple_music_auth.auth_error") }}: ' + error.message);
+    }
+}
+
+async function saveUserToken(userToken) {
+    try {
+        // Токен Apple Music обычно действителен ~6 месяцев
+        const expiresAt = new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000).toISOString();
+        
+        const response = await fetch('/api/apple_music/user_token', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                user_token: userToken,
+                expires_at: expiresAt
+            })
+        });
+        
+        if (!response.ok) {
+            const errorData = await response.json();
+            throw new Error(errorData.error || 'Failed to save token');
+        }
+        
+        // Показываем сообщение об успехе
+        showSuccess('{{ _("apple_music_auth.success") }}');
+        
+        // Перенаправляем на главную страницу через 2 секунды
+        setTimeout(() => {
+            window.location.href = '{{ url_for("index") }}';
+        }, 2000);
+        
+    } catch (error) {
+        console.error('Ошибка сохранения токена:', error);
+        showError('{{ _("apple_music_auth.save_error") }}: ' + error.message);
+    }
+}
+
+function showSuccess(message) {
+    document.getElementById('auth-button-container').style.display = 'none';
+    document.getElementById('loading-spinner').style.display = 'none';
+    document.getElementById('status-message').style.display = 'none';
+    document.getElementById('error-message').style.display = 'none';
+    document.getElementById('success-text').textContent = message;
+    document.getElementById('success-message').style.display = 'block';
+}
+
+function showError(message) {
+    document.getElementById('error-text').textContent = message;
+    document.getElementById('error-message').style.display = 'block';
+}
+
+// Инициализация при загрузке страницы
+document.addEventListener('DOMContentLoaded', function() {
+    initAppleMusic();
+    
+    // Обработчик кнопки авторизации
+    document.getElementById('authorize-btn').addEventListener('click', authorizeUser);
+});
+</script>
+{% endblock %}
+

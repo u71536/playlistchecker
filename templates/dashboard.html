@@ -273,11 +273,23 @@
                                 <span class="badge bg-dark mb-3">
                                     <i class="fas fa-check-circle me-1"></i>{{ _('dashboard.connected') }}
                                 </span>
+                                <br>
+                                <small class="text-muted d-block mb-3">{{ _('dashboard.private_playlists_available') }}</small>
                             {% else %}
-                                <a href="{{ url_for('apple_music_auth') }}" class="btn btn-outline-dark">
-                                    <i class="fas fa-plug me-2"></i>{{ _('notification_settings.connect_telegram') }}
-                                </a>
+                                <span class="badge bg-info mb-2">{{ _('dashboard.public_playlists') }}</span>
+                                <br>
+                                <small class="text-muted d-block mb-3">{{ _('dashboard.without_authorization') }}</small>
                             {% endif %}
+                            <div class="d-flex gap-2 justify-content-center">
+                                {% if not current_user.apple_music_tokens %}
+                                <a href="{{ url_for('apple_music_auth') }}" class="btn btn-outline-dark btn-sm">
+                                    <i class="fas fa-plug me-2"></i>{{ _('dashboard.connect') }}
+                                </a>
+                                {% endif %}
+                                <a href="{{ url_for('add_playlist') }}" class="btn btn-outline-dark btn-sm">
+                                    <i class="fas fa-plus me-2"></i>{{ _('add_playlist.add_playlist') }}
+                                </a>
+                            </div>
                         </div>
                     </div>
                     
