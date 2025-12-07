@@ -138,11 +138,6 @@ class PlaylistMonitor:
                 if removed_track_ids:
                     self._handle_removed_tracks(playlist, removed_track_ids)
                 
-                # Находим новые треки
-                new_track_ids = current_track_ids - db_track_ids
-                if new_track_ids:
-                    self._handle_new_tracks(playlist, current_tracks, new_track_ids)
-                
                 # Обновляем время последней проверки
                 playlist.last_checked = datetime.utcnow()
                 try:
@@ -153,7 +148,7 @@ class PlaylistMonitor:
                     db.session.rollback()
                     raise
                 
-                logger.info(f"Плейлист Deezer {playlist.name} проверен. Удалено: {len(removed_track_ids)}, добавлено: {len(new_track_ids)}")
+                logger.info(f"Плейлист Deezer {playlist.name} проверен. Удалено: {len(removed_track_ids)}")
                 
             except Exception as e:
                 logger.error(f"Ошибка при проверке плейлиста Deezer {playlist.name}: {str(e)}")
@@ -185,11 +180,6 @@ class PlaylistMonitor:
                 if removed_track_ids:
                     self._handle_removed_tracks(playlist, removed_track_ids)
                 
-                # Находим новые треки
-                new_track_ids = current_track_ids - db_track_ids
-                if new_track_ids:
-                    self._handle_new_tracks(playlist, current_tracks, new_track_ids)
-                
                 # Обновляем время последней проверки
                 playlist.last_checked = datetime.utcnow()
                 try:
@@ -200,7 +190,7 @@ class PlaylistMonitor:
                     db.session.rollback()
                     raise
                 
-                logger.info(f"Плейлист Apple Music {playlist.name} проверен. Удалено: {len(removed_track_ids)}, добавлено: {len(new_track_ids)}")
+                logger.info(f"Плейлист Apple Music {playlist.name} проверен. Удалено: {len(removed_track_ids)}")
                 
             except Exception as e:
                 logger.error(f"Ошибка при проверке плейлиста Apple Music {playlist.name}: {str(e)}")
@@ -221,11 +211,6 @@ class PlaylistMonitor:
                 if removed_track_ids:
                     self._handle_removed_tracks(playlist, removed_track_ids)
                 
-                # Находим новые треки
-                new_track_ids = current_track_ids - db_track_ids
-                if new_track_ids:
-                    self._handle_new_tracks(playlist, current_tracks, new_track_ids)
-                
                 # Обновляем время последней проверки
                 playlist.last_checked = datetime.utcnow()
                 try:
@@ -236,7 +221,7 @@ class PlaylistMonitor:
                     db.session.rollback()
                     raise
                 
-                logger.info(f"Публичный плейлист {playlist.name} проверен. Удалено: {len(removed_track_ids)}, добавлено: {len(new_track_ids)}")
+                logger.info(f"Публичный плейлист {playlist.name} проверен. Удалено: {len(removed_track_ids)}")
                 
             except Exception as e:
                 logger.error(f"Ошибка при проверке публичного плейлиста {playlist.name}: {str(e)}")
@@ -272,11 +257,6 @@ class PlaylistMonitor:
                 if removed_track_ids:
                     self._handle_removed_tracks(playlist, removed_track_ids)
                 
-                # Находим новые треки
-                new_track_ids = current_track_ids - db_track_ids
-                if new_track_ids:
-                    self._handle_new_tracks(playlist, current_tracks, new_track_ids)
-                
                 # Обновляем время последней проверки
                 playlist.last_checked = datetime.utcnow()
                 try:
@@ -287,7 +267,7 @@ class PlaylistMonitor:
                     db.session.rollback()
                     raise
                 
-                logger.info(f"Плейлист {playlist.name} проверен. Удалено: {len(removed_track_ids)}, добавлено: {len(new_track_ids)}")
+                logger.info(f"Плейлист {playlist.name} проверен. Удалено: {len(removed_track_ids)}")
                 
             except Exception as e:
                 # Импортируем TokenExpiredError локально, чтобы избежать циклических импортов
@@ -320,11 +300,6 @@ class PlaylistMonitor:
                                 if removed_track_ids:
                                     self._handle_removed_tracks(playlist, removed_track_ids)
                                 
-                                # Находим новые треки
-                                new_track_ids = current_track_ids - db_track_ids
-                                if new_track_ids:
-                                    self._handle_new_tracks(playlist, current_tracks, new_track_ids)
-                                
                                 # Обновляем время последней проверки
                                 playlist.last_checked = datetime.utcnow()
                                 try:
@@ -335,7 +310,7 @@ class PlaylistMonitor:
                                     db.session.rollback()
                                     raise
                                 
-                                logger.info(f"Плейлист {playlist.name} проверен после обновления токена. Удалено: {len(removed_track_ids)}, добавлено: {len(new_track_ids)}")
+                                logger.info(f"Плейлист {playlist.name} проверен после обновления токена. Удалено: {len(removed_track_ids)}")
                                 return
                             except Exception as retry_e:
                                 logger.error(f"Ошибка при повторной проверке плейлиста {playlist.name} после обновления токена: {str(retry_e)}")
@@ -416,6 +391,23 @@ class PlaylistMonitor:
                 if track:
                     logger.info(f"Найден трек для удаления: {track.name} (ID: {track.id})")
                     
+                    # Проверяем, не было ли уже создано непрочитанное уведомление для этого трека
+                    existing_notification = Notification.query.filter_by(
+                        user_id=playlist.user_id,
+                        playlist_id=playlist.id,
+                        track_id=track.id
+                    ).filter(Notification.is_read.is_(False)).first()
+                    
+                    # Если трек уже был удален ранее (is_removed=True), пропускаем
+                    if track.is_removed:
+                        logger.info(f"Трек {track.name} уже был отмечен как удаленный ранее, пропускаем")
+                        continue
+                    
+                    # Если уже есть непрочитанное уведомление для этого трека, пропускаем
+                    if existing_notification:
+                        logger.info(f"Непрочитанное уведомление для трека {track.name} уже существует, пропускаем создание нового")
+                        continue
+                    
                     # Отмечаем трек как удаленный
                     track.is_removed = True
                     track.removed_at = datetime.utcnow()
@@ -463,96 +455,6 @@ class PlaylistMonitor:
                     logger.warning(f"Трек с ID {track_id} не найден в плейлисте {playlist.name}")
         except Exception as e:
             logger.error(f"Ошибка в _handle_removed_tracks_impl: {str(e)}")
-            db.session.rollback()
-            raise
-    
-    def _handle_new_tracks(self, playlist, current_tracks, new_track_ids):
-        """Обработать новые треки"""
-        if self.app:
-            with self.app.app_context():
-                self._handle_new_tracks_impl(playlist, current_tracks, new_track_ids)
-        else:
-            self._handle_new_tracks_impl(playlist, current_tracks, new_track_ids)
-    
-    def _handle_new_tracks_impl(self, playlist, current_tracks, new_track_ids):
-        """Внутренняя реализация обработки новых треков"""
-        try:
-            for track_data in current_tracks:
-                if track_data['id'] in new_track_ids:
-                    # Проверяем, не существует ли уже трек с таким service_track_id
-                    # (может быть добавлен при создании плейлиста или в другой транзакции)
-                    existing_track = Track.query.filter_by(
-                        playlist_id=playlist.id,
-                        service_track_id=track_data['id'],
-                        is_removed=False
-                    ).first()
-                    
-                    if existing_track:
-                        logger.info(f"Трек {track_data['name']} уже существует в плейлисте {playlist.name}, пропускаем")
-                        continue
-                    
-                    # Проверяем, не было ли уже отправлено уведомление для этого трека
-                    from services.notification_service import notification_service
-                    if notification_service.check_notification_already_sent(
-                        playlist.user_id, 
-                        playlist.id, 
-                        track_data['id'], 
-                        'track_added'
-                    ):
-                        logger.info(f"Уведомление для трека {track_data['name']} уже было отправлено, пропускаем")
-                        continue
-                    
-                    track = Track(
-                        playlist_id=playlist.id,
-                        service_track_id=track_data['id'],
-                        name=track_data['name'],
-                        artist=track_data['artist'],
-                        album=track_data.get('album', ''),
-                        duration=track_data.get('duration', 0),
-                        added_at=datetime.utcnow()
-                    )
-                    db.session.add(track)
-                    db.session.flush()  # Получаем ID трека
-                    
-                    # Создаем уведомление в базе данных
-                    notification = Notification(
-                        user_id=playlist.user_id,
-                        playlist_id=playlist.id,
-                        track_id=track.id,
-                        message=f"Новый трек '{track.name}' от {track.artist} добавлен в плейлист '{playlist.name}'"
-                    )
-                    db.session.add(notification)
-                    
-                    # Отправляем уведомления по всем каналам
-                    try:
-                        notification_data = {
-                            'type': 'track_added',
-                            'message': f"Новый трек '{track.name}' от {track.artist} добавлен в плейлист '{playlist.name}'",
-                            'track_service_id': track.service_track_id,
-                            'track_name': track.name,
-                            'artist_name': track.artist,
-                            'playlist_name': playlist.name,
-                            'playlist_id': playlist.id
-                        }
-                        
-                        notification_service.send_all_notifications(playlist.user, notification_data)
-                        logger.info(f"Уведомления о новом треке отправлены для пользователя {playlist.user.username}")
-                        
-                    except Exception as notification_error:
-                        logger.error(f"Ошибка отправки уведомлений о новом треке: {str(notification_error)}")
-                    
-                    logger.info(f"Добавлен новый трек {track.name} в плейлист {playlist.name}")
-                    
-                    # Принудительно сохраняем изменения для каждого трека
-                    try:
-                        db.session.commit()
-                        logger.info(f"Новый трек {track.name} успешно сохранен в БД")
-                    except Exception as commit_error:
-                        logger.error(f"Ошибка при сохранении нового трека {track.name}: {str(commit_error)}")
-                        db.session.rollback()
-                        raise
-        except Exception as e:
-            logger.error(f"Ошибка в _handle_new_tracks_impl: {str(e)}")
             db.session.rollback()
             raise
     
