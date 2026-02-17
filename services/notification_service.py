@@ -416,6 +416,281 @@ PlaylistChecker - Уведомление
         logger.info(f"Уведомления для пользователя {user.username}: {results}")
         return results
 
+    def send_batch_notifications(self, user, tracks_data, playlist_name, playlist_id):
+        """Отправить одно сводное уведомление о нескольких удалённых треках.
+        
+        Вместо отдельного письма/сообщения на каждый трек, группирует все удалённые
+        треки из одного плейлиста в одно уведомление.
+        """
+        if not tracks_data:
+            return
+        
+        count = len(tracks_data)
+        
+        # Сохраняем историю для каждого трека (для дедупликации)
+        from app import NotificationHistory, db
+        from sqlalchemy.exc import IntegrityError
+        
+        new_tracks = []
+        for td in tracks_data:
+            if self.check_notification_already_sent(user.id, playlist_id, td['track_service_id'], 'track_removed'):
+                logger.info(f"Уведомление для трека {td['track_service_id']} уже было отправлено, пропускаем")
+                continue
+            try:
+                history = NotificationHistory(
+                    user_id=user.id,
+                    playlist_id=playlist_id,
+                    notification_type='track_removed',
+                    track_service_id=td['track_service_id'],
+                    track_name=td['track_name'],
+                    artist_name=td['artist_name'],
+                    playlist_name=playlist_name,
+                    message=td['message'],
+                    sent_via='sending'
+                )
+                db.session.add(history)
+                db.session.flush()
+                new_tracks.append({'data': td, 'history': history})
+            except IntegrityError:
+                db.session.rollback()
+                logger.info(f"Уведомление для трека {td['track_service_id']} уже обрабатывается")
+                continue
+        
+        if not new_tracks:
+            logger.info(f"Все уведомления для плейлиста {playlist_name} уже были отправлены ранее")
+            try:
+                db.session.commit()
+            except Exception:
+                db.session.rollback()
+            return
+        
+        try:
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            logger.error(f"Ошибка сохранения истории batch уведомлений: {str(e)}")
+            return
+        
+        actual_count = len(new_tracks)
+        
+        # Формируем сводное сообщение
+        if actual_count == 1:
+            td = new_tracks[0]['data']
+            summary_message = f"Трек '{td['track_name']}' от {td['artist_name']} был удалён из плейлиста '{playlist_name}'"
+            track_list_text = f"  - {td['track_name']} — {td['artist_name']}"
+            track_list_html = f"<li><strong>{td['track_name']}</strong> — {td['artist_name']}</li>"
+        else:
+            word = self._pluralize_tracks(actual_count)
+            summary_message = f"Из плейлиста '{playlist_name}' удалено {actual_count} {word}"
+            lines_text = []
+            lines_html = []
+            display_limit = 20
+            for i, nt in enumerate(new_tracks):
+                td = nt['data']
+                if i < display_limit:
+                    lines_text.append(f"  - {td['track_name']} — {td['artist_name']}")
+                    lines_html.append(f"<li><strong>{td['track_name']}</strong> — {td['artist_name']}</li>")
+            if actual_count > display_limit:
+                remaining = actual_count - display_limit
+                lines_text.append(f"  ... и ещё {remaining}")
+                lines_html.append(f"<li><em>... и ещё {remaining}</em></li>")
+            track_list_text = "\n".join(lines_text)
+            track_list_html = "\n".join(lines_html)
+        
+        title = f"Изменения в плейлисте {playlist_name}"
+        
+        sent_channels = []
+        
+        # Email
+        if user.email and user.email_notifications_enabled:
+            if self._send_batch_email(user.email, title, summary_message, track_list_text, track_list_html, playlist_name, actual_count):
+                sent_channels.append('email')
+        
+        # Telegram
+        if hasattr(user, 'telegram_chat_id') and user.telegram_chat_id and user.telegram_notifications_enabled:
+            if self._send_batch_telegram(user.telegram_chat_id, summary_message, track_list_text, playlist_name, actual_count):
+                sent_channels.append('telegram')
+        
+        # Browser push
+        if user.browser_notifications_enabled:
+            if self.send_browser_notification(user.id, title, summary_message):
+                sent_channels.append('browser')
+        
+        # Обновляем историю
+        try:
+            sent_via = ', '.join(sent_channels) if sent_channels else 'none'
+            for nt in new_tracks:
+                nt['history'].sent_via = sent_via
+            db.session.commit()
+            logger.info(f"Batch уведомление для {user.username}: {actual_count} треков, каналы: {sent_via}")
+        except Exception as e:
+            logger.error(f"Ошибка обновления batch истории: {str(e)}")
+            db.session.rollback()
+    
+    @staticmethod
+    def _pluralize_tracks(n):
+        """Склонение слова 'трек' по числу"""
+        if 11 <= n % 100 <= 19:
+            return "треков"
+        remainder = n % 10
+        if remainder == 1:
+            return "трек"
+        elif 2 <= remainder <= 4:
+            return "трека"
+        else:
+            return "треков"
+    
+    def _send_batch_email(self, user_email, subject, summary, track_list_text, track_list_html, playlist_name, count):
+        """Отправить одно сводное email-уведомление о нескольких удалённых треках"""
+        if not all([self.email_config['username'], self.email_config['password']]):
+            logger.warning("Email настройки не настроены, пропускаем отправку email")
+            return False
+        
+        try:
+            from_address = self.email_config.get('default_sender') or self.email_config.get('username')
+            if not from_address or '@' not in from_address:
+                logger.error("Некорректный адрес отправителя")
+                return False
+            
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = subject
+            msg['From'] = from_address
+            msg['To'] = user_email
+            
+            text_content = f"""
+PlaylistChecker - Сводное уведомление
+
+{summary}
+
+Удалённые треки:
+{track_list_text}
+
+Плейлист: {playlist_name}
+Время: {datetime.now().strftime('%d.%m.%Y %H:%M')}
+
+---
+Это автоматическое уведомление от PlaylistChecker
+            """
+            
+            html_content = f"""
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <style>
+        body {{ font-family: Arial, sans-serif; line-height: 1.6; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
+                   color: white; padding: 20px; border-radius: 8px 8px 0 0; text-align: center; }}
+        .content {{ background: #f9f9f9; padding: 20px; border-radius: 0 0 8px 8px; }}
+        .track-list {{ background: white; padding: 15px; border-radius: 5px; margin: 15px 0; 
+                       border-left: 4px solid #667eea; }}
+        .track-list ul {{ margin: 5px 0; padding-left: 20px; }}
+        .track-list li {{ margin: 4px 0; }}
+        .count-badge {{ display: inline-block; background: #e74c3c; color: white; 
+                        padding: 3px 10px; border-radius: 12px; font-weight: bold; }}
+        .footer {{ text-align: center; margin-top: 20px; color: #666; font-size: 12px; }}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎵 PlaylistChecker</h1>
+            <p>Сводное уведомление об изменениях</p>
+        </div>
+        <div class="content">
+            <h2>{summary}</h2>
+            
+            <div class="track-list">
+                <strong>📋 Плейлист:</strong> {playlist_name}<br>
+                <strong>🎵 Удалено треков:</strong> <span class="count-badge">{count}</span><br>
+                <strong>🕒 Время:</strong> {datetime.now().strftime('%d.%m.%Y %H:%M')}
+                <hr>
+                <ul>
+                    {track_list_html}
+                </ul>
+            </div>
+            
+            <p>Зайдите в свой аккаунт PlaylistChecker, чтобы увидеть подробности.</p>
+        </div>
+        <div class="footer">
+            <p>Это автоматическое уведомление от PlaylistChecker</p>
+        </div>
+    </div>
+</body>
+</html>
+            """
+            
+            text_part = MIMEText(text_content, 'plain', 'utf-8')
+            html_part = MIMEText(html_content, 'html', 'utf-8')
+            msg.attach(text_part)
+            msg.attach(html_part)
+            
+            server = smtplib.SMTP(self.email_config['server'], self.email_config['port'])
+            if self.email_config['use_tls']:
+                server.starttls()
+            server.login(self.email_config['username'], self.email_config['password'])
+            server.send_message(msg)
+            server.quit()
+            
+            logger.info(f"Сводное email уведомление отправлено на {user_email} ({count} треков)")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Ошибка отправки сводного email уведомления: {str(e)}")
+            return False
+    
+    def _send_batch_telegram(self, chat_id, summary, track_list_text, playlist_name, count):
+        """Отправить одно сводное Telegram-уведомление о нескольких удалённых треках"""
+        if not self.telegram_config['bot_token']:
+            logger.warning("Telegram bot token не настроен, пропускаем отправку в Telegram")
+            return False
+        
+        try:
+            telegram_message = f"""
+🎵 *PlaylistChecker — Сводное уведомление*
+
+{summary}
+
+📋 *Плейлист:* {playlist_name}
+🔢 *Удалено треков:* {count}
+🕒 *Время:* {datetime.now().strftime('%d.%m.%Y %H:%M')}
+
+*Удалённые треки:*
+{track_list_text}
+            """
+            
+            # Telegram ограничивает сообщения 4096 символами
+            if len(telegram_message) > 4000:
+                word = self._pluralize_tracks(count)
+                telegram_message = f"""
+🎵 *PlaylistChecker — Сводное уведомление*
+
+Из плейлиста *{playlist_name}* удалено *{count}* {word}.
+
+🕒 *Время:* {datetime.now().strftime('%d.%m.%Y %H:%M')}
+
+Полный список доступен в вашем аккаунте PlaylistChecker.
+                """
+            
+            url = f"{self.telegram_config['api_url']}{self.telegram_config['bot_token']}/sendMessage"
+            
+            payload = {
+                'chat_id': chat_id,
+                'text': telegram_message,
+                'parse_mode': 'Markdown'
+            }
+            
+            response = requests.post(url, json=payload, timeout=10)
+            response.raise_for_status()
+            
+            logger.info(f"Сводное Telegram уведомление отправлено в чат {chat_id} ({count} треков)")
+            return True
+            
+        except Exception as e:
+            logger.error(f"Ошибка отправки сводного Telegram уведомления: {str(e)}")
+            return False
+
 
 # Глобальный экземпляр сервиса уведомлений
 notification_service = NotificationService()

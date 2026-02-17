@@ -379,8 +379,15 @@ class PlaylistMonitor:
             self._handle_removed_tracks_impl(playlist, removed_track_ids)
     
     def _handle_removed_tracks_impl(self, playlist, removed_track_ids):
-        """Внутренняя реализация обработки удаленных треков"""
+        """Внутренняя реализация обработки удаленных треков.
+        
+        Сначала обрабатывает все треки (помечает как удалённые, создаёт записи
+        уведомлений в БД), затем отправляет ОДНО сводное уведомление по внешним
+        каналам (email, Telegram, push), чтобы избежать спама.
+        """
         try:
+            tracks_for_notification = []
+            
             for track_id in removed_track_ids:
                 track = Track.query.filter_by(
                     playlist_id=playlist.id,
@@ -412,47 +419,55 @@ class PlaylistMonitor:
                     track.is_removed = True
                     track.removed_at = datetime.utcnow()
                     
-                    # Создаем уведомление
+                    # Создаем уведомление в БД (для веб-интерфейса)
+                    message = f"Трек '{track.name}' от {track.artist} был удален из плейлиста '{playlist.name}'"
                     notification = Notification(
                         user_id=playlist.user_id,
                         playlist_id=playlist.id,
                         track_id=track.id,
-                        message=f"Трек '{track.name}' от {track.artist} был удален из плейлиста '{playlist.name}'"
+                        message=message
                     )
                     db.session.add(notification)
                     
-                    # Отправляем уведомления по всем каналам
-                    try:
-                        from services.notification_service import notification_service
-                        
-                        notification_data = {
-                            'type': 'track_removed',
-                            'message': f"Трек '{track.name}' от {track.artist} был удален из плейлиста '{playlist.name}'",
-                            'track_service_id': track.service_track_id,
-                            'track_name': track.name,
-                            'artist_name': track.artist,
-                            'playlist_name': playlist.name,
-                            'playlist_id': playlist.id
-                        }
-                        
-                        notification_service.send_all_notifications(playlist.user, notification_data)
-                        logger.info(f"Уведомления отправлены для пользователя {playlist.user.username}")
-                        
-                    except Exception as notification_error:
-                        logger.error(f"Ошибка отправки уведомлений: {str(notification_error)}")
+                    # Собираем данные для сводного уведомления
+                    tracks_for_notification.append({
+                        'track_service_id': track.service_track_id,
+                        'track_name': track.name,
+                        'artist_name': track.artist,
+                        'message': message
+                    })
                     
                     logger.info(f"Трек {track.name} отмечен как удаленный из плейлиста {playlist.name}")
-                    
-                    # Принудительно сохраняем изменения для каждого трека
-                    try:
-                        db.session.commit()
-                        logger.info(f"Изменения для трека {track.name} успешно сохранены в БД")
-                    except Exception as commit_error:
-                        logger.error(f"Ошибка при сохранении трека {track.name}: {str(commit_error)}")
-                        db.session.rollback()
-                        raise
                 else:
                     logger.warning(f"Трек с ID {track_id} не найден в плейлисте {playlist.name}")
+            
+            # Сохраняем все изменения в БД одним коммитом
+            try:
+                db.session.commit()
+                logger.info(f"Все изменения для {len(tracks_for_notification)} треков успешно сохранены в БД")
+            except Exception as commit_error:
+                logger.error(f"Ошибка при сохранении треков: {str(commit_error)}")
+                db.session.rollback()
+                raise
+            
+            # Отправляем ОДНО сводное уведомление по внешним каналам
+            if tracks_for_notification:
+                try:
+                    from services.notification_service import notification_service
+                    
+                    notification_service.send_batch_notifications(
+                        user=playlist.user,
+                        tracks_data=tracks_for_notification,
+                        playlist_name=playlist.name,
+                        playlist_id=playlist.id
+                    )
+                    logger.info(
+                        f"Сводное уведомление отправлено для {playlist.user.username}: "
+                        f"{len(tracks_for_notification)} треков из плейлиста {playlist.name}"
+                    )
+                except Exception as notification_error:
+                    logger.error(f"Ошибка отправки сводного уведомления: {str(notification_error)}")
+                    
         except Exception as e:
             logger.error(f"Ошибка в _handle_removed_tracks_impl: {str(e)}")
             db.session.rollback()
