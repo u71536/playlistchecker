@@ -746,6 +746,10 @@ msgstr "Панель управления"
 msgid "dashboard.new_notification"
 msgstr "Новые уведомления"
 
+#: templates/dashboard.html
+msgid "dashboard.mark_all_read"
+msgstr "Отметить все как прочитанные"
+
 #: templates/dashboard.html:179
 msgid "dashboard.playlists_being_tracked"
 msgstr "Плейлистов отслеживается"

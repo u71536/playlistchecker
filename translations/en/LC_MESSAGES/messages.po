@@ -735,6 +735,10 @@ msgstr "Dashboard"
 msgid "dashboard.new_notification"
 msgstr "New Notifications"
 
+#: templates/dashboard.html
+msgid "dashboard.mark_all_read"
+msgstr "Mark all as read"
+
 #: templates/dashboard.html:179
 msgid "dashboard.playlists_being_tracked"
 msgstr "Playlists being tracked"

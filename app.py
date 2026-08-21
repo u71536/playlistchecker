@@ -782,6 +782,33 @@ def yandex_music_auth():
     return redirect(url_for('index'))
 
 # Настройки уведомлений
+@app.route('/notifications/<int:notification_id>/read', methods=['POST'])
+@login_required
+def mark_notification_read(notification_id):
+    """Пометить уведомление как прочитанное"""
+    notification = Notification.query.filter_by(
+        id=notification_id,
+        user_id=current_user.id
+    ).first()
+    if not notification:
+        return jsonify({'status': 'error'}), 404
+    notification.is_read = True
+    db.session.commit()
+    return jsonify({'status': 'ok'})
+
+
+@app.route('/notifications/read-all', methods=['POST'])
+@login_required
+def mark_all_notifications_read():
+    """Пометить все уведомления пользователя как прочитанные"""
+    Notification.query.filter_by(
+        user_id=current_user.id,
+        is_read=False
+    ).update({'is_read': True})
+    db.session.commit()
+    return jsonify({'status': 'ok'})
+
+
 @app.route('/settings/notifications', methods=['GET', 'POST'])
 @login_required
 def notification_settings():
