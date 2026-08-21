@@ -496,6 +496,15 @@ def set_language(language=None):
     
     return redirect(request.referrer or url_for('index'))
 
+def _redirect_spotify_reauthorization():
+    """Discard stored Spotify tokens and send the user through sign-in again."""
+    SpotifyToken.query.filter_by(user_id=current_user.id).delete()
+    db.session.commit()
+    db.session.expire(current_user, ['spotify_tokens'])
+    flash(gettext('flash.spotify_reauthorization_required'))
+    return redirect(url_for('spotify_auth'))
+
+
 # Управление плейлистами
 @app.route('/playlists')
 @login_required
@@ -508,6 +517,7 @@ def playlists():
 def add_playlist():
     form = PlaylistForm()
     if form.validate_on_submit():
+        from services.spotify_service import SpotifyReauthorizationRequired
         try:
             playlist = monitor.add_playlist(
                 user=current_user,
@@ -517,6 +527,8 @@ def add_playlist():
             
             flash(gettext('flash.playlist_added_success', playlist_name=playlist.name))
             return redirect(url_for('playlists'))
+        except SpotifyReauthorizationRequired:
+            return _redirect_spotify_reauthorization()
         except ValueError as e:
             flash(gettext('flash.error_generic', error=str(e)), 'error')
         except Exception as e:
@@ -527,7 +539,9 @@ def add_playlist():
 @login_required
 def spotify_playlists():
     """Получить все плейлисты пользователя из Spotify"""
-    from services.spotify_service import SpotifyService
+    from services.spotify_service import (
+        SpotifyService, TokenExpiredError, SpotifyReauthorizationRequired
+    )
     
     # Проверяем, есть ли токен Spotify
     spotify_token = current_user.spotify_tokens[0] if current_user.spotify_tokens else None
@@ -557,11 +571,10 @@ def spotify_playlists():
         playlists = service.get_user_playlists(spotify_token.access_token, spotify_token.refresh_token)
         return render_template('spotify_playlists.html', playlists=playlists)
         
-    except Exception as e:
-        # Импортируем TokenExpiredError локально
-        from services.spotify_service import TokenExpiredError
-        
-        if isinstance(e, TokenExpiredError) and e.new_token_info:
+    except SpotifyReauthorizationRequired:
+        return _redirect_spotify_reauthorization()
+    except TokenExpiredError as e:
+        if e.new_token_info:
             # Обновляем токен в базе данных
             spotify_token.access_token = e.new_token_info['access_token']
             if 'refresh_token' in e.new_token_info:
@@ -574,10 +587,15 @@ def spotify_playlists():
                 playlists = service.get_user_playlists(spotify_token.access_token, spotify_token.refresh_token)
                 flash(gettext('flash.spotify_token_updated'), 'info')
                 return render_template('spotify_playlists.html', playlists=playlists)
+            except SpotifyReauthorizationRequired:
+                return _redirect_spotify_reauthorization()
             except Exception as retry_e:
                 flash(gettext('flash.error_getting_playlists_after_token_update', error=str(retry_e)))
                 return redirect(url_for('index'))
         
+        flash(gettext('flash.error_getting_playlists', error=str(e)))
+        return redirect(url_for('index'))
+    except Exception as e:
         flash(gettext('flash.error_getting_playlists', error=str(e)))
         return redirect(url_for('index'))
 
@@ -585,7 +603,7 @@ def spotify_playlists():
 @login_required
 def add_spotify_playlist(playlist_id):
     """Добавить плейлист Spotify по ID"""
-    from services.spotify_service import SpotifyService
+    from services.spotify_service import SpotifyReauthorizationRequired
     
     spotify_token = current_user.spotify_tokens[0] if current_user.spotify_tokens else None
     if not spotify_token:
@@ -602,6 +620,8 @@ def add_spotify_playlist(playlist_id):
         )
         flash(gettext('flash.playlist_added_success', playlist_name=playlist.name))
         return redirect(url_for('playlists'))
+    except SpotifyReauthorizationRequired:
+        return _redirect_spotify_reauthorization()
     except ValueError as e:
         flash(gettext('flash.error_generic', error=str(e)))
     except Exception as e:
@@ -613,9 +633,12 @@ def add_spotify_playlist(playlist_id):
 @login_required
 def check_playlists_now():
     """Принудительная проверка плейлистов"""
+    from services.spotify_service import SpotifyReauthorizationRequired
     try:
         monitor.check_user_playlists(current_user)
         flash(gettext('flash.playlists_checked'))
+    except SpotifyReauthorizationRequired:
+        return _redirect_spotify_reauthorization()
     except Exception as e:
         flash(gettext('flash.error_checking_playlists', error=str(e)))
     return redirect(url_for('playlists'))

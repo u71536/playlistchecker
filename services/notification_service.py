@@ -691,6 +691,39 @@ PlaylistChecker - Сводное уведомление
             logger.error(f"Ошибка отправки сводного Telegram уведомления: {str(e)}")
             return False
 
+    def send_reconnect_notification(self, user, service_name='Spotify'):
+        """Notify the user that they must sign in again after a dead refresh token."""
+        language = getattr(user, 'language', None) or 'ru'
+        if language == 'en':
+            title = f"{service_name} connection expired"
+            message = (
+                f"Your {service_name} refresh token has expired. "
+                "Sign in again in PlaylistChecker so we can keep monitoring your playlists."
+            )
+        else:
+            title = f"Подключение {service_name} истекло"
+            message = (
+                f"Срок действия токена {service_name} истёк. "
+                "Войдите снова в PlaylistChecker, чтобы мониторинг плейлистов продолжился."
+            )
+
+        if getattr(user, 'email', None) and getattr(user, 'email_notifications_enabled', True):
+            self.send_email_notification(
+                user.email,
+                title,
+                message,
+                track_name='',
+                playlist_name=service_name
+            )
+
+        if getattr(user, 'telegram_chat_id', None) and getattr(user, 'telegram_notifications_enabled', False):
+            self.send_telegram_notification(user.telegram_chat_id, message)
+
+        if getattr(user, 'browser_notifications_enabled', True) and getattr(user, 'id', None):
+            self.send_browser_notification(user.id, title, message)
+
+        logger.info(f"Sent {service_name} reauthorization notice to {getattr(user, 'username', user)}")
+
 
 # Глобальный экземпляр сервиса уведомлений
 notification_service = NotificationService()

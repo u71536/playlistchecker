@@ -100,6 +100,10 @@ msgstr "Spotify успешно подключен!"
 msgid "flash.spotify_auth_error"
 msgstr "Ошибка авторизации Spotify: {error}"
 
+#: app.py
+msgid "flash.spotify_reauthorization_required"
+msgstr "Подключение Spotify истекло. Войдите снова, чтобы продолжить."
+
 #: app.py:688
 msgid "flash.deezer_auth_coming_soon"
 msgstr "Авторизация Deezer будет реализована"
@@ -228,6 +232,10 @@ msgstr "Токен истек и нет refresh_token для обновлени�
 #: services/spotify_service.py:230
 msgid "service.spotify.token_invalid_no_refresh"
 msgstr "Токен недействителен и нет refresh_token для обновления"
+
+#: services/spotify_service.py
+msgid "service.spotify.reauthorization_required"
+msgstr "Срок действия токена Spotify истёк. Войдите снова."
 
 #: services/yandex_music_service.py:35 services/yandex_music_service.py:69
 msgid "service.yandex_music.invalid_playlist_url"

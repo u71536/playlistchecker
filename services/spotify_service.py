@@ -1,14 +1,29 @@
-import spotipy
-from spotipy.oauth2 import SpotifyOAuth
+import logging
 import os
+from datetime import datetime
+
+import spotipy
 from flask_babel import gettext
+from spotipy.cache_handler import MemoryCacheHandler
+from spotipy.oauth2 import SpotifyOAuth
+
+logger = logging.getLogger(__name__)
 
 
 class TokenExpiredError(Exception):
-    """Исключение для истекших токенов"""
+    """Исключение для истекших access-токенов, которые удалось обновить."""
     def __init__(self, message, new_token_info=None):
         super().__init__(message)
         self.new_token_info = new_token_info
+
+
+class SpotifyReauthorizationRequired(Exception):
+    """Refresh token is invalid or expired; the user must sign in again.
+
+    Raised on Spotify ``invalid_grant`` (including the 6-month refresh-token
+    expiry introduced 20 July 2026). Callers must discard the stored token
+    and must not retry the failed refresh.
+    """
 
 
 class SpotifyService:
@@ -18,42 +33,78 @@ class SpotifyService:
         self.redirect_uri = os.environ.get('SPOTIFY_REDIRECT_URI')
         
         self.scope = "playlist-read-private playlist-read-collaborative user-library-read"
+
+    def _oauth(self):
+        """Build a SpotifyOAuth client that does not persist tokens to disk."""
+        return SpotifyOAuth(
+            client_id=self.client_id,
+            client_secret=self.client_secret,
+            redirect_uri=self.redirect_uri,
+            scope=self.scope,
+            cache_handler=MemoryCacheHandler(),
+            open_browser=False,
+        )
         
     def get_auth_url(self):
         """Получить URL для авторизации"""
-        sp_oauth = SpotifyOAuth(
-            client_id=self.client_id,
-            client_secret=self.client_secret,
-            redirect_uri=self.redirect_uri,
-            scope=self.scope
-        )
-        return sp_oauth.get_authorize_url()
+        return self._oauth().get_authorize_url()
     
     def get_access_token(self, code):
         """Получить токен доступа по коду авторизации"""
-        sp_oauth = SpotifyOAuth(
-            client_id=self.client_id,
-            client_secret=self.client_secret,
-            redirect_uri=self.redirect_uri,
-            scope=self.scope
+        return self._oauth().get_access_token(code)
+
+    @staticmethod
+    def is_invalid_grant(error):
+        """Return True if a token refresh failed with OAuth invalid_grant."""
+        if error is None:
+            return False
+        error_code = getattr(error, 'error', None)
+        if isinstance(error_code, str) and error_code.lower() == 'invalid_grant':
+            return True
+        message = str(error).lower()
+        return 'invalid_grant' in message
+
+    @staticmethod
+    def _is_access_token_error(error):
+        message = str(error).lower()
+        return (
+            '401' in str(error)
+            or 'access token expired' in message
+            or 'invalid access token' in message
         )
-        token_info = sp_oauth.get_access_token(code)
-        return token_info
     
     def refresh_access_token(self, refresh_token):
-        """Обновить токен доступа"""
-        sp_oauth = SpotifyOAuth(
-            client_id=self.client_id,
-            client_secret=self.client_secret,
-            redirect_uri=self.redirect_uri,
-            scope=self.scope
-        )
-        token_info = sp_oauth.refresh_access_token(refresh_token)
-        return token_info
+        """Refresh the access token.
+
+        On ``invalid_grant`` the stored refresh token is dead: raise
+        ``SpotifyReauthorizationRequired`` and do not retry.
+        """
+        try:
+            return self._oauth().refresh_access_token(refresh_token)
+        except Exception as error:
+            if self.is_invalid_grant(error):
+                logger.warning(
+                    "Spotify refresh token rejected with invalid_grant; "
+                    "reauthorization is required (will not retry)"
+                )
+                raise SpotifyReauthorizationRequired(
+                    gettext('service.spotify.reauthorization_required')
+                ) from error
+            raise
     
     def get_client(self, access_token):
         """Получить клиент Spotify с токеном"""
         return spotipy.Spotify(auth=access_token)
+
+    def _raise_token_expired_after_refresh(self, refresh_token):
+        """Refresh once, then signal the caller to retry with the new token."""
+        try:
+            new_token_info = self.refresh_access_token(refresh_token)
+        except SpotifyReauthorizationRequired:
+            raise
+        except Exception as refresh_error:
+            raise Exception(gettext('service.spotify.token_refresh_error', error=str(refresh_error)))
+        raise TokenExpiredError("Токен истек", new_token_info)
     
     def get_playlist_info(self, access_token, playlist_url, refresh_token=None):
         """Получить информацию о плейлисте"""
@@ -74,17 +125,13 @@ class SpotifyService:
                 'owner': playlist['owner']['display_name'],
                 'public': playlist['public']
             }
+        except SpotifyReauthorizationRequired:
+            raise
+        except TokenExpiredError:
+            raise
         except Exception as e:
-            # Проверяем, является ли ошибка связанной с истекшим токеном
-            if (("401" in str(e) or "access token expired" in str(e).lower() or
-                 "invalid access token" in str(e).lower()) and refresh_token):
-                # Пытаемся обновить токен
-                try:
-                    new_token_info = self.refresh_access_token(refresh_token)
-                    # Возвращаем информацию о новом токене вместе с ошибкой
-                    raise TokenExpiredError("Токен истек", new_token_info)
-                except Exception as refresh_error:
-                    raise Exception(gettext('service.spotify.token_refresh_error', error=str(refresh_error)))
+            if self._is_access_token_error(e) and refresh_token:
+                self._raise_token_expired_after_refresh(refresh_token)
             raise Exception(gettext('service.spotify.playlist_info_error', error=str(e)))
     
     def get_playlist_tracks(self, access_token, playlist_id, refresh_token=None):
@@ -117,17 +164,13 @@ class SpotifyService:
                 if offset >= results['total']:
                     break
                     
+            except SpotifyReauthorizationRequired:
+                raise
+            except TokenExpiredError:
+                raise
             except Exception as e:
-                # Проверяем, является ли ошибка связанной с истекшим токеном
-                if (("401" in str(e) or "access token expired" in str(e).lower() or
-                     "invalid access token" in str(e).lower()) and refresh_token):
-                    # Пытаемся обновить токен
-                    try:
-                        new_token_info = self.refresh_access_token(refresh_token)
-                        # Возвращаем информацию о новом токене вместе с ошибкой
-                        raise TokenExpiredError("Токен истек", new_token_info)
-                    except Exception as refresh_error:
-                        raise Exception(gettext('service.spotify.token_refresh_error', error=str(refresh_error)))
+                if self._is_access_token_error(e) and refresh_token:
+                    self._raise_token_expired_after_refresh(refresh_token)
                 raise Exception(gettext('service.spotify.playlist_tracks_error', error=str(e)))
         
         return tracks
@@ -179,17 +222,13 @@ class SpotifyService:
                 if offset >= results['total']:
                     break
                     
+            except SpotifyReauthorizationRequired:
+                raise
+            except TokenExpiredError:
+                raise
             except Exception as e:
-                # Проверяем, является ли ошибка связанной с истекшим токеном
-                if (("401" in str(e) or "access token expired" in str(e).lower() or
-                     "invalid access token" in str(e).lower()) and refresh_token):
-                    # Пытаемся обновить токен
-                    try:
-                        new_token_info = self.refresh_access_token(refresh_token)
-                        # Возвращаем информацию о новом токене вместе с ошибкой
-                        raise TokenExpiredError("Токен истек", new_token_info)
-                    except Exception as refresh_error:
-                        raise Exception(gettext('service.spotify.token_refresh_error', error=str(refresh_error)))
+                if self._is_access_token_error(e) and refresh_token:
+                    self._raise_token_expired_after_refresh(refresh_token)
                 raise Exception(gettext('service.spotify.user_playlists_error', error=str(e)))
         
         return playlists
@@ -205,28 +244,24 @@ class SpotifyService:
     
     def check_and_refresh_token(self, access_token, refresh_token, expires_at=None):
         """Проверить токен и обновить его при необходимости"""
-        from datetime import datetime
-        
-        # Проверяем, истек ли токен по времени
         if expires_at and datetime.utcnow() >= expires_at:
             if refresh_token:
                 try:
-                    new_token_info = self.refresh_access_token(refresh_token)
-                    return new_token_info
+                    return self.refresh_access_token(refresh_token)
+                except SpotifyReauthorizationRequired:
+                    raise
                 except Exception as e:
                     raise Exception(gettext('service.spotify.token_refresh_error', error=str(e)))
-            else:
-                raise Exception(gettext('service.spotify.token_expired_no_refresh'))
+            raise Exception(gettext('service.spotify.token_expired_no_refresh'))
         
-        # Проверяем валидность токена запросом к API
         if not self.is_token_valid(access_token):
             if refresh_token:
                 try:
-                    new_token_info = self.refresh_access_token(refresh_token)
-                    return new_token_info
+                    return self.refresh_access_token(refresh_token)
+                except SpotifyReauthorizationRequired:
+                    raise
                 except Exception as e:
                     raise Exception(gettext('service.spotify.token_refresh_error', error=str(e)))
-            else:
-                raise Exception(gettext('service.spotify.token_invalid_no_refresh'))
+            raise Exception(gettext('service.spotify.token_invalid_no_refresh'))
         
         return None  # Токен валиден

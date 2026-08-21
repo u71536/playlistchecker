@@ -1,5 +1,5 @@
 from datetime import datetime, timedelta
-from services.spotify_service import SpotifyService
+from services.spotify_service import SpotifyService, TokenExpiredError, SpotifyReauthorizationRequired
 from services.deezer_service import DeezerService
 from services.apple_music_service import AppleMusicService
 from services.yandex_music_service import YandexMusicService
@@ -80,6 +80,11 @@ class PlaylistMonitor:
         for user in users:
             try:
                 self.check_user_playlists(user)
+            except SpotifyReauthorizationRequired:
+                logger.warning(
+                    f"Spotify reauthorization required for {user.username}; "
+                    "stored token discarded, skipping remaining Spotify checks"
+                )
             except Exception as e:
                 logger.error(f"Ошибка при проверке плейлистов пользователя {user.username}: {str(e)}")
         
@@ -98,11 +103,20 @@ class PlaylistMonitor:
     def _check_user_playlists_impl(self, user):
         """Внутренняя реализация проверки плейлистов пользователя"""
         playlists = Playlist.query.filter_by(user_id=user.id).all()
+        reauthorization_required = None
         for playlist in playlists:
             try:
                 self.check_playlist(playlist)
+            except SpotifyReauthorizationRequired as e:
+                reauthorization_required = e
+                logger.warning(
+                    f"Spotify refresh token expired for {user.username}; "
+                    "will not retry refresh"
+                )
             except Exception as e:
                 logger.error(f"Ошибка при проверке плейлиста {playlist.name}: {str(e)}")
+        if reauthorization_required:
+            raise reauthorization_required
     
     def check_playlist(self, playlist):
         """Проверить конкретный плейлист на изменения"""
@@ -269,59 +283,103 @@ class PlaylistMonitor:
                 
                 logger.info(f"Плейлист {playlist.name} проверен. Удалено: {len(removed_track_ids)}")
                 
-            except Exception as e:
-                # Импортируем TokenExpiredError локально, чтобы избежать циклических импортов
-                from services.spotify_service import TokenExpiredError
-                
-                if isinstance(e, TokenExpiredError) and e.new_token_info:
-                    # Обновляем токен в базе данных
-                    if playlist.service == 'spotify':
-                        token_record = playlist.user.spotify_tokens[0] if playlist.user.spotify_tokens else None
-                        if token_record:
-                            token_record.access_token = e.new_token_info['access_token']
-                            if 'refresh_token' in e.new_token_info:
-                                token_record.refresh_token = e.new_token_info['refresh_token']
-                            token_record.expires_at = datetime.utcnow() + timedelta(seconds=e.new_token_info['expires_in'])
-                            db.session.commit()
+            except SpotifyReauthorizationRequired:
+                self._discard_spotify_token(playlist.user)
+                raise
+            except TokenExpiredError as e:
+                if e.new_token_info and playlist.service == 'spotify':
+                    token_record = playlist.user.spotify_tokens[0] if playlist.user.spotify_tokens else None
+                    if token_record:
+                        token_record.access_token = e.new_token_info['access_token']
+                        if 'refresh_token' in e.new_token_info:
+                            token_record.refresh_token = e.new_token_info['refresh_token']
+                        token_record.expires_at = datetime.utcnow() + timedelta(seconds=e.new_token_info['expires_in'])
+                        db.session.commit()
+                        
+                        logger.info(f"Токен обновлен для пользователя {playlist.user.username}, повторяем проверку плейлиста")
+                        
+                        try:
+                            current_tracks = service.get_playlist_tracks(e.new_token_info['access_token'], playlist.service_playlist_id)
+                            current_track_ids = {track['id'] for track in current_tracks}
                             
-                            logger.info(f"Токен обновлен для пользователя {playlist.user.username}, повторяем проверку плейлиста")
+                            db_tracks = Track.query.filter_by(playlist_id=playlist.id, is_removed=False).all()
+                            db_track_ids = {track.service_track_id for track in db_tracks}
                             
-                            # Повторяем проверку с новым токеном
+                            removed_track_ids = db_track_ids - current_track_ids
+                            if removed_track_ids:
+                                self._handle_removed_tracks(playlist, removed_track_ids)
+                            
+                            playlist.last_checked = datetime.utcnow()
                             try:
-                                current_tracks = service.get_playlist_tracks(e.new_token_info['access_token'], playlist.service_playlist_id)
-                                current_track_ids = {track['id'] for track in current_tracks}
-                                
-                                # Получаем треки из базы данных
-                                db_tracks = Track.query.filter_by(playlist_id=playlist.id, is_removed=False).all()
-                                db_track_ids = {track.service_track_id for track in db_tracks}
-                                
-                                # Находим удаленные треки
-                                removed_track_ids = db_track_ids - current_track_ids
-                                if removed_track_ids:
-                                    self._handle_removed_tracks(playlist, removed_track_ids)
-                                
-                                # Обновляем время последней проверки
-                                playlist.last_checked = datetime.utcnow()
-                                try:
-                                    db.session.commit()
-                                    logger.info(f"Время последней проверки плейлиста {playlist.name} обновлено после обновления токена")
-                                except Exception as e:
-                                    logger.error(f"Ошибка при обновлении времени проверки плейлиста {playlist.name} после обновления токена: {str(e)}")
-                                    db.session.rollback()
-                                    raise
-                                
-                                logger.info(f"Плейлист {playlist.name} проверен после обновления токена. Удалено: {len(removed_track_ids)}")
-                                return
-                            except Exception as retry_e:
-                                logger.error(f"Ошибка при повторной проверке плейлиста {playlist.name} после обновления токена: {str(retry_e)}")
+                                db.session.commit()
+                                logger.info(f"Время последней проверки плейлиста {playlist.name} обновлено после обновления токена")
+                            except Exception as commit_error:
+                                logger.error(f"Ошибка при обновлении времени проверки плейлиста {playlist.name} после обновления токена: {str(commit_error)}")
+                                db.session.rollback()
                                 raise
+                            
+                            logger.info(f"Плейлист {playlist.name} проверен после обновления токена. Удалено: {len(removed_track_ids)}")
+                            return
+                        except SpotifyReauthorizationRequired:
+                            self._discard_spotify_token(playlist.user)
+                            raise
+                        except Exception as retry_e:
+                            logger.error(f"Ошибка при повторной проверке плейлиста {playlist.name} после обновления токена: {str(retry_e)}")
+                            raise
                 
                 logger.error(f"Ошибка при проверке плейлиста {playlist.name}: {str(e)}")
                 raise
+            except Exception as e:
+                logger.error(f"Ошибка при проверке плейлиста {playlist.name}: {str(e)}")
+                raise
+    
+    def _discard_spotify_token(self, user):
+        """Delete stored Spotify tokens. Do not retry a failed refresh."""
+        token_records = list(user.spotify_tokens) if user.spotify_tokens else []
+        if not token_records:
+            return
+        
+        for token_record in token_records:
+            db.session.delete(token_record)
+        db.session.commit()
+        db.session.expire(user, ['spotify_tokens'])
+        user._spotify_reauth_required = True
+        logger.warning(
+            f"Discarded Spotify token for {user.username} "
+            "(invalid_grant / expired refresh token); will not retry"
+        )
+        try:
+            from services.notification_service import notification_service
+            notification_service.send_reconnect_notification(user, 'Spotify')
+        except Exception as notify_error:
+            logger.error(
+                f"Failed to notify {user.username} about Spotify reauthorization: {notify_error}"
+            )
+    
+    def _apply_spotify_token_refresh(self, user, error):
+        """Persist a successfully refreshed Spotify token and return the new pair."""
+        if not error.new_token_info:
+            raise error
+        token_record = user.spotify_tokens[0] if user.spotify_tokens else None
+        if not token_record:
+            raise error
+        token_record.access_token = error.new_token_info['access_token']
+        if 'refresh_token' in error.new_token_info:
+            token_record.refresh_token = error.new_token_info['refresh_token']
+        token_record.expires_at = datetime.utcnow() + timedelta(
+            seconds=error.new_token_info['expires_in']
+        )
+        db.session.commit()
+        logger.info(f"Токен Spotify для пользователя {user.username} успешно обновлен")
+        return token_record.access_token, token_record.refresh_token
     
     def _get_user_token(self, user, service_name):
         """Получить токен доступа пользователя для сервиса"""
         if service_name == 'spotify':
+            if getattr(user, '_spotify_reauth_required', False) is True:
+                raise SpotifyReauthorizationRequired(
+                    'Spotify refresh token expired. Please sign in again.'
+                )
             token_record = user.spotify_tokens[0] if user.spotify_tokens else None
             if token_record:
                 # Проверяем, не истек ли токен
@@ -342,6 +400,9 @@ class PlaylistMonitor:
                         
                         logger.info(f"Токен Spotify для пользователя {user.username} успешно обновлен")
                         return token_record.access_token
+                    except SpotifyReauthorizationRequired:
+                        self._discard_spotify_token(user)
+                        raise
                     except Exception as e:
                         logger.error(f"Ошибка обновления токена Spotify для пользователя {user.username}: {str(e)}")
                         return None
@@ -664,11 +725,21 @@ class PlaylistMonitor:
                 if token_record:
                     refresh_token = token_record.refresh_token
             
-            # Получаем информацию о плейлисте
-            if service == 'spotify':
-                playlist_info = service_obj.get_playlist_info(access_token, playlist_url, refresh_token)
-            else:
+            try:
+                if service == 'spotify':
+                    playlist_info = service_obj.get_playlist_info(
+                        access_token, playlist_url, refresh_token
+                    )
+                else:
+                    playlist_info = service_obj.get_playlist_info(
+                        access_token, playlist_url
+                    )
+            except TokenExpiredError as e:
+                access_token, refresh_token = self._apply_spotify_token_refresh(user, e)
                 playlist_info = service_obj.get_playlist_info(access_token, playlist_url)
+            except SpotifyReauthorizationRequired:
+                self._discard_spotify_token(user)
+                raise
             
             # Проверяем, не добавлен ли уже этот плейлист
             existing_playlist = Playlist.query.filter_by(
@@ -692,11 +763,24 @@ class PlaylistMonitor:
             db.session.add(playlist)
             db.session.flush()  # Получаем ID плейлиста
             
-            # Получаем и сохраняем треки
-            if service == 'spotify':
-                tracks_data = service_obj.get_playlist_tracks(access_token, playlist_info['id'], refresh_token)
-            else:
-                tracks_data = service_obj.get_playlist_tracks(access_token, playlist_info['id'])
+            try:
+                if service == 'spotify':
+                    tracks_data = service_obj.get_playlist_tracks(
+                        access_token, playlist_info['id'], refresh_token
+                    )
+                else:
+                    tracks_data = service_obj.get_playlist_tracks(
+                        access_token, playlist_info['id']
+                    )
+            except TokenExpiredError as e:
+                access_token, refresh_token = self._apply_spotify_token_refresh(user, e)
+                tracks_data = service_obj.get_playlist_tracks(
+                    access_token, playlist_info['id']
+                )
+            except SpotifyReauthorizationRequired:
+                db.session.rollback()
+                self._discard_spotify_token(user)
+                raise
             for track_data in tracks_data:
                 track = Track(
                     playlist_id=playlist.id,

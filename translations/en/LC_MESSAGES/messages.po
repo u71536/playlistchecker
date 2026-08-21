@@ -99,6 +99,10 @@ msgstr "Spotify successfully connected!"
 msgid "flash.spotify_auth_error"
 msgstr "Spotify authorization error: {error}"
 
+#: app.py
+msgid "flash.spotify_reauthorization_required"
+msgstr "Your Spotify connection expired. Please sign in again to continue."
+
 #: app.py:688
 msgid "flash.deezer_auth_coming_soon"
 msgstr "Deezer authorization will be implemented"
@@ -227,6 +231,10 @@ msgstr "Token expired and no refresh_token available for renewal"
 #: services/spotify_service.py:230
 msgid "service.spotify.token_invalid_no_refresh"
 msgstr "Token is invalid and no refresh_token available for renewal"
+
+#: services/spotify_service.py
+msgid "service.spotify.reauthorization_required"
+msgstr "Spotify refresh token expired. Please sign in again."
 
 #: services/yandex_music_service.py:35 services/yandex_music_service.py:69
 msgid "service.yandex_music.invalid_playlist_url"
