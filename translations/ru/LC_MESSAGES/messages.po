@@ -88,6 +88,21 @@ msgstr "Ошибка при проверке плейлистов: {error}"
 msgid "flash.playlist_not_found"
 msgstr "Плейлист не найден"
 
+msgid "flash.playlist_deleted"
+msgstr "Плейлист удалён из мониторинга"
+
+msgid "flash.invalid_form"
+msgstr "Не удалось выполнить действие. Обновите страницу и попробуйте снова."
+
+msgid "flash.spotify_auth_invalid_state"
+msgstr "Авторизация Spotify отклонена. Начните подключение заново."
+
+msgid "playlists.delete"
+msgstr "Удалить"
+
+msgid "playlists.confirm_delete"
+msgstr "Удалить этот плейлист из мониторинга? История уведомлений по нему тоже будет удалена."
+
 #: app.py:654
 msgid "flash.spotify_auth_error_no_code"
 msgstr "Ошибка авторизации Spotify: код не получен"

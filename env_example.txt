@@ -35,6 +35,13 @@ MAIL_PASSWORD=your_app_password
 # Telegram Bot настройки
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 TELEGRAM_BOT_USERNAME=your_bot_username
+# Тот же secret_token нужно передать в setWebhook (заголовок X-Telegram-Bot-Api-Secret-Token).
+# Без него webhook отклоняет все запросы.
+TELEGRAM_WEBHOOK_SECRET=change-me
+
+# Время ежедневной проверки для scheduler_runner.py (локальное время процесса)
+CHECK_HOUR=9
+CHECK_MINUTE=0
 
 # VAPID ключи для браузерных push-уведомлений
 VAPID_PUBLIC_KEY=your_vapid_public_key

@@ -179,9 +179,14 @@
                             </li>
                             <li><hr class="dropdown-divider"></li>
                             <li>
-                                <a class="dropdown-item text-danger" href="#">
-                                    <i class="fas fa-trash me-2"></i>Delete
-                                </a>
+                                <form method="post"
+                                      action="{{ url_for('delete_playlist', playlist_id=playlist.id) }}"
+                                      onsubmit="return confirm({{ _('playlists.confirm_delete') | tojson }});">
+                                    {{ delete_form.hidden_tag() }}
+                                    <button type="submit" class="dropdown-item text-danger">
+                                        <i class="fas fa-trash me-2"></i>{{ _('playlists.delete') }}
+                                    </button>
+                                </form>
                             </li>
                         </ul>
                     </div>

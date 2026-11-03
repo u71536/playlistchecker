@@ -45,9 +45,9 @@ class SpotifyService:
             open_browser=False,
         )
         
-    def get_auth_url(self):
+    def get_auth_url(self, state=None):
         """Получить URL для авторизации"""
-        return self._oauth().get_authorize_url()
+        return self._oauth().get_authorize_url(state=state)
     
     def get_access_token(self, code):
         """Получить токен доступа по коду авторизации"""

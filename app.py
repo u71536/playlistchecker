@@ -11,11 +11,17 @@ from werkzeug.security import generate_password_hash, check_password_hash
 import os
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
+import secrets
 import jwt
-from apscheduler.schedulers.background import BackgroundScheduler
-import atexit
 import logging
 from playlist_monitor import PlaylistMonitor
+from services.notification_service import notification_service
+from services.spotify_service import SpotifyService
+from services.telegram_link import (
+    make_start_token,
+    parse_start_token,
+    webhook_authorized,
+)
 
 # Настройка логирования
 logger = logging.getLogger(__name__)
@@ -92,7 +98,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(120), nullable=False)
+    password_hash = db.Column(db.String(255), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     # Настройки уведомлений
@@ -257,6 +263,9 @@ class ForgotPasswordForm(FlaskForm):
 class ResetPasswordForm(FlaskForm):
     password = PasswordField(lazy_gettext('login.password'), validators=[DataRequired()])
     submit = SubmitField(lazy_gettext('form.save'))
+
+class DeletePlaylistForm(FlaskForm):
+    submit = SubmitField(lazy_gettext('playlists.delete'))
 
 @login_manager.user_loader
 def load_user(user_id):
@@ -432,7 +441,6 @@ def forgot_password():
 
                 # Отправляем письмо
                 try:
-                    from services.notification_service import notification_service
                     subject = 'Восстановление пароля'
                     message = f"Чтобы сбросить пароль, перейдите по ссылке: {reset_url}\n\nСсылка действительна 1 час."
                     sent = notification_service.send_email_notification(user.email, subject, message)
@@ -510,7 +518,11 @@ def _redirect_spotify_reauthorization():
 @login_required
 def playlists():
     playlists = Playlist.query.filter_by(user_id=current_user.id).all()
-    return render_template('playlists.html', playlists=playlists)
+    return render_template(
+        'playlists.html',
+        playlists=playlists,
+        delete_form=DeletePlaylistForm(),
+    )
 
 @app.route('/add_playlist', methods=['GET', 'POST'])
 @login_required
@@ -655,23 +667,59 @@ def playlist_tracks(playlist_id):
     tracks = Track.query.filter_by(playlist_id=playlist_id).order_by(Track.added_at.desc()).all()
     return render_template('playlist_tracks.html', playlist=playlist, tracks=tracks)
 
+@app.route('/playlist/<int:playlist_id>/delete', methods=['POST'])
+@login_required
+def delete_playlist(playlist_id):
+    """Удалить плейлист из мониторинга вместе с треками и уведомлениями."""
+    form = DeletePlaylistForm()
+    if not form.validate_on_submit():
+        flash(gettext('flash.invalid_form'))
+        return redirect(url_for('playlists'))
+
+    playlist = Playlist.query.filter_by(
+        id=playlist_id,
+        user_id=current_user.id,
+    ).first()
+    if not playlist:
+        flash(gettext('flash.playlist_not_found'))
+        return redirect(url_for('playlists'))
+
+    Notification.query.filter_by(playlist_id=playlist.id).delete(
+        synchronize_session=False
+    )
+    NotificationHistory.query.filter_by(playlist_id=playlist.id).delete(
+        synchronize_session=False
+    )
+    db.session.delete(playlist)
+    db.session.commit()
+    flash(gettext('flash.playlist_deleted'))
+    return redirect(url_for('playlists'))
+
 # API для авторизации в сервисах
 @app.route('/auth/spotify')
 @login_required
 def spotify_auth():
     """Начать авторизацию Spotify"""
-    from services.spotify_service import SpotifyService
-    
     service = SpotifyService()
-    auth_url = service.get_auth_url()
+    state = secrets.token_urlsafe(32)
+    session['spotify_oauth_state'] = state
+    auth_url = service.get_auth_url(state=state)
     return redirect(auth_url)
 
 @app.route('/auth/spotify/callback')
 @login_required
 def spotify_callback():
     """Обработка callback от Spotify"""
-    from services.spotify_service import SpotifyService
-    
+    expected_state = session.pop('spotify_oauth_state', None)
+    state = request.args.get('state') or ''
+    if (
+        not expected_state
+        or not state
+        or not secrets.compare_digest(state, expected_state)
+    ):
+        flash(gettext('flash.spotify_auth_invalid_state'))
+        return redirect(url_for('index'))
+
     code = request.args.get('code')
     if not code:
         flash(gettext('flash.spotify_auth_error_no_code'))
@@ -852,48 +900,45 @@ def notification_history():
 def telegram_connect():
     """Подключение Telegram бота"""
     bot_username = os.environ.get('TELEGRAM_BOT_USERNAME', 'checkingplaylistbot')
-    telegram_url = f"https://t.me/{bot_username}?start={current_user.id}"
+    start_token = make_start_token(current_user.id, app.config['SECRET_KEY'])
+    telegram_url = f"https://t.me/{bot_username}?start={start_token}"
     return redirect(telegram_url)
 
 @app.route('/api/telegram/webhook', methods=['POST'])
 def telegram_webhook():
     """Webhook для обработки сообщений от Telegram бота"""
+    if not webhook_authorized(request.headers.get('X-Telegram-Bot-Api-Secret-Token')):
+        logger.warning('Rejected Telegram webhook: missing or invalid secret')
+        return {'status': 'unauthorized'}, 401
+
     try:
-        data = request.get_json()
+        data = request.get_json(silent=True) or {}
         
         if 'message' in data:
             message = data['message']
             chat_id = message['chat']['id']
             text = message.get('text', '')
             
-            # Обрабатываем команду /start с параметром user_id
+            # /start <signed token>, не числовой id пользователя
             if text.startswith('/start'):
                 parts = text.split()
-                if len(parts) > 1:
-                    try:
-                        user_id = int(parts[1])
-                        user = User.query.get(user_id)
-                        
-                        if user:
-                            user.telegram_chat_id = str(chat_id)
-                            if 'username' in message['chat']:
-                                user.telegram_username = message['chat']['username']
-                            
-                            db.session.commit()
-                            
-                            # Отправляем подтверждение
-                            from services.notification_service import notification_service
-                            notification_service.send_telegram_notification(
-                                chat_id,
-                                f"✅ Telegram успешно подключен к аккаунту {user.username}!\n\nТеперь вы будете получать уведомления об изменениях в ваших плейлистах."
-                            )
-                            
-                            return {'status': 'ok'}
-                    except ValueError:
-                        pass
+                user_id = parse_start_token(parts[1], app.config['SECRET_KEY']) if len(parts) > 1 else None
+                user = db.session.get(User, user_id) if user_id is not None else None
+
+                if user:
+                    user.telegram_chat_id = str(chat_id)
+                    if 'username' in message['chat']:
+                        user.telegram_username = message['chat']['username']
+
+                    db.session.commit()
+
+                    notification_service.send_telegram_notification(
+                        chat_id,
+                        f"✅ Telegram успешно подключен к аккаунту {user.username}!\n\nТеперь вы будете получать уведомления об изменениях в ваших плейлистах."
+                    )
+
+                    return {'status': 'ok'}
             
-            # Отправляем справку для неизвестных команд
-            from services.notification_service import notification_service
             notification_service.send_telegram_notification(
                 chat_id,
                 "🤖 Привет! Я бот PlaylistChecker.\n\nДля подключения перейдите в настройки уведомлений на сайте и нажмите 'Подключить Telegram'."
@@ -974,39 +1019,11 @@ def get_vapid_public_key():
     
     return {'publicKey': public_key}
 
-# Создаем глобальный экземпляр монитора
+# Создаем глобальный экземпляр монитора.
+# Ежедневная проверка запускается отдельным процессом: python scheduler_runner.py
 monitor = PlaylistMonitor(app)
-
-# Планировщик задач
-def check_playlists():
-    """Функция для проверки всех плейлистов на изменения"""
-    from datetime import datetime
-    print(f"[{datetime.now()}] Запуск проверки плейлистов...")
-    try:
-        # Используем глобальную переменную app с контекстом
-        with app.app_context():
-            monitor.check_all_playlists()
-        print(f"[{datetime.now()}] Проверка плейлистов завершена успешно")
-    except Exception as e:
-        print(f"[{datetime.now()}] Ошибка при проверке плейлистов: {str(e)}")
-        import traceback
-        traceback.print_exc()
-
-# Настройка планировщика
-scheduler = BackgroundScheduler()
-scheduler.add_job(
-    func=check_playlists,
-    trigger="cron",
-    hour=9,  # Проверяем каждый день в 9:00 утра
-    minute=0,
-    id='playlist_checker'
-)
-scheduler.start()
-
-# Остановка планировщика при выходе
-atexit.register(lambda: scheduler.shutdown())
 
 if __name__ == '__main__':
     with app.app_context():
         db.create_all()
-    app.run(debug=True)
+    app.run(debug=os.environ.get('FLASK_DEBUG') == '1')
