@@ -87,6 +87,21 @@ msgstr "Error checking playlists: {error}"
 msgid "flash.playlist_not_found"
 msgstr "Playlist not found"
 
+msgid "flash.playlist_deleted"
+msgstr "Playlist removed from monitoring"
+
+msgid "flash.invalid_form"
+msgstr "The action could not be completed. Refresh the page and try again."
+
+msgid "flash.spotify_auth_invalid_state"
+msgstr "Spotify authorization was rejected. Start the connection again."
+
+msgid "playlists.delete"
+msgstr "Delete"
+
+msgid "playlists.confirm_delete"
+msgstr "Remove this playlist from monitoring? Its notification history will be deleted too."
+
 #: app.py:654
 msgid "flash.spotify_auth_error_no_code"
 msgstr "Spotify authorization error: code not received"

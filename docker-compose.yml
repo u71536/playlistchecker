@@ -32,6 +32,20 @@ services:
     depends_on:
       - db
 
+  scheduler:
+    build: .
+    container_name: playlistchecker-scheduler
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - ./instance:/app/instance
+    command: ["python", "scheduler_runner.py"]
+    depends_on:
+      - db
+    networks:
+      - traefik-network
+
   db:
     image: postgres:15-alpine
     container_name: playlistchecker-db
