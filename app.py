@@ -450,7 +450,7 @@ def forgot_password():
                     logger.error(f"[PasswordReset] Ошибка отправки письма: {str(e)}")
                     logger.info(f"[PasswordReset] Ссылка: {reset_url}")
         finally:
-            flash(gettext('Если такой email существует, мы отправили письмо с инструкциями'))
+            flash(gettext('flash.password_reset_email_sent'))
             return redirect(url_for('login'))
 
     return render_template('forgot_password.html', form=form)
@@ -470,14 +470,14 @@ def reset_password(token):
         if not user:
             raise jwt.InvalidTokenError('user not found')
     except Exception:
-        flash(gettext('Ссылка для восстановления недействительна или устарела'))
+        flash(gettext('flash.password_reset_invalid'))
         return redirect(url_for('forgot_password'))
 
     form = ResetPasswordForm()
     if form.validate_on_submit():
         user.password_hash = generate_password_hash(form.password.data)
         db.session.commit()
-        flash(gettext('Пароль успешно обновлён. Войдите с новым паролем.'))
+        flash(gettext('flash.password_updated'))
         return redirect(url_for('login'))
 
     return render_template('reset_password.html', form=form)

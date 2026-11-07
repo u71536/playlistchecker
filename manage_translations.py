@@ -11,7 +11,9 @@ def extract_messages():
     """Извлечь строки для перевода из кода и шаблонов"""
     print("Извлекаем строки для перевода...")
     result = subprocess.run([
-        'pybabel', 'extract', '-F', 'babel.cfg', '-k', '_l', '-o', 'messages.pot', '.'
+        'pybabel', 'extract', '-F', 'babel.cfg',
+        '-k', '_l', '-k', 'lazy_gettext',
+        '-o', 'messages.pot', '.'
     ], capture_output=True, text=True)
     
     if result.returncode == 0:

@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}My Playlists - PlaylistChecker{% endblock %}
+{% block title %}{{ _('base.my_playlists') }} - PlaylistChecker{% endblock %}
 
 {% block content %}
 <style>
@@ -125,16 +125,16 @@
     <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
         <div>
             <h1 class="display-6 fw-bold mb-2">
-                <i class="fas fa-list text-primary"></i> My Playlists
+                <i class="fas fa-list text-primary"></i> {{ _('base.my_playlists') }}
             </h1>
-            <p class="text-muted mb-0">Manage and monitor all your playlists in one place</p>
+            <p class="text-muted mb-0">{{ _('playlists.subtitle') }}</p>
         </div>
         <div class="d-flex gap-2">
             <a href="{{ url_for('check_playlists_now') }}" class="btn btn-outline-primary">
-                <i class="fas fa-sync me-2"></i>Check Now
+                <i class="fas fa-sync me-2"></i>{{ _('playlists.check_now') }}
             </a>
             <a href="{{ url_for('add_playlist') }}" class="btn btn-primary">
-                <i class="fas fa-plus me-2"></i>Add Playlist
+                <i class="fas fa-plus me-2"></i>{{ _('add_playlist.add_playlist') }}
             </a>
         </div>
     </div>
@@ -169,12 +169,12 @@
                         <ul class="dropdown-menu dropdown-menu-end shadow">
                             <li>
                                 <a class="dropdown-item" href="{{ url_for('check_playlists_now') }}">
-                                    <i class="fas fa-sync me-2 text-primary"></i>Check Now
+                                    <i class="fas fa-sync me-2 text-primary"></i>{{ _('playlists.check_now') }}
                                 </a>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="{{ url_for('playlist_tracks', playlist_id=playlist.id) }}">
-                                    <i class="fas fa-eye me-2 text-info"></i>View Tracks
+                                    <i class="fas fa-eye me-2 text-info"></i>{{ _('playlists.view_tracks') }}
                                 </a>
                             </li>
                             <li><hr class="dropdown-divider"></li>
@@ -204,15 +204,15 @@
                 <div class="stats-grid">
                     <div class="stat-box">
                         <div class="stat-value text-primary">{{ playlist.tracks|length }}</div>
-                        <div class="stat-label">Tracks</div>
+                        <div class="stat-label">{{ _('playlists.stat.tracks') }}</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-value text-danger">{{ playlist.tracks|selectattr('is_removed', 'equalto', true)|list|length }}</div>
-                        <div class="stat-label">Removed</div>
+                        <div class="stat-label">{{ _('playlists.stat.removed') }}</div>
                     </div>
                     <div class="stat-box">
                         <div class="stat-value text-success">{{ playlist.tracks|selectattr('is_removed', 'equalto', false)|list|length }}</div>
-                        <div class="stat-label">Active</div>
+                        <div class="stat-label">{{ _('playlists.stat.active') }}</div>
                     </div>
                 </div>
                 
@@ -221,16 +221,16 @@
                         {% if playlist.last_checked %}
                             <i class="fas fa-clock me-1"></i>{{ playlist.last_checked.strftime('%d.%m.%Y %H:%M') }}
                         {% else %}
-                            <i class="fas fa-exclamation-circle text-warning me-1"></i>Not checked yet
+                            <i class="fas fa-exclamation-circle text-warning me-1"></i>{{ _('playlists.not_checked') }}
                         {% endif %}
                     </small>
                     <span class="playlist-status {% if playlist.last_checked %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %}">
                         {% if playlist.last_checked %}
                             <i class="fas fa-check-circle"></i>
-                            <span>Active</span>
+                            <span>{{ _('playlists.status.active') }}</span>
                         {% else %}
                             <i class="fas fa-hourglass-half"></i>
-                            <span>Pending</span>
+                            <span>{{ _('playlists.status.pending') }}</span>
                         {% endif %}
                     </span>
                 </div>

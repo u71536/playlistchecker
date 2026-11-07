@@ -129,7 +129,7 @@
                 <h1 class="display-5 fw-bold mb-2">
                     <i class="fas fa-tachometer-alt text-primary"></i> {{ _('dashboard.dashboard') }}
                 </h1>
-                <p class="text-muted">Welcome back! Here's your playlist overview</p>
+                <p class="text-muted">{{ _('dashboard.welcome') }}</p>
             </div>
         </div>
     </div>
@@ -362,19 +362,19 @@
                                         <div class="col-4">
                                             <div class="track-stat">
                                                 <div class="track-stat-number">{{ playlist.tracks|length }}</div>
-                                                <small class="text-muted">Tracks</small>
+                                                <small class="text-muted">{{ _('playlists.stat.tracks') }}</small>
                                             </div>
                                         </div>
                                         <div class="col-4">
                                             <div class="track-stat">
                                                 <div class="track-stat-number text-danger">{{ playlist.tracks|selectattr('is_removed', 'equalto', true)|list|length }}</div>
-                                                <small class="text-muted">Removed</small>
+                                                <small class="text-muted">{{ _('playlists.stat.removed') }}</small>
                                             </div>
                                         </div>
                                         <div class="col-4">
                                             <div class="track-stat">
                                                 <div class="track-stat-number text-success">{{ playlist.tracks|selectattr('is_removed', 'equalto', false)|list|length }}</div>
-                                                <small class="text-muted">Active</small>
+                                                <small class="text-muted">{{ _('playlists.stat.active') }}</small>
                                             </div>
                                         </div>
                                     </div>

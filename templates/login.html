@@ -103,7 +103,7 @@
                 <i class="fas fa-sign-in-alt"></i>
             </div>
             <h2 class="mb-2 fw-bold">{{ _('login.title') }}</h2>
-            <p class="mb-0 opacity-90">Welcome back to PlaylistChecker</p>
+            <p class="mb-0 opacity-90">{{ _('login.subtitle') }}</p>
         </div>
         
         <div class="card-body p-4">
@@ -148,7 +148,7 @@
                     {{ form.submit(class="btn btn-primary btn-lg") }}
                 </div>
                 <div class="text-end mb-3">
-                    <a href="{{ url_for('forgot_password') }}" class="auth-link">Забыли пароль?</a>
+                    <a href="{{ url_for('forgot_password') }}" class="auth-link">{{ _('login.forgot_password') }}</a>
                 </div>
             </form>
             
@@ -164,7 +164,7 @@
     <div class="text-center mt-4">
         <p class="text-white">
             <i class="fas fa-shield-alt me-2"></i>
-            Your data is secure and encrypted
+            {{ _('auth.data_secure') }}
         </p>
     </div>
 </div>

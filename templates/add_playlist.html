@@ -117,7 +117,7 @@
                 <h4 class="mb-0 fw-bold">
                     <i class="fas fa-plus me-2"></i>{{ _('add_playlist.add_playlist') }}
                 </h4>
-                <p class="mb-0 mt-2 opacity-90">Add a playlist from your favorite music service</p>
+                <p class="mb-0 mt-2 opacity-90">{{ _('add_playlist.subtitle') }}</p>
             </div>
             <div class="card-body p-4">
                 <form method="POST">
@@ -200,14 +200,14 @@
                         <div id="collapseDeezer" class="accordion-collapse collapse" data-bs-parent="#instructionsAccordion">
                             <div class="accordion-body">
                                 <ol>
-                                    <li>Откройте Deezer в браузере</li>
-                                    <li>Найдите плейлист, который хотите отслеживать</li>
-                                    <li>Скопируйте ссылку на плейлист из адресной строки браузера</li>
-                                    <li>Вставьте ссылку в поле выше</li>
+                                    <li>{{ _('add_playlist.open_deezer') }}</li>
+                                    <li>{{ _('add_playlist.find_playlist') }}</li>
+                                    <li>{{ _('add_playlist.copy_link_from_browser') }}</li>
+                                    <li>{{ _('add_playlist.paste_link_field') }}</li>
                                 </ol>
                                 <p class="mt-3 mb-0">
                                     <small class="text-muted">
-                                        Пример ссылки:<br>
+                                        {{ _('add_playlist.example_link') }}<br>
                                         <code>https://www.deezer.com/playlist/1234567890</code>
                                     </small>
                                 </p>
