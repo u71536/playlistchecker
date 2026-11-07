@@ -17,7 +17,16 @@ depends_on = None
 
 
 def upgrade():
-    # Удаляем старый не-уникальный индекс
+    # Старые повторы не дают создать уникальный индекс. Оставляем самую раннюю запись.
+    op.execute(sa.text(
+        """
+        DELETE FROM notification_history
+        WHERE id NOT IN (
+            SELECT MIN(id) FROM notification_history
+            GROUP BY user_id, playlist_id, track_service_id, notification_type
+        )
+        """
+    ))
     with op.batch_alter_table('notification_history', schema=None) as batch_op:
         batch_op.drop_index('idx_unique_notification')
         # Создаем уникальный индекс
