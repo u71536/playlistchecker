@@ -209,11 +209,11 @@ class PlaylistMonitor:
             except Exception as e:
                 logger.error(f"Ошибка при проверке плейлиста Apple Music {playlist.name}: {str(e)}")
                 raise
-        elif playlist.service == 'yandex_music' and hasattr(playlist, 'is_public') and playlist.is_public:
+        elif playlist.service == 'yandex_music':
             try:
-                # Получаем треки публичного плейлиста
-                playlist_url = f"https://music.yandex.ru/playlists/{playlist.service_playlist_id}"
-                current_tracks = service.get_public_playlist_tracks(playlist_url)
+                current_tracks = service.get_playlist_tracks_by_id(
+                    playlist.service_playlist_id
+                )
                 current_track_ids = {track['id'] for track in current_tracks}
                 
                 # Получаем треки из базы данных
@@ -502,6 +502,7 @@ class PlaylistMonitor:
                 else:
                     logger.warning(f"Трек с ID {track_id} не найден в плейлисте {playlist.name}")
             
+            owner_id = playlist.user_id
             # Сохраняем все изменения в БД одним коммитом
             try:
                 db.session.commit()
@@ -515,15 +516,21 @@ class PlaylistMonitor:
             if tracks_for_notification:
                 try:
                     from services.notification_service import notification_service
-                    
+
+                    owner = db.session.get(User, owner_id)
+                    if owner is None:
+                        logger.warning(
+                            f"Пользователь {owner_id} не найден, уведомление не отправлено"
+                        )
+                        return
                     notification_service.send_batch_notifications(
-                        user=playlist.user,
+                        user=owner,
                         tracks_data=tracks_for_notification,
                         playlist_name=playlist.name,
                         playlist_id=playlist.id
                     )
                     logger.info(
-                        f"Сводное уведомление отправлено для {playlist.user.username}: "
+                        f"Сводное уведомление отправлено для {owner.username}: "
                         f"{len(tracks_for_notification)} треков из плейлиста {playlist.name}"
                     )
                 except Exception as notification_error:
@@ -663,7 +670,7 @@ class PlaylistMonitor:
             except Exception as e:
                 logger.error(f"Ошибка при добавлении плейлиста Apple Music: {str(e)}")
                 raise
-        elif service == 'yandex_music' and 'music.yandex.ru/playlists/' in playlist_url:
+        elif service == 'yandex_music':
             try:
                 # Получаем информацию о публичном плейлисте
                 playlist_info = service_obj.get_public_playlist_info(playlist_url)
@@ -690,8 +697,7 @@ class PlaylistMonitor:
                 db.session.add(playlist)
                 db.session.flush()  # Получаем ID плейлиста
                 
-                # Получаем и сохраняем треки публичного плейлиста
-                tracks_data = service_obj.get_public_playlist_tracks(playlist_url)
+                tracks_data = service_obj.get_playlist_tracks_by_id(playlist_info['id'])
                 for track_data in tracks_data:
                     track = Track(
                         playlist_id=playlist.id,

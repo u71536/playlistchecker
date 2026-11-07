@@ -6,6 +6,7 @@ from urllib.parse import parse_qs, urlparse
 from werkzeug.security import generate_password_hash
 
 import app as app_module
+from extensions import limiter
 from app import (
     Notification,
     NotificationHistory,
@@ -17,6 +18,8 @@ from app import (
     db,
     monitor,
 )
+import jwt
+
 from services.spotify_service import SpotifyService
 from services.telegram_link import make_start_token
 
@@ -25,6 +28,7 @@ class MonitoringTests(unittest.TestCase):
     def setUp(self):
         app.config['TESTING'] = True
         app.config['WTF_CSRF_ENABLED'] = False
+        app.config['RATELIMIT_ENABLED'] = False
         self.context = app.app_context()
         self.context.push()
         db.drop_all()
@@ -235,6 +239,80 @@ class MonitoringTests(unittest.TestCase):
         stored = SpotifyToken.query.filter_by(user_id=user.id).one()
         self.assertEqual(stored.access_token, 'access')
 
+    def test_yandex_user_playlist_is_checked_without_oauth(self):
+        user = self._make_user('yana', 'yana@example.com')
+        service = monitor.services['yandex_music']
+        original_info = service.get_public_playlist_info
+        original_tracks = service.get_playlist_tracks_by_id
+        service.get_public_playlist_info = lambda url: {
+            'id': 'yamusic-daily:101',
+            'name': 'Day',
+            'description': '',
+        }
+        remaining = [{
+            'id': '1',
+            'name': 'Keep',
+            'artist': 'Artist',
+            'album': '',
+            'duration': 10,
+        }]
+        snapshots = [
+            remaining + [{
+                'id': '2',
+                'name': 'Gone',
+                'artist': 'Artist',
+                'album': '',
+                'duration': 10,
+            }],
+            remaining,
+        ]
+
+        def tracks(storage_id):
+            self.assertEqual(storage_id, 'yamusic-daily:101')
+            return snapshots.pop(0)
+
+        service.get_playlist_tracks_by_id = tracks
+        try:
+            playlist = monitor.add_playlist(
+                user,
+                'yandex_music',
+                'https://music.yandex.ru/users/yamusic-daily/playlists/101',
+            )
+            self.assertEqual(playlist.service_playlist_id, 'yamusic-daily:101')
+            self.assertEqual(Track.query.filter_by(playlist_id=playlist.id).count(), 2)
+            monitor.check_playlist(playlist)
+            db.session.expire_all()
+            gone = Track.query.filter_by(service_track_id='2').one()
+            self.assertTrue(gone.is_removed)
+            self.assertFalse(Track.query.filter_by(service_track_id='1').one().is_removed)
+        finally:
+            service.get_public_playlist_info = original_info
+            service.get_playlist_tracks_by_id = original_tracks
+
+    def test_password_reset_link_works_once(self):
+        user = self._make_user()
+        user.password_reset_nonce = 'abc123'
+        db.session.commit()
+        token = jwt.encode({
+            'sub': str(user.id),
+            'exp': datetime.utcnow() + timedelta(hours=1),
+            'type': 'password_reset',
+            'nonce': 'abc123',
+        }, app.config['SECRET_KEY'], algorithm='HS256')
+        first = self.client.post(
+            f'/reset_password/{token}',
+            data={'password': 'new-password-1'},
+        )
+        self.assertEqual(first.status_code, 302)
+        db.session.refresh(user)
+        self.assertIsNone(user.password_reset_nonce)
+        second = self.client.post(
+            f'/reset_password/{token}',
+            data={'password': 'another-password'},
+        )
+        self.assertEqual(second.status_code, 302)
+        self.assertIn('/forgot_password', second.headers['Location'])
+
     def test_telegram_webhook_rejects_missing_secret(self):
         response = self.client.post(
             '/api/telegram/webhook',
@@ -327,6 +405,29 @@ class MonitoringTests(unittest.TestCase):
         with self.client.session_transaction() as sess:
             sess['_user_id'] = str(user.id)
             sess['_fresh'] = True
+
+    def test_health_checks_database(self):
+        response = self.client.get('/health')
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.get_json(), {'status': 'ok'})
+
+    def test_login_and_password_reset_are_rate_limited(self):
+        app.config['RATELIMIT_ENABLED'] = True
+        limiter.reset()
+        payload = {'username': 'nobody', 'password': 'wrong-password'}
+        for _ in range(5):
+            allowed = self.client.post('/login', data=payload)
+            self.assertNotEqual(allowed.status_code, 429)
+        blocked = self.client.post('/login', data=payload)
+        self.assertEqual(blocked.status_code, 429)
+
+        limiter.reset()
+        forgot = {'email': 'missing@example.com'}
+        for _ in range(3):
+            allowed = self.client.post('/forgot_password', data=forgot)
+            self.assertNotEqual(allowed.status_code, 429)
+        blocked = self.client.post('/forgot_password', data=forgot)
+        self.assertEqual(blocked.status_code, 429)
 
 
 if __name__ == '__main__':

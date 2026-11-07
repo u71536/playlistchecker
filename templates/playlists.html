@@ -130,9 +130,12 @@
             <p class="text-muted mb-0">{{ _('playlists.subtitle') }}</p>
         </div>
         <div class="d-flex gap-2">
-            <a href="{{ url_for('check_playlists_now') }}" class="btn btn-outline-primary">
-                <i class="fas fa-sync me-2"></i>{{ _('playlists.check_now') }}
-            </a>
+            <form method="post" action="{{ url_for('check_playlists_now') }}">
+                {{ csrf_form.hidden_tag() }}
+                <button type="submit" class="btn btn-outline-primary">
+                    <i class="fas fa-sync me-2"></i>{{ _('playlists.check_now') }}
+                </button>
+            </form>
             <a href="{{ url_for('add_playlist') }}" class="btn btn-primary">
                 <i class="fas fa-plus me-2"></i>{{ _('add_playlist.add_playlist') }}
             </a>
@@ -168,9 +171,12 @@
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end shadow">
                             <li>
-                                <a class="dropdown-item" href="{{ url_for('check_playlists_now') }}">
-                                    <i class="fas fa-sync me-2 text-primary"></i>{{ _('playlists.check_now') }}
-                                </a>
+                                <form method="post" action="{{ url_for('check_playlists_now') }}">
+                                    {{ csrf_form.hidden_tag() }}
+                                    <button type="submit" class="dropdown-item">
+                                        <i class="fas fa-sync me-2 text-primary"></i>{{ _('playlists.check_now') }}
+                                    </button>
+                                </form>
                             </li>
                             <li>
                                 <a class="dropdown-item" href="{{ url_for('playlist_tracks', playlist_id=playlist.id) }}">

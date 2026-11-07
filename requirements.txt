@@ -4,6 +4,7 @@ Flask-Migrate==4.0.5
 Flask-Login==0.6.3
 Flask-WTF==1.1.1
 Flask-Babel==4.0.0
+Flask-Limiter==3.5.1
 WTForms==3.0.1
 Werkzeug==2.3.7
 requests==2.31.0
@@ -14,4 +15,5 @@ PyJWT==2.8.0
 yandex-music==2.1.0
 email_validator==2.1.0
 pywebpush==1.14.0
+cryptography==45.0.7
 psycopg2-binary==2.9.7
