@@ -136,6 +136,31 @@ PlaylistChecker - Уведомление
         except Exception as e:
             logger.error(f"Ошибка отправки email уведомления: {str(e)}")
             return False
+
+    def send_plain_email(self, user_email, subject, message):
+        """Короткое письмо без шаблона уведомления об изменениях."""
+        if not all([self.email_config['username'], self.email_config['password']]):
+            logger.warning('Email настройки не настроены, пропускаем отправку email')
+            return False
+        try:
+            from_address = self.email_config.get('default_sender') or self.email_config.get('username')
+            if not from_address or '@' not in from_address:
+                logger.error('Некорректный адрес отправителя')
+                return False
+            msg = MIMEText(message, 'plain', 'utf-8')
+            msg['Subject'] = subject
+            msg['From'] = from_address
+            msg['To'] = user_email
+            server = smtplib.SMTP(self.email_config['server'], self.email_config['port'])
+            if self.email_config['use_tls']:
+                server.starttls()
+            server.login(self.email_config['username'], self.email_config['password'])
+            server.send_message(msg)
+            server.quit()
+            return True
+        except Exception as error:
+            logger.error(f'Ошибка отправки письма: {error}')
+            return False
     
     def send_telegram_notification(self, chat_id, message, track_name=None, playlist_name=None):
         """Отправить Telegram уведомление"""

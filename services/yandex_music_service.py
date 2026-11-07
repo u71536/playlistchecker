@@ -1,104 +1,123 @@
+import re
+
 import requests
 from datetime import datetime
 from flask_babel import gettext
 
+_USER_PLAYLIST = re.compile(
+    r'music\.yandex\.ru/users/([^/?#]+)/playlists/(\d+)'
+)
+_PUBLIC_PLAYLIST = re.compile(
+    r'music\.yandex\.ru/playlists/([^/?#]+)'
+)
+
 
 class YandexMusicService:
     def __init__(self):
-        pass
-    
-    def _extract_playlist_id(self, url):
-        """Извлечь ID плейлиста из URL"""
-        import re
-        
-        # Паттерны для различных форматов URL Yandex Music
-        patterns = [
-            r'music\.yandex\.ru/users/([^/]+)/playlists/(\d+)',
-            r'music\.yandex\.ru/playlists/([a-f0-9-]+)',  # UUID формат для публичных плейлистов
-            r'music\.yandex\.ru/playlists/ya\.music/playlists/ya\.music/(\d+)',  # Новый формат
-            r'playlists/(\d+)',
-            r'playlist/(\d+)',
-            r'playlist/([a-f0-9-]+)'  # UUID формат
-        ]
-        
-        for pattern in patterns:
-            match = re.search(pattern, url)
-            if match:
-                return match.group(1) if len(match.groups()) == 1 else match.group(2)
-        
+        self.base_url = 'https://api.music.yandex.net'
+
+    def storage_id_from_url(self, url):
+        """Ключ плейлиста: owner:kind для пользовательских, иначе id из ссылки."""
+        if not url:
+            return None
+        user_match = _USER_PLAYLIST.search(url)
+        if user_match:
+            return f'{user_match.group(1)}:{user_match.group(2)}'
+        public_match = _PUBLIC_PLAYLIST.search(url)
+        if public_match and ':' not in public_match.group(1):
+            return public_match.group(1)
         return None
-    
+
+    def _request_playlist(self, storage_id):
+        if not storage_id:
+            raise ValueError(gettext('service.yandex_music.invalid_playlist_url'))
+        if ':' in storage_id:
+            owner, kind = storage_id.split(':', 1)
+            url = f'{self.base_url}/users/{owner}/playlists/{kind}'
+        else:
+            url = f'{self.base_url}/playlist/{storage_id}'
+        response = requests.get(
+            url,
+            headers={
+                'User-Agent': 'Mozilla/5.0',
+                'Accept': 'application/json',
+            },
+            timeout=20,
+        )
+        if response.status_code != 200:
+            raise Exception(gettext(
+                'service.yandex_music.api_error',
+                status_code=response.status_code,
+                response_text=response.text,
+            ))
+        return response.json()['result']
+
+    def _storage_id_from_result(self, result, fallback):
+        owner = (result.get('owner') or {}).get('login')
+        kind = result.get('kind')
+        if owner and kind is not None:
+            return f'{owner}:{kind}'
+        return fallback
+
     def get_public_playlist_info(self, playlist_url):
-        """Получить информацию о публичном плейлисте без авторизации"""
-        playlist_id = self._extract_playlist_id(playlist_url)
-        if not playlist_id:
+        """Информация о публичном плейлисте без OAuth."""
+        storage_id = self.storage_id_from_url(playlist_url)
+        if not storage_id:
             raise ValueError(gettext('service.yandex_music.invalid_playlist_url'))
-        
         try:
-            # Используем прямой API endpoint для публичных плейлистов
-            url = f"https://api.music.yandex.net/playlist/{playlist_id}"
-            
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Accept': 'application/json',
+            result = self._request_playlist(storage_id)
+            owner = result.get('owner') or {}
+            return {
+                'id': self._storage_id_from_result(result, storage_id),
+                'name': result['title'],
+                'description': result.get('description') or '',
+                'tracks_count': result.get('trackCount', 0),
+                'owner': owner.get('name') or owner.get('login') or '',
+                'public': result.get('visibility') == 'public',
             }
-            
-            response = requests.get(url, headers=headers)
-            
-            if response.status_code == 200:
-                data = response.json()
-                result = data['result']
-                return {
-                    'id': str(result['kind']),
-                    'name': result['title'],
-                    'description': result.get('description', ''),
-                    'tracks_count': result['trackCount'],
-                    'owner': result['owner']['name'],
-                    'public': result.get('visibility') == 'public'
-                }
-            else:
-                raise Exception(gettext('service.yandex_music.api_error', status_code=response.status_code, response_text=response.text))
-                
-        except Exception as e:
-            raise Exception(gettext('service.yandex_music.playlist_info_error', error=str(e)))
-    
+        except ValueError:
+            raise
+        except Exception as error:
+            raise Exception(gettext(
+                'service.yandex_music.playlist_info_error',
+                error=str(error),
+            ))
+
+    def get_playlist_tracks_by_id(self, storage_id):
+        """Треки по сохранённому ключу owner:kind."""
+        try:
+            result = self._request_playlist(storage_id)
+        except ValueError:
+            raise
+        except Exception as error:
+            raise Exception(gettext(
+                'service.yandex_music.playlist_tracks_error',
+                error=str(error),
+            ))
+        tracks = []
+        for track_data in result.get('tracks') or []:
+            track = track_data.get('track') if isinstance(track_data, dict) else None
+            if not track or not track.get('id'):
+                continue
+            albums = track.get('albums') or []
+            artists = track.get('artists') or []
+            duration_ms = track.get('durationMs') or 0
+            tracks.append({
+                'id': str(track['id']),
+                'name': track.get('title') or '',
+                'artist': ', '.join(
+                    artist.get('name', '') for artist in artists if artist.get('name')
+                ),
+                'album': albums[0].get('title', '') if albums else '',
+                'duration': duration_ms // 1000,
+                'added_at': datetime.utcnow().isoformat(),
+            })
+        return tracks
+
     def get_public_playlist_tracks(self, playlist_url):
-        """Получить треки публичного плейлиста без авторизации"""
-        playlist_id = self._extract_playlist_id(playlist_url)
-        if not playlist_id:
+        """Треки публичного плейлиста без OAuth."""
+        storage_id = self.storage_id_from_url(playlist_url)
+        if not storage_id:
             raise ValueError(gettext('service.yandex_music.invalid_playlist_url'))
-        
-        try:
-            # Используем прямой API endpoint для публичных плейлистов
-            url = f"https://api.music.yandex.net/playlist/{playlist_id}"
-            
-            headers = {
-                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-                'Accept': 'application/json',
-            }
-            
-            response = requests.get(url, headers=headers)
-            
-            if response.status_code == 200:
-                data = response.json()
-                result = data['result']
-                tracks = []
-                
-                for track_data in result['tracks']:
-                    track = track_data['track']
-                    tracks.append({
-                        'id': str(track['id']),
-                        'name': track['title'],
-                        'artist': ', '.join([artist['name'] for artist in track['artists']]),
-                        'album': track['albums'][0]['title'] if track['albums'] else '',
-                        'duration': track['durationMs'] // 1000,  # Конвертируем в секунды
-                        'added_at': datetime.utcnow().isoformat()  # Yandex Music не предоставляет время добавления
-                    })
-                
-                return tracks
-            else:
-                raise Exception(gettext('service.yandex_music.api_error', status_code=response.status_code, response_text=response.text))
-                
-        except Exception as e:
-            raise Exception(gettext('service.yandex_music.playlist_tracks_error', error=str(e)))
-    
+        info = self.get_public_playlist_info(playlist_url)
+        return self.get_playlist_tracks_by_id(info['id'])

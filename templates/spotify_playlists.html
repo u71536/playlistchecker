@@ -219,10 +219,12 @@
                 </div>
                 
                 <div class="action-buttons">
-                    <a href="{{ url_for('add_spotify_playlist', playlist_id=playlist.id) }}" 
-                       class="btn btn-spotify-primary">
-                        <i class="fas fa-plus me-2"></i>{{ _('spotify_playlists.add_for_monitoring') }}
-                    </a>
+                    <form method="post" action="{{ url_for('add_spotify_playlist', playlist_id=playlist.id) }}">
+                        {{ csrf_form.hidden_tag() }}
+                        <button type="submit" class="btn btn-spotify-primary">
+                            <i class="fas fa-plus me-2"></i>{{ _('spotify_playlists.add_for_monitoring') }}
+                        </button>
+                    </form>
                     <a href="{{ playlist.url }}" target="_blank" class="btn btn-spotify-outline">
                         <i class="fab fa-spotify me-2"></i>{{ _('spotify_playlists.open_in_spotify') }}
                     </a>

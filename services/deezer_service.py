@@ -130,104 +130,79 @@ class DeezerService:
             'x-rapidapi-host': self.rapidapi_host
         }
     
+    def _fetch_public_json(self, url, params=None):
+        response = requests.get(url, params=params, timeout=20)
+        if response.status_code != 200:
+            raise Exception(gettext(
+                'service.deezer.playlist_info_error',
+                status_code=response.status_code,
+            ))
+        data = response.json()
+        if data.get('error'):
+            raise Exception(gettext(
+                'service.deezer.playlist_info_error',
+                status_code=data['error'].get('type', response.status_code),
+            ))
+        return data
+
     def get_public_playlist_info(self, playlist_url):
-        """Получить информацию о плейлисте через RapidAPI (без авторизации)"""
+        """Информация о публичном плейлисте через API Deezer, без RapidAPI."""
         playlist_id = self._extract_playlist_id(playlist_url)
         if not playlist_id:
             raise ValueError(gettext('service.deezer.invalid_playlist_url'))
-        
         try:
-            url = f"https://{self.rapidapi_host}/playlist/{playlist_id}"
-            headers = self._get_rapidapi_headers()
-            
-            response = requests.get(url, headers=headers)
-            
-            if response.status_code == 200:
-                data = response.json()
-                return {
-                    'id': str(data['id']),
-                    'name': data['title'],
-                    'description': data.get('description', ''),
-                    'tracks_count': data.get('nb_tracks', 0),
-                    'owner': data.get('creator', {}).get('name', 'Unknown'),
-                    'public': data.get('public', True)
-                }
-            else:
-                raise Exception(gettext('service.deezer.playlist_info_error', status_code=response.status_code))
-        except Exception as e:
-            raise Exception(gettext('service.deezer.playlist_info_error', status_code=str(e)))
-    
+            data = self._fetch_public_json(f'{self.base_url}/playlist/{playlist_id}')
+            creator = data.get('creator') or {}
+            return {
+                'id': str(data['id']),
+                'name': data['title'],
+                'description': data.get('description') or '',
+                'tracks_count': data.get('nb_tracks', 0),
+                'owner': creator.get('name', 'Unknown'),
+                'public': data.get('public', True),
+            }
+        except ValueError:
+            raise
+        except Exception as error:
+            raise Exception(gettext(
+                'service.deezer.playlist_info_error',
+                status_code=str(error),
+            ))
+
     def get_public_playlist_tracks(self, playlist_url):
-        """Получить треки плейлиста через RapidAPI (без авторизации)"""
+        """Треки публичного плейлиста через API Deezer, без RapidAPI."""
         playlist_id = self._extract_playlist_id(playlist_url)
         if not playlist_id:
             raise ValueError(gettext('service.deezer.invalid_playlist_url'))
-        
         try:
             tracks = []
-            url = f"https://{self.rapidapi_host}/playlist/{playlist_id}"
-            headers = self._get_rapidapi_headers()
-            
-            response = requests.get(url, headers=headers)
-            
-            if response.status_code == 200:
-                data = response.json()
-                
-                # Получаем треки из плейлиста
-                tracks_data = data.get('tracks', {}).get('data', [])
-                
-                for track_data in tracks_data:
-                    # Проверяем, что трек не None (может быть удален)
-                    if track_data:
-                        tracks.append({
-                            'id': str(track_data['id']),
-                            'name': track_data['title'],
-                            'artist': track_data.get('artist', {}).get('name', 'Unknown'),
-                            'album': track_data.get('album', {}).get('title', ''),
-                            'duration': track_data.get('duration', 0),
-                            'added_at': datetime.utcnow().isoformat()
-                        })
-                
-                # Обрабатываем пагинацию, если есть
-                tracks_obj = data.get('tracks', {})
-                next_url = tracks_obj.get('next')
-                index = len(tracks_data)
-                
-                while next_url:
-                    # Для RapidAPI используем параметр index для пагинации
-                    pagination_url = f"https://{self.rapidapi_host}/playlist/{playlist_id}/tracks"
-                    params = {'index': index, 'limit': 100}
-                    
-                    pagination_response = requests.get(pagination_url, headers=headers, params=params)
-                    
-                    if pagination_response.status_code == 200:
-                        pagination_data = pagination_response.json()
-                        pagination_tracks = pagination_data.get('data', [])
-                        
-                        if not pagination_tracks:
-                            break
-                        
-                        for track_data in pagination_tracks:
-                            if track_data:
-                                tracks.append({
-                                    'id': str(track_data['id']),
-                                    'name': track_data['title'],
-                                    'artist': track_data.get('artist', {}).get('name', 'Unknown'),
-                                    'album': track_data.get('album', {}).get('title', ''),
-                                    'duration': track_data.get('duration', 0),
-                                    'added_at': datetime.utcnow().isoformat()
-                                })
-                        
-                        index += len(pagination_tracks)
-                        next_url = pagination_data.get('next')
-                    else:
-                        break
-                
-                return tracks
-            else:
-                raise Exception(gettext('service.deezer.playlist_tracks_error', error=f"Status code: {response.status_code}"))
-        except Exception as e:
-            raise Exception(gettext('service.deezer.playlist_tracks_error', error=str(e)))
+            url = f'{self.base_url}/playlist/{playlist_id}/tracks'
+            params = {'limit': 100}
+            while url:
+                data = self._fetch_public_json(url, params=params)
+                for track_data in data.get('data') or []:
+                    if not track_data or not track_data.get('id'):
+                        continue
+                    artist = track_data.get('artist') or {}
+                    album = track_data.get('album') or {}
+                    tracks.append({
+                        'id': str(track_data['id']),
+                        'name': track_data.get('title') or '',
+                        'artist': artist.get('name', 'Unknown'),
+                        'album': album.get('title', ''),
+                        'duration': track_data.get('duration', 0),
+                        'added_at': datetime.utcnow().isoformat(),
+                    })
+                url = data.get('next')
+                params = None
+            return tracks
+        except ValueError:
+            raise
+        except Exception as error:
+            raise Exception(gettext(
+                'service.deezer.playlist_tracks_error',
+                error=str(error),
+            ))
     
     def is_token_valid(self, access_token):
         """Проверить валидность токена"""
