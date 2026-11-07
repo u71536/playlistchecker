@@ -113,7 +113,7 @@
     <h1 class="display-6 fw-bold mb-2">
         <i class="fas fa-bell text-primary"></i> {{ _('notification_settings.title') }}
     </h1>
-    <p class="text-muted mb-0">Configure how you want to receive playlist change notifications</p>
+    <p class="text-muted mb-0">{{ _('notification_settings.subtitle') }}</p>
 </div>
 
 <div class="row g-4">
@@ -310,7 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
             pushNotificationStatus.innerHTML = `
                 <div class="status-badge bg-danger-subtle text-danger">
                     <i class="fas fa-times-circle"></i>
-                    <span>Push notifications blocked</span>
+                    <span>{{ _('notification_settings.push_blocked') }}</span>
                 </div>
             `;
             enablePushBtn.style.display = 'none';

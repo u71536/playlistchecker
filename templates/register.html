@@ -127,7 +127,7 @@
                 <i class="fas fa-user-plus"></i>
             </div>
             <h2 class="mb-2 fw-bold">{{ _('base.register') }}</h2>
-            <p class="mb-0 opacity-90">Start protecting your playlists today</p>
+            <p class="mb-0 opacity-90">{{ _('register.subtitle') }}</p>
         </div>
         
         <div class="card-body p-4">
@@ -192,8 +192,8 @@
             
             <div class="text-center">
                 <p class="text-muted mb-0">
-                    Already have an account? 
-                    <a href="{{ url_for('login') }}" class="auth-link">Sign in</a>
+                    {{ _('register.have_account') }}
+                    <a href="{{ url_for('login') }}" class="auth-link">{{ _('action.login') }}</a>
                 </p>
             </div>
             
@@ -202,19 +202,19 @@
                     <div class="feature-icon">
                         <i class="fas fa-check"></i>
                     </div>
-                    <span class="text-muted">Track unlimited playlists</span>
+                    <span class="text-muted">{{ _('register.feature.unlimited') }}</span>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">
                         <i class="fas fa-check"></i>
                     </div>
-                    <span class="text-muted">Real-time notifications</span>
+                    <span class="text-muted">{{ _('register.feature.realtime') }}</span>
                 </div>
                 <div class="feature-item">
                     <div class="feature-icon">
                         <i class="fas fa-check"></i>
                     </div>
-                    <span class="text-muted">Free forever</span>
+                    <span class="text-muted">{{ _('register.feature.free') }}</span>
                 </div>
             </div>
         </div>
@@ -223,7 +223,7 @@
     <div class="text-center mt-4">
         <p class="text-white">
             <i class="fas fa-shield-alt me-2"></i>
-            Your data is secure and encrypted
+            {{ _('auth.data_secure') }}
         </p>
     </div>
 </div>
