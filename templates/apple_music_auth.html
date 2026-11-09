@@ -1,5 +1,7 @@
 {% extends "base.html" %}
 
+{% block robots %}noindex, follow{% endblock %}
+
 {% block title %}{{ _('dashboard.apple_music_auth') }} - PlaylistChecker{% endblock %}
 
 {% block content %}

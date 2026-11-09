@@ -330,10 +330,8 @@ msgstr ""
 #: templates/about.html:27
 msgid "page.about.work"
 msgstr ""
-"Наш сервис работает 24/7, отслеживая ваши плейлисты на популярных "
-"музыкальных платформах и уведомляя вас о любых изменениях в режиме реального"
-" времени. Больше не нужно вручную проверять каждый плейлист — мы сделаем это"
-" за вас!"
+"Проверка запускается раз в день в выбранный час. Если трек пропал из "
+"плейлиста, PlaylistChecker сохраняет это в истории и отправляет уведомление."
 
 #: templates/about.html:38
 msgid "why_check.stats_title"
@@ -476,21 +474,19 @@ msgstr "Как PlaylistChecker решает эти проблемы"
 
 #: templates/about.html:183
 msgid "why_check.solution.constant_monitoring"
-msgstr "Постоянное наблюдение"
+msgstr "Ежедневная проверка"
 
 #: templates/about.html:184
 msgid "why_check.solution.constant_monitoring_desc"
-msgstr "Наш сервис работает 24/7, отслеживая каждое изменение в ваших плейлистах"
+msgstr "Каждый день сервис сверяет сохранённый список треков с каталогом музыкального сервиса."
 
 #: templates/about.html:188
 msgid "why_check.solution.instant_notifications"
-msgstr "Мгновенные уведомления"
+msgstr "Уведомления о пропавших треках"
 
 #: templates/about.html:189
 msgid "why_check.solution.instant_notifications_desc"
-msgstr ""
-"Получайте уведомления о любых изменениях в течение 10 минут после их "
-"возникновения"
+msgstr "После ежедневной проверки приходит сообщение, какие треки исчезли из плейлиста."
 
 #: templates/about.html:193
 msgid "why_check.solution.detailed_analytics"
@@ -761,15 +757,11 @@ msgstr "Ошибка сохранения токена"
 # SEO Meta Tags
 #: templates/base.html:13
 msgid "seo.default_title"
-msgstr "PlaylistChecker - Мониторинг плейлистов Spotify, Apple Music, Yandex Music"
+msgstr "PlaylistChecker — мониторинг плейлистов Spotify, Deezer, Apple Music и Яндекс Музыки"
 
 #: templates/base.html:21
 msgid "seo.default_description"
-msgstr ""
-"PlaylistChecker - профессиональный сервис для мониторинга плейлистов. "
-"Отслеживайте исчезновение песен из ваших плейлистов Spotify, Apple Music и "
-"Yandex Music. Получайте уведомления о любых изменениях в режиме реального "
-"времени."
+msgstr "PlaylistChecker проверяет плейлисты Spotify, Deezer, Apple Music и Яндекс Музыки раз в день и сообщает, если треки исчезли из каталога."
 
 #: templates/base.html:22
 msgid "seo.default_keywords"
@@ -940,9 +932,8 @@ msgstr ""
 #: templates/index.html:5 templates/index.html:133
 msgid "page.home.description"
 msgstr ""
-"профессиональный сервис для мониторинга плейлистов. Отслеживайте "
-"исчезновение песен из ваших плейлистов Spotify, Deezer, Apple Music и Yandex"
-" Music. Получайте уведомления о любых изменениях в режиме реального времени."
+"PlaylistChecker проверяет плейлисты Spotify, Deezer, Apple Music и Яндекс "
+"Музыки раз в день и сообщает, если песни исчезли из каталога."
 
 #: templates/index.html:7
 msgid "page.home.keywords"
@@ -1676,4 +1667,10 @@ msgstr "Проверка запускается каждый день в выб�
 
 msgid "playlists.check_failed"
 msgstr "Проверка не удалась"
+
+msgid "page.home.h1"
+msgstr "Мониторинг изменений в плейлистах Spotify, Deezer, Apple Music и Яндекс Музыки"
+
+msgid "page.about.h1"
+msgstr "Почему песни исчезают из плейлистов"
 

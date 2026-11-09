@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from flask import Response, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 from sqlalchemy import text
@@ -40,7 +38,6 @@ def health():
 def sitemap():
     """Sitemap для поисковых систем с поддержкой двух языков"""
     base_url = request.url_root.rstrip('/')
-    lastmod = datetime.now().strftime('%Y-%m-%d')
     pages = [
         {'path': '', 'changefreq': 'daily', 'priority': '1.0'},
         {'path': 'about', 'changefreq': 'weekly', 'priority': '0.8'},
@@ -53,13 +50,12 @@ def sitemap():
     sitemap_content += 'xmlns:xhtml="http://www.w3.org/1999/xhtml">\n'
     for page in pages:
         url_path = page['path']
-        page_url = f'{base_url}/{url_path}' if url_path else base_url
+        page_url = f'{base_url}/' if not url_path else f'{base_url}/{url_path}'
         sitemap_content += '    <url>\n'
         sitemap_content += f'        <loc>{page_url}</loc>\n'
-        sitemap_content += f'        <lastmod>{lastmod}</lastmod>\n'
         sitemap_content += f'        <changefreq>{page["changefreq"]}</changefreq>\n'
         sitemap_content += f'        <priority>{page["priority"]}</priority>\n'
-        sitemap_content += f'        <xhtml:link rel="alternate" hreflang="ru" href="{page_url}?lang=ru" />\n'
+        sitemap_content += f'        <xhtml:link rel="alternate" hreflang="ru" href="{page_url}" />\n'
         sitemap_content += f'        <xhtml:link rel="alternate" hreflang="en" href="{page_url}?lang=en" />\n'
         sitemap_content += f'        <xhtml:link rel="alternate" hreflang="x-default" href="{page_url}" />\n'
         sitemap_content += '    </url>\n'
@@ -82,6 +78,19 @@ Disallow: /migrations/
 Disallow: /__pycache__/
 Disallow: /services/__pycache__/
 Disallow: /api/
+Disallow: /auth/
+Disallow: /playlists
+Disallow: /add_playlist
+Disallow: /playlist/
+Disallow: /spotify_playlists
+Disallow: /notification
+Disallow: /forgot_password
+Disallow: /reset_password
+Disallow: /verify_email
+Disallow: /set_language
+Disallow: /check_playlists_now
+Disallow: /logout
+Disallow: /clear_session
 
 # Allow important pages
 Allow: /

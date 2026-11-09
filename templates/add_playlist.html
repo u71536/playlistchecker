@@ -1,20 +1,18 @@
 {% extends "base.html" %}
 
+{% block robots %}noindex, follow{% endblock %}
+
 {% block title %}{{ _('add_playlist.add_playlist') }} - PlaylistChecker{% endblock %}
 
 {% block content %}
 <style>
     .form-card {
-        border-radius: 20px;
-        border: none;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
     }
     
     .form-card .card-header {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-        color: white;
-        border-radius: 20px 20px 0 0 !important;
-        padding: 1.75rem;
+        background: var(--surface);
+        color: var(--text);
     }
     
     .form-control, .form-select {
@@ -50,7 +48,7 @@
     }
     
     .accordion-button:not(.collapsed) {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
+        background: var(--primary-soft);
         color: var(--primary-color);
         box-shadow: none;
     }
@@ -79,9 +77,7 @@
     }
     
     .instructions-card {
-        border-radius: 20px;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
     }
     
     .service-icon {
@@ -95,18 +91,18 @@
     }
     
     .alert-info-custom {
-        background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(37, 99, 235, 0.1));
-        border: 2px solid rgba(59, 130, 246, 0.2);
-        border-radius: 12px;
-        padding: 1.25rem;
+        background: var(--primary-soft);
+        border: 1px solid #e0e7ff;
+        border-radius: 8px;
+        padding: 0.9rem 1rem;
     }
     
     code {
-        background: #1e293b;
-        color: #10b981;
-        padding: 0.25rem 0.5rem;
-        border-radius: 6px;
-        font-size: 0.875rem;
+        background: #f1f5f9;
+        color: var(--text);
+        padding: 0.15rem 0.4rem;
+        border-radius: 4px;
+        font-size: 0.875em;
     }
 </style>
 
@@ -191,8 +187,8 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="deezerInstructions">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseDeezer">
-                                <div class="service-icon bg-primary-subtle">
-                                    <i class="fas fa-music text-primary fa-lg"></i>
+                                <div class="service-icon">
+                                    <i class="fab fa-deezer service-deezer"></i>
                                 </div>
                                 <span class="fw-bold">Deezer</span>
                             </button>
@@ -241,8 +237,8 @@
                     <div class="accordion-item">
                         <h2 class="accordion-header" id="yandexMusicInstructions">
                             <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseYandexMusic">
-                                <div class="service-icon bg-danger-subtle">
-                                    <i class="fas fa-music text-danger fa-lg"></i>
+                                <div class="service-icon">
+                                    <i class="fas fa-music service-yandex"></i>
                                 </div>
                                 <span class="fw-bold">Yandex Music</span>
                             </button>
