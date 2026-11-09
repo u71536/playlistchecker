@@ -1,4 +1,6 @@
 from datetime import datetime, timedelta
+from services.notification_service import notification_service
+from services.check_schedule import is_due
 from services.spotify_service import SpotifyService, TokenExpiredError, SpotifyReauthorizationRequired
 from services.deezer_service import DeezerService
 from services.apple_music_service import AppleMusicService
@@ -89,6 +91,30 @@ class PlaylistMonitor:
                 logger.error(f"Ошибка при проверке плейлистов пользователя {user.username}: {str(e)}")
         
         logger.info("Проверка всех плейлистов завершена")
+
+    def check_due_playlists(self, moment=None):
+        """Проверить плейлисты пользователей, у которых сейчас выбранный час."""
+        if self.app:
+            with self.app.app_context():
+                self._check_due_playlists_impl(moment)
+        else:
+            self._check_due_playlists_impl(moment)
+
+    def _check_due_playlists_impl(self, moment):
+        for user in User.query.all():
+            if not is_due(user.check_hour, user.timezone, moment):
+                continue
+            try:
+                self.check_user_playlists(user)
+            except SpotifyReauthorizationRequired:
+                logger.warning(
+                    "Spotify reauthorization required for %s; stored token discarded",
+                    user.username,
+                )
+            except Exception:
+                logger.exception(
+                    "Ошибка при проверке плейлистов пользователя %s", user.username,
+                )
     
     def check_user_playlists(self, user):
         """Проверить плейлисты конкретного пользователя"""
@@ -107,14 +133,16 @@ class PlaylistMonitor:
         for playlist in playlists:
             try:
                 self.check_playlist(playlist)
-            except SpotifyReauthorizationRequired as e:
-                reauthorization_required = e
+            except SpotifyReauthorizationRequired as error:
+                self._record_check_failure(playlist.id, error)
+                reauthorization_required = error
                 logger.warning(
                     f"Spotify refresh token expired for {user.username}; "
                     "will not retry refresh"
                 )
-            except Exception as e:
-                logger.error(f"Ошибка при проверке плейлиста {playlist.name}: {str(e)}")
+            except Exception as error:
+                logger.error(f"Ошибка при проверке плейлиста {playlist.name}: {str(error)}")
+                self._record_check_failure(playlist.id, error)
         if reauthorization_required:
             raise reauthorization_required
     
@@ -141,28 +169,8 @@ class PlaylistMonitor:
                 # Получаем треки плейлиста Deezer через RapidAPI
                 playlist_url = f"https://www.deezer.com/playlist/{playlist.service_playlist_id}"
                 current_tracks = service.get_public_playlist_tracks(playlist_url)
-                current_track_ids = {track['id'] for track in current_tracks}
-                
-                # Получаем треки из базы данных
-                db_tracks = Track.query.filter_by(playlist_id=playlist.id, is_removed=False).all()
-                db_track_ids = {track.service_track_id for track in db_tracks}
-                
-                # Находим удаленные треки
-                removed_track_ids = db_track_ids - current_track_ids
-                if removed_track_ids:
-                    self._handle_removed_tracks(playlist, removed_track_ids)
-                
-                # Обновляем время последней проверки
-                playlist.last_checked = datetime.utcnow()
-                try:
-                    db.session.commit()
-                    logger.info(f"Время последней проверки плейлиста Deezer {playlist.name} обновлено")
-                except Exception as e:
-                    logger.error(f"Ошибка при обновлении времени проверки плейлиста Deezer {playlist.name}: {str(e)}")
-                    db.session.rollback()
-                    raise
-                
-                logger.info(f"Плейлист Deezer {playlist.name} проверен. Удалено: {len(removed_track_ids)}")
+                self._sync_playlist_tracks(playlist, current_tracks)
+                logger.info("Плейлист Deezer %s проверен", playlist.name)
                 
             except Exception as e:
                 logger.error(f"Ошибка при проверке плейлиста Deezer {playlist.name}: {str(e)}")
@@ -171,40 +179,14 @@ class PlaylistMonitor:
             try:
                 # Проверяем, есть ли User Token (для приватных плейлистов)
                 user_token = self._get_user_token(playlist.user, 'apple_music')
-                
-                if user_token:
-                    # Используем User Token для приватных плейлистов
-                    current_tracks = service.get_playlist_tracks(
-                        playlist.service_playlist_id,
-                        user_token=user_token
-                    )
-                else:
-                    # Используем публичный доступ
-                    playlist_url = f"https://music.apple.com/playlist/pl.{playlist.service_playlist_id}"
-                    current_tracks = service.get_public_playlist_tracks(playlist_url)
-                
-                current_track_ids = {track['id'] for track in current_tracks}
-                
-                # Получаем треки из базы данных
-                db_tracks = Track.query.filter_by(playlist_id=playlist.id, is_removed=False).all()
-                db_track_ids = {track.service_track_id for track in db_tracks}
-                
-                # Находим удаленные треки
-                removed_track_ids = db_track_ids - current_track_ids
-                if removed_track_ids:
-                    self._handle_removed_tracks(playlist, removed_track_ids)
-                
-                # Обновляем время последней проверки
-                playlist.last_checked = datetime.utcnow()
-                try:
-                    db.session.commit()
-                    logger.info(f"Время последней проверки плейлиста Apple Music {playlist.name} обновлено")
-                except Exception as e:
-                    logger.error(f"Ошибка при обновлении времени проверки плейлиста Apple Music {playlist.name}: {str(e)}")
-                    db.session.rollback()
-                    raise
-                
-                logger.info(f"Плейлист Apple Music {playlist.name} проверен. Удалено: {len(removed_track_ids)}")
+                storefront, playlist_id = service.split_storage_id(playlist.service_playlist_id)
+                current_tracks = service.get_playlist_tracks(
+                    playlist_id,
+                    user_token=user_token,
+                    storefront=storefront,
+                )
+                self._sync_playlist_tracks(playlist, current_tracks)
+                logger.info("Плейлист Apple Music %s проверен", playlist.name)
                 
             except Exception as e:
                 logger.error(f"Ошибка при проверке плейлиста Apple Music {playlist.name}: {str(e)}")
@@ -214,28 +196,8 @@ class PlaylistMonitor:
                 current_tracks = service.get_playlist_tracks_by_id(
                     playlist.service_playlist_id
                 )
-                current_track_ids = {track['id'] for track in current_tracks}
-                
-                # Получаем треки из базы данных
-                db_tracks = Track.query.filter_by(playlist_id=playlist.id, is_removed=False).all()
-                db_track_ids = {track.service_track_id for track in db_tracks}
-                
-                # Находим удаленные треки
-                removed_track_ids = db_track_ids - current_track_ids
-                if removed_track_ids:
-                    self._handle_removed_tracks(playlist, removed_track_ids)
-                
-                # Обновляем время последней проверки
-                playlist.last_checked = datetime.utcnow()
-                try:
-                    db.session.commit()
-                    logger.info(f"Время последней проверки публичного плейлиста {playlist.name} обновлено")
-                except Exception as e:
-                    logger.error(f"Ошибка при обновлении времени проверки публичного плейлиста {playlist.name}: {str(e)}")
-                    db.session.rollback()
-                    raise
-                
-                logger.info(f"Публичный плейлист {playlist.name} проверен. Удалено: {len(removed_track_ids)}")
+                self._sync_playlist_tracks(playlist, current_tracks)
+                logger.info("Публичный плейлист %s проверен", playlist.name)
                 
             except Exception as e:
                 logger.error(f"Ошибка при проверке публичного плейлиста {playlist.name}: {str(e)}")
@@ -245,6 +207,7 @@ class PlaylistMonitor:
             access_token = self._get_user_token(playlist.user, playlist.service)
             if not access_token:
                 logger.warning(f"Нет токена доступа для {playlist.service} у пользователя {playlist.user.username}")
+                self._record_check_failure(playlist.id, "Нет токена доступа")
                 return
             
             # Получаем refresh_token для Spotify
@@ -260,28 +223,8 @@ class PlaylistMonitor:
                     current_tracks = service.get_playlist_tracks(access_token, playlist.service_playlist_id, refresh_token)
                 else:
                     current_tracks = service.get_playlist_tracks(access_token, playlist.service_playlist_id)
-                current_track_ids = {track['id'] for track in current_tracks}
-                
-                # Получаем треки из базы данных
-                db_tracks = Track.query.filter_by(playlist_id=playlist.id, is_removed=False).all()
-                db_track_ids = {track.service_track_id for track in db_tracks}
-                
-                # Находим удаленные треки
-                removed_track_ids = db_track_ids - current_track_ids
-                if removed_track_ids:
-                    self._handle_removed_tracks(playlist, removed_track_ids)
-                
-                # Обновляем время последней проверки
-                playlist.last_checked = datetime.utcnow()
-                try:
-                    db.session.commit()
-                    logger.info(f"Время последней проверки плейлиста {playlist.name} обновлено")
-                except Exception as e:
-                    logger.error(f"Ошибка при обновлении времени проверки плейлиста {playlist.name}: {str(e)}")
-                    db.session.rollback()
-                    raise
-                
-                logger.info(f"Плейлист {playlist.name} проверен. Удалено: {len(removed_track_ids)}")
+                self._sync_playlist_tracks(playlist, current_tracks)
+                logger.info("Плейлист %s проверен", playlist.name)
                 
             except SpotifyReauthorizationRequired:
                 self._discard_spotify_token(playlist.user)
@@ -300,25 +243,8 @@ class PlaylistMonitor:
                         
                         try:
                             current_tracks = service.get_playlist_tracks(e.new_token_info['access_token'], playlist.service_playlist_id)
-                            current_track_ids = {track['id'] for track in current_tracks}
-                            
-                            db_tracks = Track.query.filter_by(playlist_id=playlist.id, is_removed=False).all()
-                            db_track_ids = {track.service_track_id for track in db_tracks}
-                            
-                            removed_track_ids = db_track_ids - current_track_ids
-                            if removed_track_ids:
-                                self._handle_removed_tracks(playlist, removed_track_ids)
-                            
-                            playlist.last_checked = datetime.utcnow()
-                            try:
-                                db.session.commit()
-                                logger.info(f"Время последней проверки плейлиста {playlist.name} обновлено после обновления токена")
-                            except Exception as commit_error:
-                                logger.error(f"Ошибка при обновлении времени проверки плейлиста {playlist.name} после обновления токена: {str(commit_error)}")
-                                db.session.rollback()
-                                raise
-                            
-                            logger.info(f"Плейлист {playlist.name} проверен после обновления токена. Удалено: {len(removed_track_ids)}")
+                            self._sync_playlist_tracks(playlist, current_tracks)
+                            logger.info("Плейлист %s проверен после обновления токена", playlist.name)
                             return
                         except SpotifyReauthorizationRequired:
                             self._discard_spotify_token(playlist.user)
@@ -431,116 +357,129 @@ class PlaylistMonitor:
         
         return None
     
-    def _handle_removed_tracks(self, playlist, removed_track_ids):
-        """Обработать удаленные треки"""
+    def _record_check_failure(self, playlist_id, error):
+        detail = ' '.join(str(error).split())[:240]
+        try:
+            db.session.rollback()
+        except Exception:
+            logger.exception('Не удалось откатить сессию после ошибки проверки')
+        playlist = db.session.get(Playlist, playlist_id)
+        if playlist is None:
+            return
+        playlist.last_check_error = detail or 'Ошибка проверки'
+        playlist.last_check_failed_at = datetime.utcnow()
+        db.session.commit()
+
+    def _sync_playlist_tracks(self, playlist, current_tracks):
         if self.app:
             with self.app.app_context():
-                self._handle_removed_tracks_impl(playlist, removed_track_ids)
+                self._sync_playlist_tracks_impl(playlist, current_tracks)
         else:
-            self._handle_removed_tracks_impl(playlist, removed_track_ids)
-    
-    def _handle_removed_tracks_impl(self, playlist, removed_track_ids):
-        """Внутренняя реализация обработки удаленных треков.
-        
-        Сначала обрабатывает все треки (помечает как удалённые, создаёт записи
-        уведомлений в БД), затем отправляет ОДНО сводное уведомление по внешним
-        каналам (email, Telegram, push), чтобы избежать спама.
-        """
-        try:
-            tracks_for_notification = []
-            
-            for track_id in removed_track_ids:
-                track = Track.query.filter_by(
-                    playlist_id=playlist.id,
-                    service_track_id=track_id,
-                    is_removed=False
-                ).first()
-                
-                if track:
-                    logger.info(f"Найден трек для удаления: {track.name} (ID: {track.id})")
-                    
-                    # Проверяем, не было ли уже создано непрочитанное уведомление для этого трека
-                    existing_notification = Notification.query.filter_by(
-                        user_id=playlist.user_id,
-                        playlist_id=playlist.id,
-                        track_id=track.id
-                    ).filter(Notification.is_read.is_(False)).first()
-                    
-                    # Если трек уже был удален ранее (is_removed=True), пропускаем
-                    if track.is_removed:
-                        logger.info(f"Трек {track.name} уже был отмечен как удаленный ранее, пропускаем")
-                        continue
-                    
-                    # Если уже есть непрочитанное уведомление для этого трека, пропускаем
-                    if existing_notification:
-                        logger.info(f"Непрочитанное уведомление для трека {track.name} уже существует, пропускаем создание нового")
-                        continue
-                    
-                    # Отмечаем трек как удаленный
-                    track.is_removed = True
-                    track.removed_at = datetime.utcnow()
-                    
-                    # Создаем уведомление в БД (для веб-интерфейса)
-                    message = f"Трек '{track.name}' от {track.artist} был удален из плейлиста '{playlist.name}'"
-                    notification = Notification(
-                        user_id=playlist.user_id,
-                        playlist_id=playlist.id,
-                        track_id=track.id,
-                        message=message
-                    )
-                    db.session.add(notification)
-                    
-                    # Собираем данные для сводного уведомления
-                    tracks_for_notification.append({
-                        'track_service_id': track.service_track_id,
-                        'track_name': track.name,
-                        'artist_name': track.artist,
-                        'message': message
-                    })
-                    
-                    logger.info(f"Трек {track.name} отмечен как удаленный из плейлиста {playlist.name}")
-                else:
-                    logger.warning(f"Трек с ID {track_id} не найден в плейлисте {playlist.name}")
-            
-            owner_id = playlist.user_id
-            # Сохраняем все изменения в БД одним коммитом
-            try:
-                db.session.commit()
-                logger.info(f"Все изменения для {len(tracks_for_notification)} треков успешно сохранены в БД")
-            except Exception as commit_error:
-                logger.error(f"Ошибка при сохранении треков: {str(commit_error)}")
-                db.session.rollback()
-                raise
-            
-            # Отправляем ОДНО сводное уведомление по внешним каналам
-            if tracks_for_notification:
-                try:
-                    from services.notification_service import notification_service
+            self._sync_playlist_tracks_impl(playlist, current_tracks)
 
-                    owner = db.session.get(User, owner_id)
-                    if owner is None:
-                        logger.warning(
-                            f"Пользователь {owner_id} не найден, уведомление не отправлено"
-                        )
-                        return
-                    notification_service.send_batch_notifications(
-                        user=owner,
-                        tracks_data=tracks_for_notification,
-                        playlist_name=playlist.name,
-                        playlist_id=playlist.id
-                    )
-                    logger.info(
-                        f"Сводное уведомление отправлено для {owner.username}: "
-                        f"{len(tracks_for_notification)} треков из плейлиста {playlist.name}"
-                    )
-                except Exception as notification_error:
-                    logger.error(f"Ошибка отправки сводного уведомления: {str(notification_error)}")
-                    
-        except Exception as e:
-            logger.error(f"Ошибка в _handle_removed_tracks_impl: {str(e)}")
-            db.session.rollback()
-            raise
-    
+    def _sync_playlist_tracks_impl(self, playlist, current_tracks):
+        current_by_id = {}
+        for track in current_tracks:
+            track_id = track.get('id')
+            if track_id is None or track_id == '':
+                continue
+            current_by_id[str(track_id)] = track
+
+        stored = Track.query.filter_by(playlist_id=playlist.id).all()
+        by_service_id = {}
+        for track in stored:
+            by_service_id.setdefault(str(track.service_track_id), track)
+
+        removed_payloads = []
+        added_payloads = []
+        for service_id, track_data in current_by_id.items():
+            existing = by_service_id.get(service_id)
+            if existing is None:
+                existing = Track(
+                    playlist_id=playlist.id,
+                    service_track_id=service_id,
+                    name=track_data.get('name') or '',
+                    artist=track_data.get('artist') or '',
+                    album=track_data.get('album') or '',
+                    duration=track_data.get('duration') or 0,
+                    added_at=datetime.utcnow(),
+                    is_removed=False,
+                )
+                db.session.add(existing)
+                db.session.flush()
+                added_payloads.append(self._change_payload(existing, playlist, added=True))
+                continue
+            if existing.is_removed:
+                existing.is_removed = False
+                existing.removed_at = None
+                existing.name = track_data.get('name') or existing.name
+                existing.artist = track_data.get('artist') or existing.artist
+                existing.album = track_data.get('album') or existing.album
+                if track_data.get('duration'):
+                    existing.duration = track_data.get('duration')
+                existing.added_at = datetime.utcnow()
+                added_payloads.append(self._change_payload(existing, playlist, added=True))
+
+        for service_id, existing in by_service_id.items():
+            if existing.is_removed or service_id in current_by_id:
+                continue
+            existing.is_removed = True
+            existing.removed_at = datetime.utcnow()
+            removed_payloads.append(self._change_payload(existing, playlist, added=False))
+
+        for payload in removed_payloads + added_payloads:
+            db.session.add(Notification(
+                user_id=playlist.user_id,
+                playlist_id=playlist.id,
+                track_id=payload['track_db_id'],
+                message=payload['message'],
+            ))
+
+        playlist.last_checked = datetime.utcnow()
+        playlist.last_check_error = None
+        playlist.last_check_failed_at = None
+        owner_id = playlist.user_id
+        playlist_name = playlist.name
+        playlist_id = playlist.id
+        db.session.commit()
+
+        owner = db.session.get(User, owner_id)
+        if owner is None:
+            return
+        self._send_change_batch(owner, removed_payloads, playlist_name, playlist_id, 'track_removed')
+        self._send_change_batch(owner, added_payloads, playlist_name, playlist_id, 'track_added')
+
+    def _change_payload(self, track, playlist, added):
+        if added:
+            message = (
+                f"Трек '{track.name}' от {track.artist} добавлен в плейлист '{playlist.name}'"
+            )
+        else:
+            message = (
+                f"Трек '{track.name}' от {track.artist} был удален из плейлиста '{playlist.name}'"
+            )
+        return {
+            'track_db_id': track.id,
+            'track_service_id': track.service_track_id,
+            'track_name': track.name,
+            'artist_name': track.artist,
+            'message': message,
+        }
+
+    def _send_change_batch(self, owner, payloads, playlist_name, playlist_id, notification_type):
+        if not payloads:
+            return
+        try:
+            notification_service.send_batch_notifications(
+                user=owner,
+                tracks_data=payloads,
+                playlist_name=playlist_name,
+                playlist_id=playlist_id,
+                notification_type=notification_type,
+            )
+        except Exception:
+            logger.exception('Ошибка отправки сводного уведомления')
+
     def add_playlist(self, user, service, playlist_url):
         """Добавить новый плейлист для мониторинга"""
         # Убеждаемся, что работаем в контексте приложения

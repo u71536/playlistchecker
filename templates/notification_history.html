@@ -1,14 +1,13 @@
 {% extends "base.html" %}
 
+{% block robots %}noindex, follow{% endblock %}
+
 {% block title %}{{ _('base.notification_history') }}{% endblock %}
 
 {% block content %}
 <style>
     .history-header {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
-        border-radius: 20px;
-        padding: 2rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
     
     .history-table {
@@ -18,14 +17,14 @@
     }
     
     .table thead th {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.08), rgba(139, 92, 246, 0.08));
-        color: #1e293b;
+        background: #f8fafc;
+        color: var(--text-muted);
         font-weight: 600;
         text-transform: uppercase;
         font-size: 0.75rem;
-        letter-spacing: 0.5px;
-        padding: 1.25rem 1rem;
-        border: none;
+        letter-spacing: 0.04em;
+        padding: 0.85rem 1rem;
+        border-bottom: 1px solid var(--line);
     }
     
     .table tbody tr {
@@ -34,8 +33,7 @@
     }
     
     .table tbody tr:hover {
-        background: rgba(99, 102, 241, 0.02);
-        transform: scale(1.01);
+        background: #f8fafc;
     }
     
     .table tbody td {
@@ -83,15 +81,15 @@
     }
     
     .page-link:hover {
-        background: var(--primary-color);
-        color: white;
-        border-color: var(--primary-color);
-        transform: translateY(-2px);
+        background: var(--primary-soft);
+        color: var(--primary-color);
+        border-color: var(--line);
     }
     
     .page-item.active .page-link {
-        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        background: var(--primary-color);
         border-color: var(--primary-color);
+        color: #fff;
     }
     
     .page-item.disabled .page-link {
@@ -100,27 +98,26 @@
     }
     
     .info-alert {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
+        background: var(--primary-soft);
         border-radius: 12px;
-        padding: 1rem 1.5rem;
-        border-left: 4px solid var(--primary-color);
+        padding: 1rem 1.15rem;
+        border: 1px solid #e0e7ff;
     }
     
     .empty-state-icon {
-        width: 120px;
-        height: 120px;
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
-        border-radius: 30px;
+        width: 3.5rem;
+        height: 3.5rem;
+        background: var(--primary-soft);
+        border-radius: 12px;
         display: flex;
         align-items: center;
         justify-content: center;
-        margin: 0 auto 2rem;
+        margin: 0 auto 1rem;
     }
     
     .empty-state-icon i {
-        font-size: 4rem;
+        font-size: 1.4rem;
         color: var(--primary-color);
-        opacity: 0.6;
     }
     
     .channel-badge {
@@ -136,18 +133,12 @@
     }
 </style>
 
-<div class="history-header fade-in-up">
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
-        <div>
-            <h1 class="display-6 fw-bold mb-2">
-                <i class="fas fa-history text-primary"></i> {{ _('base.notification_history') }}
-            </h1>
-            <p class="text-muted mb-0">{{ _('notification_history.subtitle') }}</p>
-        </div>
-        <a href="{{ url_for('notification_settings') }}" class="btn btn-outline-primary">
-            <i class="fas fa-cog me-2"></i>{{ _('base.notification_settings') }}
-        </a>
+<div class="page-header d-flex justify-content-between align-items-center flex-wrap gap-3">
+    <div>
+        <h1>{{ _('base.notification_history') }}</h1>
+        <p class="text-secondary mb-0">{{ _('notification_history.subtitle') }}</p>
     </div>
+    <a href="{{ url_for('notification_settings') }}" class="btn btn-outline-primary">{{ _('base.notification_settings') }}</a>
 </div>
 
 {% if history_pagination.items %}

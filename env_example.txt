@@ -39,7 +39,8 @@ TELEGRAM_BOT_USERNAME=your_bot_username
 # Без него webhook отклоняет все запросы.
 TELEGRAM_WEBHOOK_SECRET=change-me
 
-# Время ежедневной проверки для scheduler_runner.py (локальное время процесса)
+# CHECK_HOUR — час по умолчанию для новых пользователей и для уже существующих при миграции.
+# Планировщик запускается каждый час в CHECK_MINUTE и проверяет тех, у кого сейчас этот час.
 CHECK_HOUR=9
 CHECK_MINUTE=0
 

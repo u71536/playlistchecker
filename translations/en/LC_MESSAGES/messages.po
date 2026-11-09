@@ -326,9 +326,9 @@ msgstr ""
 #: templates/about.html:27
 msgid "page.about.work"
 msgstr ""
-"Our service works 24/7, tracking your playlists on popular music platforms "
-"and notifying you of any changes in real time. No more need to manually "
-"check each playlist - we'll do it for you!"
+"The check runs once a day at the hour you choose. When a track disappears "
+"from a playlist, PlaylistChecker keeps it in the history and sends a "
+"notification."
 
 #: templates/about.html:38
 msgid "why_check.stats_title"
@@ -468,19 +468,19 @@ msgstr "How PlaylistChecker Solves These Problems"
 
 #: templates/about.html:183
 msgid "why_check.solution.constant_monitoring"
-msgstr "Constant Monitoring"
+msgstr "Daily check"
 
 #: templates/about.html:184
 msgid "why_check.solution.constant_monitoring_desc"
-msgstr "Our service works 24/7, tracking every change in your playlists"
+msgstr "Every day the service compares the saved track list with the music catalog."
 
 #: templates/about.html:188
 msgid "why_check.solution.instant_notifications"
-msgstr "Instant Notifications"
+msgstr "Alerts for removed tracks"
 
 #: templates/about.html:189
 msgid "why_check.solution.instant_notifications_desc"
-msgstr "Get notifications about any changes within 10 minutes of their occurrence"
+msgstr "After the daily check you get a message listing the tracks that disappeared from the playlist."
 
 #: templates/about.html:193
 msgid "why_check.solution.detailed_analytics"
@@ -747,14 +747,11 @@ msgstr "Token save error"
 # SEO Meta Tags
 #: templates/base.html:13
 msgid "seo.default_title"
-msgstr "PlaylistChecker - Monitor Spotify, Apple Music, Yandex Music Playlists"
+msgstr "PlaylistChecker — monitor playlists on Spotify, Deezer, Apple Music, and Yandex Music"
 
 #: templates/base.html:21
 msgid "seo.default_description"
-msgstr ""
-"PlaylistChecker - professional service for monitoring playlists. Track songs"
-" disappearing from your Spotify, Apple Music, and Yandex Music playlists. "
-"Receive notifications about any changes in real time."
+msgstr "PlaylistChecker checks Spotify, Deezer, Apple Music, and Yandex Music playlists once a day and tells you when tracks disappear from the catalog."
 
 #: templates/base.html:22
 msgid "seo.default_keywords"
@@ -922,9 +919,8 @@ msgstr "Monitoring playlists on Spotify, Deezer, Apple Music, Yandex Music"
 #: templates/index.html:5 templates/index.html:133
 msgid "page.home.description"
 msgstr ""
-"A service for monitoring playlists. Track songs disappearing from your "
-"Spotify, Deezer, Apple Music, and Yandex Music playlists. Get notified about"
-" any changes in real time."
+"PlaylistChecker checks Spotify, Deezer, Apple Music, and Yandex Music "
+"playlists once a day and tells you when songs disappear from the catalog."
 
 #: templates/index.html:7
 msgid "page.home.keywords"
@@ -1039,7 +1035,7 @@ msgstr "Your data is protected by modern encryption and authentication methods"
 
 #: templates/index.html:308
 msgid "page.home.problem.title"
-msgstr "Songs that disappear"
+msgstr "Why songs disappear from playlists"
 
 #: templates/index.html:310
 msgid "page.home.problem.description"
@@ -2362,4 +2358,22 @@ msgstr "Add Playlist Manually"
 
 #~ msgid "flash.yandex_music_auth_coming_soon"
 #~ msgstr "Yandex Music authorization will be implemented soon"
+
+msgid "notification_settings.check_hour"
+msgstr "Check hour"
+
+msgid "notification_settings.timezone"
+msgstr "Time zone"
+
+msgid "notification_settings.check_schedule_help"
+msgstr "Playlists are checked once a day at the hour you choose, in your time zone."
+
+msgid "playlists.check_failed"
+msgstr "Check failed"
+
+msgid "page.home.h1"
+msgstr "Track playlist changes on Spotify, Deezer, Apple Music, and Yandex Music"
+
+msgid "page.about.h1"
+msgstr "Why songs disappear from playlists"
 

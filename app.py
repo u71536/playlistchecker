@@ -34,7 +34,53 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['LANGUAGES'] = {
     'ru': 'Русский',
     'en': 'English',
+    'uk': 'Українська',
+    'es': 'Español',
+    'pt': 'Português',
+    'de': 'Deutsch',
+    'fr': 'Français',
+    'it': 'Italiano',
+    'pl': 'Polski',
+    'tr': 'Türkçe',
+    'zh': '中文',
+    'ja': '日本語',
+    'ko': '한국어',
+    'ar': 'العربية',
 }
+app.config['HREFLANG'] = {
+    'ru': 'ru',
+    'en': 'en',
+    'uk': 'uk',
+    'es': 'es',
+    'pt': 'pt',
+    'de': 'de',
+    'fr': 'fr',
+    'it': 'it',
+    'pl': 'pl',
+    'tr': 'tr',
+    'zh': 'zh-Hans',
+    'ja': 'ja',
+    'ko': 'ko',
+    'ar': 'ar',
+}
+app.config['OG_LOCALES'] = {
+    'ru': 'ru_RU',
+    'en': 'en_US',
+    'uk': 'uk_UA',
+    'es': 'es_ES',
+    'pt': 'pt_BR',
+    'de': 'de_DE',
+    'fr': 'fr_FR',
+    'it': 'it_IT',
+    'pl': 'pl_PL',
+    'tr': 'tr_TR',
+    'zh': 'zh_CN',
+    'ja': 'ja_JP',
+    'ko': 'ko_KR',
+    'ar': 'ar_AR',
+}
+app.config['HTML_LANG'] = {'zh': 'zh-Hans'}
+app.config['RTL_LANGUAGES'] = ('ar',)
 app.config['BABEL_TRANSLATION_DIRECTORIES'] = 'translations'
 app.config['BABEL_DEFAULT_LOCALE'] = 'ru'
 app.config['TEMPLATES_AUTO_RELOAD'] = True
@@ -48,11 +94,19 @@ limiter.init_app(app)
 
 
 def get_locale():
-    if 'language' in session:
-        return session['language']
-    if current_user.is_authenticated and hasattr(current_user, 'language'):
+    languages = app.config['LANGUAGES']
+    requested = request.args.get('lang')
+    if requested in languages:
+        session['language'] = requested
+        return requested
+    selected = session.get('language')
+    if selected in languages:
+        return selected
+    if current_user.is_authenticated and getattr(current_user, 'language', None) in languages:
         return current_user.language
-    return request.accept_languages.best_match(app.config['LANGUAGES'].keys()) or 'ru'
+    # Адрес без параметра языка всегда русский, чтобы / и /?lang=en не меняли
+    # текст в зависимости от Accept-Language поискового робота.
+    return 'ru'
 
 
 babel = Babel(app, locale_selector=get_locale)
@@ -62,6 +116,10 @@ babel = Babel(app, locale_selector=get_locale)
 def inject_conf_vars():
     return {
         'LANGUAGES': app.config['LANGUAGES'],
+        'HREFLANG': app.config['HREFLANG'],
+        'OG_LOCALES': app.config['OG_LOCALES'],
+        'HTML_LANG': app.config['HTML_LANG'],
+        'RTL_LANGUAGES': app.config['RTL_LANGUAGES'],
         'CURRENT_LANGUAGE': session.get('language', get_locale()),
         '_': gettext,
         '_l': lazy_gettext,

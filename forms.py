@@ -3,6 +3,8 @@ from flask_wtf import FlaskForm
 from wtforms import BooleanField, PasswordField, SelectField, StringField, SubmitField
 from wtforms.validators import DataRequired, Email, Length
 
+from services.check_schedule import TIMEZONES
+
 
 class LoginForm(FlaskForm):
     username = StringField(lazy_gettext('login.username'), validators=[DataRequired()])
@@ -36,6 +38,17 @@ class NotificationSettingsForm(FlaskForm):
     email_notifications_enabled = BooleanField(lazy_gettext('notification_settings.email_notifications'))
     telegram_notifications_enabled = BooleanField(lazy_gettext('notification_settings.telegram_notifications'))
     browser_notifications_enabled = BooleanField(lazy_gettext('notification_settings.browser_notifications'))
+    check_hour = SelectField(
+        lazy_gettext('notification_settings.check_hour'),
+        choices=[(hour, f'{hour:02d}:00') for hour in range(24)],
+        coerce=int,
+        validators=[DataRequired()],
+    )
+    timezone = SelectField(
+        lazy_gettext('notification_settings.timezone'),
+        choices=list(TIMEZONES),
+        validators=[DataRequired()],
+    )
     submit = SubmitField(lazy_gettext('form.save_settings'))
 
 

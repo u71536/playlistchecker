@@ -145,10 +145,17 @@ class SpotifyService:
         while True:
             try:
                 results = sp.playlist_tracks(playlist_id, offset=offset, limit=limit)
-                if not results['items']:
+                page = results['items'] or []
+                total = results.get('total') or 0
+                if not page:
+                    if offset < total:
+                        raise Exception(gettext(
+                            'service.spotify.playlist_tracks_error',
+                            error='incomplete',
+                        ))
                     break
                 
-                for item in results['items']:
+                for item in page:
                     if item['track']:  # Проверяем, что трек не удален
                         track = item['track']
                         tracks.append({

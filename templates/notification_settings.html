@@ -1,20 +1,17 @@
 {% extends "base.html" %}
 
+{% block robots %}noindex, follow{% endblock %}
+
 {% block title %}{{ _('notification_settings.title') }} - PlaylistChecker{% endblock %}
 
 {% block content %}
 <style>
     .settings-header {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.1), rgba(139, 92, 246, 0.1));
-        border-radius: 20px;
-        padding: 2rem;
-        margin-bottom: 2rem;
+        margin-bottom: 1.5rem;
     }
     
     .settings-card {
-        border-radius: 20px;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        border-radius: 12px;
         overflow: hidden;
     }
     
@@ -74,10 +71,10 @@
     }
     
     .info-card {
-        background: linear-gradient(135deg, rgba(99, 102, 241, 0.05), rgba(139, 92, 246, 0.05));
-        border-radius: 16px;
-        padding: 1.5rem;
-        border: 2px solid rgba(99, 102, 241, 0.1);
+        background: var(--primary-soft);
+        border-radius: 12px;
+        padding: 1.15rem;
+        border: 1px solid #e0e7ff;
     }
     
     .info-list {
@@ -109,16 +106,14 @@
     }
 </style>
 
-<div class="settings-header fade-in-up">
-    <h1 class="display-6 fw-bold mb-2">
-        <i class="fas fa-bell text-primary"></i> {{ _('notification_settings.title') }}
-    </h1>
-    <p class="text-muted mb-0">{{ _('notification_settings.subtitle') }}</p>
+<div class="page-header">
+    <h1>{{ _('notification_settings.title') }}</h1>
+    <p class="text-secondary mb-0">{{ _('notification_settings.subtitle') }}</p>
 </div>
 
 <div class="row g-4">
     <div class="col-lg-8">
-        <div class="settings-card">
+        <div class="card settings-card">
             <div class="card-header bg-white border-bottom-0 p-4">
                 <h5 class="mb-0 fw-bold">
                     <i class="fas fa-cog text-primary me-2"></i>{{ _('notification_settings.manage_notifications') }}
@@ -213,6 +208,26 @@
                         </div>
                     </div>
                     
+                    <div class="notification-section">
+                        <div class="d-flex align-items-start gap-3">
+                            <div class="section-icon bg-primary-subtle">
+                                <i class="fas fa-clock text-primary"></i>
+                            </div>
+                            <div class="flex-grow-1">
+                                <h6 class="fw-bold mb-2">{{ _('notification_settings.check_hour') }}</h6>
+                                <p class="text-muted mb-3">{{ _('notification_settings.check_schedule_help') }}</p>
+                                <div class="row g-3">
+                                    <div class="col-sm-4">
+                                        {{ form.check_hour(class="form-select") }}
+                                    </div>
+                                    <div class="col-sm-8">
+                                        {{ form.timezone(class="form-select") }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
                     <div class="p-4">
                         <div class="d-grid">
                             {{ form.submit(class="btn btn-primary btn-lg") }}
@@ -254,7 +269,7 @@
             <h6 class="fw-bold mb-2">
                 <i class="fas fa-clock text-primary me-2"></i>{{ _('notification_settings.check_frequency') }}
             </h6>
-            <p class="text-muted mb-0">{{ _('notification_settings.every_10_minutes') }}</p>
+            <p class="text-muted mb-0">{{ _('notification_settings.check_schedule_help') }}</p>
         </div>
         
         <div class="info-card">

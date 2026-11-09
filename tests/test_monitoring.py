@@ -148,6 +148,127 @@ class MonitoringTests(unittest.TestCase):
         note = Notification.query.filter_by(track_id=gone.id).one()
         self.assertIn('Song B', note.message)
 
+    def test_added_and_returned_tracks_are_tracked(self):
+        user = self._make_user()
+        self._attach_spotify(user)
+        playlist = self._playlist(user, 'pl1', 'Night Drive')
+        db.session.add(Track(
+            playlist_id=playlist.id,
+            service_track_id='t1',
+            name='Song A',
+            artist='Artist',
+        ))
+        returned = Track(
+            playlist_id=playlist.id,
+            service_track_id='t2',
+            name='Song B',
+            artist='Artist',
+            is_removed=True,
+        )
+        db.session.add(returned)
+        db.session.commit()
+        self.spotify.get_playlist_tracks = lambda *args, **kwargs: [
+            {'id': 't1', 'name': 'Song A', 'artist': 'Artist', 'album': '', 'duration': 1},
+            {'id': 't2', 'name': 'Song B', 'artist': 'Artist', 'album': '', 'duration': 1},
+            {'id': 't3', 'name': 'Song C', 'artist': 'Artist', 'album': '', 'duration': 1},
+        ]
+        monitor.check_playlist(playlist)
+        db.session.expire_all()
+        self.assertFalse(Track.query.filter_by(service_track_id='t2').one().is_removed)
+        added = Track.query.filter_by(service_track_id='t3').one()
+        self.assertFalse(added.is_removed)
+        messages = [note.message for note in Notification.query.all()]
+        self.assertTrue(any('Song C' in message and 'добавлен' in message for message in messages))
+        self.assertTrue(any('Song B' in message and 'добавлен' in message for message in messages))
+
+    def test_failed_check_keeps_tracks_and_stores_the_error(self):
+        user = self._make_user()
+        self._attach_spotify(user)
+        playlist = self._playlist(user, 'pl1', 'Night Drive')
+        db.session.add(Track(
+            playlist_id=playlist.id,
+            service_track_id='t1',
+            name='Song A',
+            artist='Artist',
+        ))
+        db.session.commit()
+
+        def explode(*args, **kwargs):
+            raise RuntimeError('playlist api down')
+
+        self.spotify.get_playlist_tracks = explode
+        monitor.check_user_playlists(user)
+        db.session.expire_all()
+        stored = Track.query.filter_by(service_track_id='t1').one()
+        self.assertFalse(stored.is_removed)
+        failed = db.session.get(Playlist, playlist.id)
+        self.assertIn('playlist api down', failed.last_check_error)
+        self.assertIsNotNone(failed.last_check_failed_at)
+
+    def test_check_runs_only_for_users_whose_hour_matches(self):
+        from datetime import timezone as dt_timezone
+
+        morning = self._make_user('morning', 'morning@example.com')
+        later = self._make_user('later', 'later@example.com')
+        morning.check_hour = 9
+        morning.timezone = 'UTC'
+        later.check_hour = 15
+        later.timezone = 'Europe/Moscow'
+        db.session.commit()
+        seen = []
+        original = monitor.check_user_playlists
+        monitor.check_user_playlists = lambda user: seen.append(user.username)
+        try:
+            moment = datetime(2026, 11, 9, 9, 0, tzinfo=dt_timezone.utc)
+            monitor.check_due_playlists(moment)
+        finally:
+            monitor.check_user_playlists = original
+        self.assertEqual(seen, ['morning'])
+
+    def test_apple_storefront_and_incomplete_page(self):
+        from services.apple_music_service import AppleMusicService
+
+        service = AppleMusicService()
+        service.get_developer_token = lambda: 'dev'
+        storefront, playlist_id = service.parse_playlist_ref(
+            'https://music.apple.com/ru/playlist/day/pl.abc123'
+        )
+        self.assertEqual((storefront, playlist_id), ('ru', 'pl.abc123'))
+        calls = []
+
+        class Response:
+            def __init__(self, status, payload):
+                self.status_code = status
+                self._payload = payload
+
+            def json(self):
+                return self._payload
+
+        def fake_get(url, headers=None, params=None, timeout=None):
+            calls.append(url)
+            offset = (params or {}).get('offset', 0)
+            if offset == 0:
+                return Response(200, {
+                    'data': [{
+                        'type': 'songs',
+                        'id': '1',
+                        'attributes': {
+                            'name': 'Keep',
+                            'artistName': 'Artist',
+                            'albumName': 'Album',
+                            'durationInMillis': 1000,
+                        },
+                    }],
+                    'meta': {'total': 150},
+                })
+            return Response(500, {})
+
+        with patch('services.apple_music_service.requests.get', fake_get):
+            with self.assertRaises(Exception):
+                service.get_playlist_tracks('pl.abc123', storefront='ru')
+        self.assertIn('/v1/catalog/ru/playlists/pl.abc123/tracks', calls[0])
+
+
     def test_delete_playlist_removes_only_the_owned_one(self):
         owner = self._make_user()
         other = self._make_user('bob', 'bob@example.com')
