@@ -763,7 +763,7 @@
         }
     </style>
 </head>
-<body>
+<body class="lang-{{ CURRENT_LANGUAGE or 'ru' }}">
     <!-- Google Tag Manager (noscript) -->
     <noscript><iframe src="https://www.googletagmanager.com/ns.html?id=GTM-5G556ZDK"
     height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>
@@ -810,16 +810,15 @@
                     <!-- Language Switcher -->
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown">
-                            <i class="fas fa-globe"></i> 
-                            {% if CURRENT_LANGUAGE == 'en' %}English{% else %}Русский{% endif %}
+                            <i class="fas fa-globe"></i>
+                            {{ LANGUAGES.get(CURRENT_LANGUAGE, LANGUAGES['ru']) }}
                         </a>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="{{ url_for('set_language', language='ru') }}">
-                                <i class="fas fa-flag"></i> Русский
+                        <ul class="dropdown-menu dropdown-menu-end language-menu">
+                            {% for code, name in LANGUAGES.items() %}
+                            <li><a class="dropdown-item {% if code == CURRENT_LANGUAGE %}active{% endif %}" href="{{ url_for('set_language', language=code) }}">
+                                {{ name }}
                             </a></li>
-                            <li><a class="dropdown-item" href="{{ url_for('set_language', language='en') }}">
-                                <i class="fas fa-flag"></i> English
-                            </a></li>
+                            {% endfor %}
                         </ul>
                     </li>
                     {% if current_user.is_authenticated %}

@@ -1,0 +1,2402 @@
+
+msgid ""
+msgstr ""
+"Project-Id-Version: PlaylistChecker 1.0\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2026-11-07 10:45+0300\n"
+"PO-Revision-Date: 2024-01-01 12:00+0000\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language: uk\n"
+"Language-Team: en <LL@li.org>\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.17.0\n"
+
+#: app.py:248 app.py:253
+msgid "login.username"
+msgstr "Ім'я користувача"
+
+#: app.py:249 app.py:256 app.py:285
+msgid "login.password"
+msgstr "Пароль"
+
+#: app.py:250 templates/about.html:356 templates/base.html:417
+#: templates/base.html:477 templates/login.html:3
+msgid "base.login"
+msgstr "Логін"
+
+#: app.py:257 app.py:286
+msgid "form.password_min_length"
+msgstr "Пароль має бути не менше 8 символів."
+
+#: app.py:259 templates/index.html:170
+msgid "form.register"
+msgstr "зареєструватися"
+
+#: app.py:262
+msgid "form.service"
+msgstr "Сервіс"
+
+#: app.py:268
+msgid "form.playlist_url"
+msgstr "URL-адреса списку відтворення"
+
+#: app.py:269 templates/add_playlist.html:3 templates/add_playlist.html:118
+#: templates/dashboard.html:270 templates/dashboard.html:306
+#: templates/dashboard.html:322 templates/dashboard.html:341
+#: templates/playlists.html:140
+msgid "add_playlist.add_playlist"
+msgstr "Додайте список відтворення"
+
+#: app.py:273 templates/notification_settings.html:138
+msgid "notification_settings.email_notifications"
+msgstr "Сповіщення електронною поштою"
+
+#: app.py:274 templates/notification_settings.html:161
+msgid "notification_settings.telegram_notifications"
+msgstr "Сповіщення Telegram"
+
+#: app.py:275 templates/notification_settings.html:198
+msgid "notification_settings.browser_notifications"
+msgstr "Сповіщення браузера"
+
+#: app.py:276
+msgid "form.save_settings"
+msgstr "Зберегти налаштування"
+
+#: app.py:281
+msgid "form.send"
+msgstr "Надіслати"
+
+#: app.py:288
+msgid "form.save"
+msgstr "зберегти"
+
+#: app.py:294 templates/playlists.html:193
+msgid "playlists.delete"
+msgstr "Видалити"
+
+#: app.py:410
+msgid "flash.email_not_verified"
+msgstr ""
+"Підтвердьте свою електронну адресу перед входом. Ми вже надіслали вам "
+"посилання."
+
+#: app.py:414
+msgid "login.invalid_username_or_password"
+msgstr "Недійсне ім'я користувача або пароль"
+
+# Flash messages
+#: app.py:425
+msgid "flash.user_exists_username"
+msgstr "Користувач із таким іменем вже існує"
+
+#: app.py:429
+msgid "flash.user_exists_email"
+msgstr "Користувач із цією електронною адресою вже існує"
+
+#: app.py:442
+msgid "flash.registration_check_email"
+msgstr "Реєстрація майже завершена. Перевірте свою електронну пошту та підтвердьте її."
+
+#: app.py:452 app.py:707 app.py:741 app.py:771 app.py:931
+msgid "flash.invalid_form"
+msgstr "Не вдалося завершити дію. Оновіть сторінку та повторіть спробу."
+
+#: app.py:489
+msgid "flash.email_verify_invalid"
+msgstr ""
+"Це посилання для підтвердження електронною поштою недійсне або термін дії "
+"минув."
+
+#: app.py:494
+msgid "flash.email_verified"
+msgstr "Електронну адресу підтверджено. Ви можете увійти зараз."
+
+#: app.py:532
+msgid "flash.password_reset_email_sent"
+msgstr "Якщо цей електронний лист існує, ми надіслали інструкції щодо скидання пароля."
+
+#: app.py:557
+msgid "flash.password_reset_invalid"
+msgstr "Це посилання для скидання недійсне або термін його дії минув."
+
+#: app.py:565
+msgid "flash.password_updated"
+msgstr "Пароль оновлено. Увійдіть за допомогою нового пароля."
+
+#: app.py:597
+msgid "flash.spotify_reauthorization_required"
+msgstr "Термін дії підключення Spotify минув. Увійдіть знову, щоб продовжити."
+
+#: app.py:625 app.py:724
+msgid "flash.playlist_added_success"
+msgstr "Список відтворення \"{playlist_name}\" успішно додано для моніторингу!"
+
+#: app.py:630 app.py:729
+msgid "flash.error_generic"
+msgstr "Помилка: {error}"
+
+#: app.py:633
+msgid "flash.playlist_already_added"
+msgstr "Цей список відтворення вже додано."
+
+#: app.py:635
+msgid "flash.error_adding_playlist"
+msgstr "Помилка додавання списку відтворення: {error}"
+
+#: app.py:649 app.py:713
+msgid "flash.connect_spotify_first"
+msgstr "Спочатку підключіть Spotify"
+
+#: app.py:669 app.py:688
+msgid "flash.spotify_token_updated"
+msgstr "Маркер Spotify оновлюється автоматично"
+
+#: app.py:693
+msgid "flash.error_getting_playlists_after_token_update"
+msgstr "Помилка отримання списків відтворення після оновлення маркера: {error}"
+
+#: app.py:696 app.py:699
+msgid "flash.error_getting_playlists"
+msgstr "Помилка отримання списків відтворення: {error}"
+
+#: app.py:731
+msgid "flash.error_generic_short"
+msgstr "Сталася помилка: {error}"
+
+#: app.py:746
+msgid "flash.playlists_checked"
+msgstr "Плейлисти перевірені! Перевірте сповіщення."
+
+#: app.py:750
+msgid "flash.error_checking_playlists"
+msgstr "Помилка перевірки списків відтворення: {error}"
+
+#: app.py:759 app.py:779 app.py:941
+msgid "flash.playlist_not_found"
+msgstr "Список відтворення не знайдено"
+
+#: app.py:790
+msgid "flash.playlist_deleted"
+msgstr "Список відтворення видалено з моніторингу"
+
+#: app.py:815
+msgid "flash.spotify_auth_invalid_state"
+msgstr "Авторизацію Spotify відхилено. Почніть підключення знову."
+
+#: app.py:820
+msgid "flash.spotify_auth_error_no_code"
+msgstr "Помилка авторизації Spotify: код не отримано"
+
+#: app.py:843
+msgid "flash.spotify_connected_success"
+msgstr "Spotify успішно підключено!"
+
+#: app.py:847
+msgid "flash.spotify_auth_error"
+msgstr "Помилка авторизації Spotify: {error}"
+
+#: app.py:853 app.py:922
+msgid "flash.public_playlist_no_auth"
+msgstr ""
+"Цей сервіс не потребує входу. Додайте загальнодоступний список відтворення за"
+" посиланням."
+
+#: app.py:945
+msgid "flash.service_disconnected"
+msgstr "Службу відключено."
+
+#: app.py:988
+msgid "flash.notification_settings_saved"
+msgstr "Налаштування сповіщень збережено!"
+
+# Service error messages
+#: services/apple_music_service.py:62
+msgid "service.apple_music.credentials_not_configured"
+msgstr "Облікові дані Apple Music не налаштовано"
+
+#: services/apple_music_service.py:80
+msgid "service.apple_music.developer_token_error"
+msgstr "Помилка створення маркера розробника: {error}"
+
+#: services/apple_music_service.py:86 services/apple_music_service.py:176
+msgid "service.apple_music.invalid_playlist_url"
+msgstr "Недійсна URL-адреса списку відтворення Apple Music"
+
+#: services/apple_music_service.py:115
+msgid "service.apple_music.playlist_info_error"
+msgstr "Помилка отримання інформації про список відтворення: {status_code}"
+
+#: services/deezer_service.py:48
+msgid "service.deezer.access_token_error"
+msgstr "Помилка отримання маркера доступу Deezer"
+
+#: services/deezer_service.py:54 services/deezer_service.py:152
+#: services/deezer_service.py:176
+msgid "service.deezer.invalid_playlist_url"
+msgstr "Недійсна URL-адреса списку відтворення Deezer"
+
+#: services/deezer_service.py:71 services/deezer_service.py:137
+#: services/deezer_service.py:143 services/deezer_service.py:168
+msgid "service.deezer.playlist_info_error"
+msgstr "Помилка отримання інформації про список відтворення: {status_code}"
+
+#: services/deezer_service.py:203
+msgid "service.deezer.playlist_tracks_error"
+msgstr "Помилка отримання треків списку відтворення: {error}"
+
+#: services/spotify_service.py:91
+msgid "service.spotify.reauthorization_required"
+msgstr "Термін дії маркера оновлення Spotify минув. Увійдіть знову."
+
+#: services/spotify_service.py:106 services/spotify_service.py:254
+#: services/spotify_service.py:264
+msgid "service.spotify.token_refresh_error"
+msgstr "Помилка оновлення маркера: {error}"
+
+#: services/spotify_service.py:116
+msgid "service.spotify.invalid_playlist_url"
+msgstr "Недійсна URL-адреса списку відтворення Spotify"
+
+#: services/spotify_service.py:135
+msgid "service.spotify.playlist_info_error"
+msgstr "Помилка отримання інформації про список відтворення: {error}"
+
+#: services/spotify_service.py:174
+msgid "service.spotify.playlist_tracks_error"
+msgstr "Помилка отримання треків списку відтворення: {error}"
+
+#: services/spotify_service.py:232
+msgid "service.spotify.user_playlists_error"
+msgstr "Помилка отримання списків відтворення користувача: {error}"
+
+#: services/spotify_service.py:255
+msgid "service.spotify.token_expired_no_refresh"
+msgstr "Термін дії токена закінчився, і немає доступного refresh_token для поновлення"
+
+#: services/spotify_service.py:265
+msgid "service.spotify.token_invalid_no_refresh"
+msgstr "Маркер недійсний і немає refresh_token, доступного для оновлення"
+
+#: services/yandex_music_service.py:33 services/yandex_music_service.py:66
+#: services/yandex_music_service.py:121
+msgid "service.yandex_music.invalid_playlist_url"
+msgstr "Недійсна URL-адреса списку відтворення Yandex Music"
+
+#: services/yandex_music_service.py:49
+msgid "service.yandex_music.api_error"
+msgstr "Помилка API: {status_code} - {response_text}"
+
+#: services/yandex_music_service.py:82
+msgid "service.yandex_music.playlist_info_error"
+msgstr "Помилка отримання загальнодоступної інформації про список відтворення: {error}"
+
+#: services/yandex_music_service.py:94
+msgid "service.yandex_music.playlist_tracks_error"
+msgstr "Помилка отримання композицій загальнодоступного списку відтворення: {error}"
+
+#: templates/about.html:3 templates/about.html:14 templates/base.html:356
+#: templates/base.html:471
+msgid "base.about"
+msgstr "про"
+
+#: templates/about.html:3 templates/about.html:5
+msgid "page.about.monitoring_description"
+msgstr "Моніторинг плейлистів на Spotify, Deezer, Apple Music, Yandex Music"
+
+#: templates/about.html:7
+msgid "page.about.keywords"
+msgstr ""
+"про, playlistchecker, моніторинг плейлистів, особливості, можливості, "
+"spotify, deezer, apple music, yandex music, музичні сервіси"
+
+#: templates/about.html:16
+msgid "page.about.subtitle"
+msgstr "Професійне рішення для моніторингу ваших музичних колекцій"
+
+#: templates/about.html:24
+msgid "page.about.title"
+msgstr "Що таке PlaylistChecker?"
+
+#: templates/about.html:25
+msgid "page.about.description"
+msgstr ""
+"PlaylistChecker – це інноваційна веб-служба, створена для вирішення проблеми "
+"зникнення пісень із музичних списків відтворення. Ми розуміємо, наскільки "
+"важливо зберегти цілісність ваших музичних колекцій, і пропонуємо "
+"автоматизоване рішення для моніторингу змін."
+
+#: templates/about.html:27
+msgid "page.about.work"
+msgstr ""
+"Перевірка виконується раз на день у вибрану вами годину. Коли трек зникає зі "
+"списку відтворення, PlaylistChecker зберігає його в історії та надсилає "
+"сповіщення."
+
+#: templates/about.html:38
+msgid "why_check.stats_title"
+msgstr "Статистика проблем"
+
+#: templates/about.html:44
+msgid "why_check.stats.users_lose_songs"
+msgstr "Користувачі втрачають пісні"
+
+#: templates/about.html:45
+msgid "why_check.stats.due_to_licensing"
+msgstr "через проблеми з ліцензуванням"
+
+#: templates/about.html:51
+msgid "why_check.stats.playlists_compromised"
+msgstr "Списки відтворення зламано"
+
+#: templates/about.html:52
+msgid "why_check.stats.due_to_catalog_changes"
+msgstr "у зв'язку зі зміною каталогу"
+
+#: templates/about.html:58
+msgid "why_check.stats.weeks_average"
+msgstr "Середня кількість тижнів"
+
+#: templates/about.html:59
+msgid "why_check.stats.until_detection"
+msgstr "до виявлення змін"
+
+#: templates/about.html:65
+msgid "why_check.stats.can_prevent"
+msgstr "Можна запобігти"
+
+#: templates/about.html:66
+msgid "why_check.stats.with_monitoring"
+msgstr "з моніторингом"
+
+#: templates/about.html:77
+msgid "why_check.reasons_title"
+msgstr "Чому зникають пісні?"
+
+#: templates/about.html:86
+msgid "why_check.reason.license_expiration"
+msgstr "Закінчення терміну дії ліцензії"
+
+#: templates/about.html:87
+msgid "why_check.reason.license_expiration_desc"
+msgstr ""
+"Музичні лейбли та виконавці не можуть продовжувати ліцензійні угоди з "
+"потоковими службами, що призводить до видалення композицій із каталогів."
+
+#: templates/about.html:96
+msgid "why_check.reason.copyright_disputes"
+msgstr "Спори щодо авторських прав"
+
+#: templates/about.html:97
+msgid "why_check.reason.copyright_disputes_desc"
+msgstr ""
+"Конфлікти між правовласниками можуть призвести до тимчасового або остаточного"
+" видалення вмісту з усіх служб."
+
+#: templates/about.html:106
+msgid "why_check.reason.regional_restrictions"
+msgstr "Регіональні обмеження"
+
+#: templates/about.html:107
+msgid "why_check.reason.regional_restrictions_desc"
+msgstr ""
+"Зміни в геоблокуванні можуть зробити доступні раніше треки недоступними у "
+"вашому регіоні."
+
+#: templates/about.html:116
+msgid "why_check.reason.technical_failures"
+msgstr "Технічні збої"
+
+#: templates/about.html:117
+msgid "why_check.reason.technical_failures_desc"
+msgstr ""
+"Помилки в системах музичних сервісів можуть призвести до тимчасової "
+"недоступності вмісту."
+
+#: templates/about.html:126
+msgid "why_check.reason.metadata_changes"
+msgstr "Зміни метаданих"
+
+#: templates/about.html:127
+msgid "why_check.reason.metadata_changes_desc"
+msgstr ""
+"Оновлення інформації про композиції може змінити їхні ідентифікатори, що "
+"призведе до «зникнення» зі списків відтворення."
+
+#: templates/about.html:136
+msgid "why_check.reason.platform_policy"
+msgstr "Політика платформи"
+
+#: templates/about.html:137
+msgid "why_check.reason.platform_policy_desc"
+msgstr ""
+"Зміни в правилах обслуговування можуть призвести до видалення певного "
+"контенту з різних причин."
+
+# Consequences
+#: templates/about.html:148
+msgid "why_check.consequences_title"
+msgstr "Наслідки для користувачів"
+
+#: templates/about.html:151
+msgid "why_check.consequences.emotional_title"
+msgstr "Емоційні втрати"
+
+#: templates/about.html:153
+msgid "page.about.problem.consequence1"
+msgstr "Втрата улюблених треків"
+
+#: templates/about.html:154 templates/about.html:162
+msgid "page.about.problem.consequence2"
+msgstr "Порушення цілісності списку відтворення"
+
+#: templates/about.html:155 templates/about.html:163
+msgid "page.about.problem.consequence3"
+msgstr "Необхідність ручної перевірки"
+
+#: templates/about.html:156 templates/about.html:164
+msgid "page.about.problem.consequence4"
+msgstr "Втрачений час на реставрацію"
+
+#: templates/about.html:160
+msgid "why_check.consequences.practical_title"
+msgstr "Практичні задачі"
+
+#: templates/about.html:165
+msgid "page.about.problem.consequence5"
+msgstr "Проблеми синхронізації"
+
+# Solutions
+#: templates/about.html:179
+msgid "why_check.solutions_title"
+msgstr "Як PlaylistChecker вирішує ці проблеми"
+
+#: templates/about.html:183
+msgid "why_check.solution.constant_monitoring"
+msgstr "Щоденна перевірка"
+
+#: templates/about.html:184
+msgid "why_check.solution.constant_monitoring_desc"
+msgstr "Щодня сервіс порівнює збережений трек-лист з музичним каталогом."
+
+#: templates/about.html:188
+msgid "why_check.solution.instant_notifications"
+msgstr "Сповіщення про видалені треки"
+
+#: templates/about.html:189
+msgid "why_check.solution.instant_notifications_desc"
+msgstr ""
+"Після щоденної перевірки ви отримуєте повідомлення зі списком треків, які "
+"зникли зі списку відтворення."
+
+#: templates/about.html:193
+msgid "why_check.solution.detailed_analytics"
+msgstr "Детальна аналітика"
+
+#: templates/about.html:194
+msgid "why_check.solution.detailed_analytics_desc"
+msgstr "Повна історія змін і статистика, щоб зрозуміти тенденції у ваших колекціях"
+
+#: templates/about.html:205
+msgid "page.about.features.title"
+msgstr "Функції PlaylistChecker"
+
+#: templates/about.html:214
+msgid "page.about.features.monitoring"
+msgstr "Автоматичний моніторинг"
+
+#: templates/about.html:215
+msgid "page.about.features.monitoring.description"
+msgstr "Постійна перевірка ваших плейлистів раз на день без вашої участі"
+
+#: templates/about.html:224
+msgid "page.about.features.notifications"
+msgstr "Миттєві повідомлення"
+
+#: templates/about.html:225
+msgid "page.about.features.notifications.description"
+msgstr ""
+"Отримуйте сповіщення про будь-які зміни у своїх списках відтворення в режимі "
+"реального часу"
+
+#: templates/about.html:234
+msgid "page.about.features.platforms"
+msgstr "Кілька платформ"
+
+#: templates/about.html:235
+msgid "page.about.features.platforms.description"
+msgstr "Підтримка Spotify, Apple Music, Yandex Music та інших популярних сервісів"
+
+#: templates/about.html:244
+msgid "page.about.features.stats"
+msgstr "Детальна статистика"
+
+#: templates/about.html:245
+msgid "page.about.features.stats.description"
+msgstr "Аналіз змін, історії модифікацій і тенденцій у ваших колекціях"
+
+#: templates/about.html:254
+msgid "page.about.features.security"
+msgstr "Безпека даних"
+
+#: templates/about.html:255
+msgid "page.about.features.security.description"
+msgstr "Ваші дані захищені сучасними методами шифрування та аутентифікації"
+
+#: templates/about.html:264
+msgid "page.about.features.interface"
+msgstr "Зручний інтерфейс"
+
+#: templates/about.html:265
+msgid "page.about.features.interface.description"
+msgstr "Адаптивний дизайн для комфортного використання на будь-якому пристрої"
+
+# Benefits
+#: templates/about.html:274
+msgid "why_check.benefits_title"
+msgstr "Переваги моніторингу списку відтворення"
+
+#: templates/about.html:282
+msgid "why_check.benefit.preserve_integrity"
+msgstr "Збереження цілісності колекції"
+
+#: templates/about.html:283
+msgid "why_check.benefit.preserve_integrity_desc"
+msgstr ""
+"Ви завжди знатимете про будь-які зміни у ваших списках відтворення та зможете"
+" швидко вжити заходів для їх відновлення."
+
+#: templates/about.html:291
+msgid "why_check.benefit.save_time"
+msgstr "Економія часу"
+
+#: templates/about.html:292
+msgid "why_check.benefit.save_time_desc"
+msgstr ""
+"Більше не потрібно вручну перевіряти кожен плейлист - наш сервіс зробить це "
+"автоматично і повідомить вас лише про важливі зміни."
+
+#: templates/about.html:300
+msgid "why_check.benefit.protect_memories"
+msgstr "Захист музичних спогадів"
+
+#: templates/about.html:301
+msgid "why_check.benefit.protect_memories_desc"
+msgstr ""
+"Ваші улюблені пісні та списки відтворення – це не просто музика, це спогади. "
+"Ми допоможемо їх зберегти."
+
+#: templates/about.html:309
+msgid "why_check.benefit.understand_trends"
+msgstr "Розуміння тенденцій"
+
+#: templates/about.html:310
+msgid "why_check.benefit.understand_trends_desc"
+msgstr ""
+"Проаналізуйте, які виконавці чи жанри найчастіше зникають із каталогів, і "
+"плануйте свої колекції відповідно."
+
+#: templates/about.html:321
+msgid "page.about.features.supported.title"
+msgstr "Підтримувані музичні сервіси"
+
+#: templates/about.html:326
+msgid "page.about.features.supported.spotify.description"
+msgstr ""
+"Повна підтримка всіх функцій Spotify, включаючи публічні та приватні списки "
+"відтворення"
+
+#: templates/about.html:331
+msgid "page.about.features.supported.apple_music.description"
+msgstr "Моніторинг списку відтворення Apple Music зі збереженням усіх метаданих"
+
+#: templates/about.html:336
+msgid "page.about.features.supported.yandex_music.description"
+msgstr "Відстеження змін у плейлистах Yandex Music"
+
+# Call to action
+#: templates/about.html:349
+msgid "why_check.cta_title"
+msgstr "Не чекайте, поки ваші пісні зникнуть!"
+
+#: templates/about.html:350
+msgid "why_check.cta_description"
+msgstr ""
+"Почніть захищати свої музичні колекції вже сьогодні. PlaylistChecker допоможе"
+" зберегти те, що має значення."
+
+#: templates/about.html:353
+msgid "why_check.cta.start_monitoring"
+msgstr "Розпочати моніторинг"
+
+#: templates/about.html:360
+msgid "why_check.cta.my_playlists"
+msgstr "Мої списки відтворення"
+
+#: templates/add_playlist.html:120
+msgid "add_playlist.subtitle"
+msgstr "Додайте список відтворення з улюбленого музичного сервісу"
+
+#: templates/add_playlist.html:140
+msgid "add_playlist.paste_playlist_url"
+msgstr "Вставте посилання на список відтворення"
+
+#: templates/add_playlist.html:149
+msgid "add_playlist.copy_playlist_url"
+msgstr "Скопіюйте посилання на список відтворення з вашого музичного сервісу"
+
+#: templates/add_playlist.html:164
+msgid "add_playlist.how_to_add_playlist"
+msgstr "Як додати список відтворення?"
+
+#: templates/add_playlist.html:181
+msgid "add_playlist.open_spotify"
+msgstr "Відкрийте Spotify (веб або додаток)"
+
+#: templates/add_playlist.html:182 templates/add_playlist.html:204
+#: templates/add_playlist.html:231 templates/add_playlist.html:258
+msgid "add_playlist.find_playlist"
+msgstr "Знайдіть потрібний список відтворення"
+
+#: templates/add_playlist.html:183 templates/add_playlist.html:232
+msgid "add_playlist.click_three_dots"
+msgstr "Натисніть три крапки (...) біля назви списку відтворення"
+
+#: templates/add_playlist.html:184
+msgid "add_playlist.select_share_copy_link"
+msgstr "Виберіть «Поділитися» → «Копіювати посилання на список відтворення»"
+
+#: templates/add_playlist.html:185 templates/add_playlist.html:206
+#: templates/add_playlist.html:235 templates/add_playlist.html:261
+msgid "add_playlist.paste_link_field"
+msgstr "Вставте посилання в поле вище"
+
+#: templates/add_playlist.html:203
+msgid "add_playlist.open_deezer"
+msgstr "Відкрийте Deezer у своєму браузері"
+
+#: templates/add_playlist.html:205 templates/add_playlist.html:260
+msgid "add_playlist.copy_link_from_browser"
+msgstr "Скопіюйте посилання з адресного рядка браузера"
+
+#: templates/add_playlist.html:210 templates/add_playlist.html:265
+msgid "add_playlist.example_link"
+msgstr "Приклад посилання:"
+
+#: templates/add_playlist.html:230
+msgid "add_playlist.open_apple_music"
+msgstr "Відкрийте Apple Music"
+
+#: templates/add_playlist.html:233
+msgid "add_playlist.select_share_playlist"
+msgstr "Виберіть «Поділитися списком відтворення\\"
+
+#: templates/add_playlist.html:234
+msgid "add_playlist.copy_link"
+msgstr "Скопіюйте посилання"
+
+#: templates/add_playlist.html:253
+msgid "add_playlist.important"
+msgstr "Важливо:"
+
+#: templates/add_playlist.html:254
+msgid "add_playlist.yandex_music_public"
+msgstr "Щоб контролювати плейлисти Яндекс.Музики, вони повинні бути публічними!"
+
+#: templates/add_playlist.html:257
+msgid "add_playlist.open_yandex_music"
+msgstr "Відкрийте Яндекс.Музика в браузері"
+
+#: templates/add_playlist.html:259
+msgid "add_playlist.check_public_playlist"
+msgstr ""
+"Переконайтеся, що список відтворення загальнодоступний (доступний за "
+"посиланням)"
+
+#: templates/apple_music_auth.html:3 templates/apple_music_auth.html:11
+msgid "dashboard.apple_music_auth"
+msgstr "Авторизація Apple Music"
+
+#: templates/apple_music_auth.html:17
+msgid "apple_music_auth.loading"
+msgstr "Завантаження..."
+
+#: templates/apple_music_auth.html:19
+msgid "apple_music_auth.initializing"
+msgstr "Ініціалізація Apple Music..."
+
+#: templates/apple_music_auth.html:24 templates/apple_music_auth.html:101
+msgid "apple_music_auth.authorize"
+msgstr "Авторизуйтеся за допомогою Apple Music"
+
+#: templates/apple_music_auth.html:27
+msgid "apple_music_auth.description"
+msgstr ""
+"Щоб отримати доступ до приватних списків відтворення, вам потрібно "
+"авторизуватися за допомогою Apple ID. Ви повинні мати активну підписку на "
+"Apple Music."
+
+#: templates/apple_music_auth.html:82
+msgid "apple_music_auth.init_error"
+msgstr "Помилка ініціалізації"
+
+#: templates/apple_music_auth.html:90
+msgid "apple_music_auth.authorizing"
+msgstr "Авторизація..."
+
+#: templates/apple_music_auth.html:102
+msgid "apple_music_auth.auth_error"
+msgstr "Помилка авторизації"
+
+#: templates/apple_music_auth.html:128
+msgid "apple_music_auth.success"
+msgstr "Авторизація успішна! Тепер ви можете відстежувати приватні списки відтворення."
+
+#: templates/apple_music_auth.html:137
+msgid "apple_music_auth.save_error"
+msgstr "Помилка збереження маркера"
+
+# SEO Meta Tags
+#: templates/base.html:13
+msgid "seo.default_title"
+msgstr ""
+"PlaylistChecker — відстежуйте списки відтворення на Spotify, Deezer, Apple "
+"Music і Yandex Music"
+
+#: templates/base.html:21
+msgid "seo.default_description"
+msgstr ""
+"PlaylistChecker раз на день перевіряє списки відтворення Spotify, Deezer, "
+"Apple Music і Yandex Music і повідомляє вам, коли треки зникають із каталогу."
+
+#: templates/base.html:22
+msgid "seo.default_keywords"
+msgstr ""
+"плейлист, музика, spotify, apple music, yandex music, відстеження, "
+"моніторинг, пісні, треки, зникнення, сповіщення, музичні сервіси, моніторинг "
+"плейлистів, зміни треків"
+
+#: templates/base.html:351
+msgid "base.home"
+msgstr "додому"
+
+#: templates/base.html:362 templates/dashboard.html:244
+#: templates/dashboard.html:338 templates/playlists.html:3
+#: templates/playlists.html:128
+msgid "base.my_playlists"
+msgstr "Мої плейлисти"
+
+#: templates/base.html:398 templates/notification_history.html:148
+msgid "base.notification_settings"
+msgstr "Налаштування сповіщень"
+
+#: templates/base.html:401 templates/notification_history.html:3
+#: templates/notification_history.html:143
+msgid "base.notification_history"
+msgstr "Історія сповіщень"
+
+#: templates/base.html:408
+msgid "base.logout"
+msgstr "Вийти"
+
+#: templates/base.html:422 templates/base.html:482 templates/register.html:3
+#: templates/register.html:129
+msgid "base.register"
+msgstr "зареєструватися"
+
+#: templates/base.html:453
+msgid "footer.message"
+msgstr ""
+"Сервіс для моніторингу змін у ваших списках відтворення Spotify, Yandex Music"
+" і Apple Music"
+
+#: templates/base.html:467
+msgid "links"
+msgstr "Посилання"
+
+#: templates/base.html:489 templates/index.html:184
+msgid "page.home.supported_services"
+msgstr "Підтримувані музичні сервіси"
+
+#: templates/base.html:499
+msgid "base.follow_changes"
+msgstr "Подивіться, що змінилося у ваших списках відтворення"
+
+#: templates/dashboard.html:3 templates/dashboard.html:130
+msgid "dashboard.dashboard"
+msgstr "Приладова панель"
+
+#: templates/dashboard.html:132
+msgid "dashboard.welcome"
+msgstr "Ласкаво просимо назад! Ось огляд списку відтворення"
+
+#: templates/dashboard.html:145
+msgid "dashboard.new_notification"
+msgstr "Нові сповіщення"
+
+#: templates/dashboard.html:148
+msgid "dashboard.mark_all_read"
+msgstr "Позначити все як прочитане"
+
+#: templates/dashboard.html:182
+msgid "dashboard.playlists_being_tracked"
+msgstr "Відстежуються списки відтворення"
+
+#: templates/dashboard.html:193
+msgid "dashboard.checked_today"
+msgstr "Сьогодні перевірив"
+
+#: templates/dashboard.html:204
+msgid "dashboard.new_notifications"
+msgstr "Нові сповіщення"
+
+#: templates/dashboard.html:215
+msgid "dashboard.next_check"
+msgstr "Наступна перевірка"
+
+#: templates/dashboard.html:227
+msgid "dashboard.connected_services"
+msgstr "Підключені служби"
+
+#: templates/dashboard.html:240 templates/dashboard.html:283
+msgid "dashboard.connected"
+msgstr "Підключено"
+
+#: templates/dashboard.html:249 templates/dashboard.html:301
+msgid "dashboard.disconnect"
+msgstr "Відключити"
+
+#: templates/dashboard.html:254 templates/notification_settings.html:184
+msgid "notification_settings.connect_telegram"
+msgstr "Підключитися"
+
+#: templates/dashboard.html:266 templates/dashboard.html:288
+#: templates/dashboard.html:318
+msgid "dashboard.public_playlists"
+msgstr "Публічні списки відтворення"
+
+#: templates/dashboard.html:268 templates/dashboard.html:290
+#: templates/dashboard.html:320
+msgid "dashboard.without_authorization"
+msgstr "Без авторизації"
+
+#: templates/dashboard.html:286
+msgid "dashboard.private_playlists_available"
+msgstr "Доступні приватні списки відтворення"
+
+#: templates/dashboard.html:295
+msgid "dashboard.connect"
+msgstr "Підключитися"
+
+#: templates/dashboard.html:378 templates/playlists.html:213
+msgid "playlists.stat.tracks"
+msgstr "Доріжки"
+
+#: templates/dashboard.html:384 templates/playlists.html:217
+msgid "playlists.stat.removed"
+msgstr "Видалено"
+
+#: templates/dashboard.html:390 templates/playlists.html:221
+msgid "playlists.stat.active"
+msgstr "Активний"
+
+#: templates/dashboard.html:400
+msgid "dashboard.not_checked"
+msgstr "Не перевірено"
+
+#: templates/dashboard.html:414 templates/playlists.html:255
+msgid "dashboard.no_playlists"
+msgstr "У вас ще немає списків відтворення."
+
+#: templates/dashboard.html:415 templates/playlists.html:256
+msgid "dashboard.add_playlists_for_tracking"
+msgstr "Додайте списки відтворення для відстеження змін."
+
+#: templates/dashboard.html:417 templates/playlists.html:258
+msgid "add_playlist.add_new_playlist"
+msgstr "Додати перший список відтворення"
+
+#: templates/forgot_password.html:3 templates/forgot_password.html:12
+msgid "forgot.title"
+msgstr "Відновлення пароля"
+
+#: templates/forgot_password.html:13
+msgid "forgot.subtitle"
+msgstr "Введіть свою електронну адресу, щоб отримати посилання для скидання"
+
+#: templates/forgot_password.html:43
+msgid "forgot.back_to_login"
+msgstr "Назад до входу"
+
+#: templates/index.html:3
+msgid "page.home.monitoring_description"
+msgstr "Моніторинг плейлистів на Spotify, Deezer, Apple Music, Yandex Music"
+
+#: templates/index.html:5 templates/index.html:133
+msgid "page.home.description"
+msgstr ""
+"PlaylistChecker раз на день перевіряє списки відтворення Spotify, Deezer, "
+"Apple Music і Yandex Music і повідомляє вам, коли пісні зникають з каталогу."
+
+#: templates/index.html:7
+msgid "page.home.keywords"
+msgstr ""
+"плейлист, музика, spotify, deezer, apple music, yandex music, стеження, "
+"моніторинг, пісні, треки, зникнення, сповіщення, музичні сервіси"
+
+#: templates/index.html:132
+msgid "page.home.subtitle"
+msgstr ""
+"Відстежуйте зміни у своїх списках відтворення на всіх основних музичних "
+"платформах"
+
+#: templates/index.html:138 templates/index.html:173
+msgid "action.register"
+msgstr "зареєструватися"
+
+#: templates/index.html:141 templates/index.html:159 templates/register.html:196
+msgid "action.login"
+msgstr "Логін"
+
+#: templates/index.html:156
+msgid "form.username"
+msgstr "Ім'я користувача"
+
+#: templates/index.html:157
+msgid "action.login.description"
+msgstr "Увійдіть у свій обліковий запис"
+
+#: templates/index.html:171
+msgid "action.register_description"
+msgstr "Створіть новий обліковий запис"
+
+#: templates/index.html:185
+msgid "page.home.services_lead"
+msgstr "Відстежуйте свої улюблені списки відтворення на різних платформах"
+
+#: templates/index.html:196
+msgid "page.home.spotify_description"
+msgstr "Відстежуйте списки відтворення Spotify"
+
+#: templates/index.html:206
+msgid "page.home.deezer_description"
+msgstr "Моніторинг списків відтворення Deezer"
+
+#: templates/index.html:216
+msgid "page.home.apple_music_description"
+msgstr "Відстежуйте списки відтворення Apple Music"
+
+#: templates/index.html:226
+msgid "page.home.yandex_music_description"
+msgstr "Відстежуйте плейлисти Yandex Music"
+
+#: templates/index.html:235
+msgid "page.home.how_it_works"
+msgstr "Як це працює"
+
+#: templates/index.html:240
+msgid "page.home.step1.title"
+msgstr "Підключіть свої послуги"
+
+#: templates/index.html:241
+msgid "page.home.step1.description"
+msgstr "Увійдіть у свої музичні служби"
+
+#: templates/index.html:245
+msgid "page.home.step2.title"
+msgstr "Додати списки відтворення"
+
+#: templates/index.html:246
+msgid "page.home.step2.description"
+msgstr "Виберіть списки відтворення для моніторингу"
+
+#: templates/index.html:250
+msgid "page.home.step3.title"
+msgstr "Отримувати сповіщення"
+
+#: templates/index.html:251
+msgid "page.home.step3.description"
+msgstr "Ми повідомимо вас про будь-які зміни"
+
+#: templates/index.html:260
+msgid "page.home.features.title"
+msgstr "Функції PlaylistChecker"
+
+#: templates/index.html:261
+msgid "page.home.features_lead"
+msgstr "Усе, що потрібно для захисту вашої музичної колекції"
+
+#: templates/index.html:272
+msgid "page.home.feature.sync.title"
+msgstr "Автоматична синхронізація"
+
+#: templates/index.html:273
+msgid "page.home.feature.sync.description"
+msgstr "Постійний моніторинг усіх ваших списків відтворення"
+
+#: templates/index.html:283
+msgid "page.home.feature.stats.title"
+msgstr "Детальна статистика"
+
+#: templates/index.html:284
+msgid "page.home.feature.stats.description"
+msgstr "Аналіз змін і тенденцій у ваших колекціях"
+
+#: templates/index.html:294
+msgid "page.home.feature.security.title"
+msgstr "Безпека даних"
+
+#: templates/index.html:295
+msgid "page.home.feature.security.description"
+msgstr "Ваші дані захищені сучасними методами шифрування та аутентифікації"
+
+#: templates/index.html:308
+msgid "page.home.problem.title"
+msgstr "Чому пісні зникають з плейлистів"
+
+#: templates/index.html:310
+msgid "page.home.problem.description"
+msgstr ""
+"Музичні сервіси регулярно видаляють треки через закінчення терміну дії "
+"ліцензій, зміну прав або оновлення правил платформи. Улюблені пісні можуть "
+"зникнути без попередження."
+
+#: templates/index.html:319
+msgid "page.home.protection.title"
+msgstr "Захистіть свої колекції"
+
+#: templates/index.html:321
+msgid "page.home.protection.description"
+msgstr ""
+"PlaylistChecker допомагає зберегти ваші музичні колекції недоторканими, "
+"сповіщаючи про зміни в реальному часі. Ви завжди знаєте, що відбувається з "
+"вашими списками відтворення."
+
+#: templates/index.html:330
+msgid "page.home.monitoring.title"
+msgstr "Автоматичний моніторинг"
+
+#: templates/index.html:332
+msgid "page.home.monitoring.description"
+msgstr "Постійна перевірка ваших плейлистів раз на день без вашої участі"
+
+#: templates/index.html:341
+msgid "page.home.notifications.title"
+msgstr "Зручні сповіщення"
+
+#: templates/index.html:343
+msgid "page.home.notifications.description"
+msgstr ""
+"Отримуйте миттєві сповіщення про зміни у своїх списках відтворення. "
+"Подивіться, які пісні зникли, і вирішіть, що робити далі."
+
+#: templates/index.html:352
+msgid "page.home.cta_title"
+msgstr "Готові захистити свої списки відтворення?"
+
+#: templates/index.html:353
+msgid "page.home.cta_text"
+msgstr "Приєднуйтесь до тисяч меломанів, які ніколи не пропускають трек"
+
+#: templates/index.html:355
+msgid "page.home.cta_button"
+msgstr "Почніть роботу безкоштовно"
+
+#: templates/login.html:5
+msgid "seo.login.description"
+msgstr ""
+"Увійдіть у PlaylistChecker, щоб контролювати свої списки відтворення Spotify,"
+" Apple Music і Yandex Music. Відстежуйте зміни у своїх музичних колекціях."
+
+#: templates/login.html:7
+msgid "seo.login.keywords"
+msgstr ""
+"вхід, вхід, автентифікація, перевірка списків відтворення, моніторинг списків"
+" відтворення, spotify, apple music, yandex music"
+
+#: templates/login.html:105
+msgid "login.title"
+msgstr "Увійдіть"
+
+#: templates/login.html:106
+msgid "login.subtitle"
+msgstr "Ласкаво просимо до PlaylistChecker"
+
+#: templates/login.html:151
+msgid "login.forgot_password"
+msgstr "Забули пароль?"
+
+#: templates/login.html:157
+msgid "login.no_account"
+msgstr "Немає облікового запису?"
+
+#: templates/login.html:158
+msgid "login.register"
+msgstr "зареєструватися"
+
+#: templates/login.html:167 templates/register.html:226
+msgid "auth.data_secure"
+msgstr "Ваші дані безпечні та зашифровані"
+
+#: templates/notification_history.html:145
+msgid "notification_history.subtitle"
+msgstr "Відстежуйте всі сповіщення про зміну списку відтворення"
+
+#: templates/notification_history.html:160
+msgid "notification_history.date_time"
+msgstr "Дата і час"
+
+#: templates/notification_history.html:161
+msgid "notification_history.playlist"
+msgstr "Список відтворення"
+
+#: templates/notification_history.html:162
+msgid "notification_history.change_type"
+msgstr "Змінити тип"
+
+#: templates/notification_history.html:163 templates/playlist_tracks.html:266
+msgid "notification_history.track"
+msgstr "Трек"
+
+#: templates/notification_history.html:164
+msgid "notification_history.send_method"
+msgstr "Надіслано через"
+
+#: templates/notification_history.html:185
+msgid "notification_history.track_added"
+msgstr "Трек додано"
+
+#: templates/notification_history.html:190
+msgid "notification_history.track_removed"
+msgstr "Доріжку видалено"
+
+#: templates/notification_history.html:195
+msgid "notification_history.change"
+msgstr "Зміна"
+
+#: templates/notification_history.html:208
+msgid "notification_history.information_unavailable"
+msgstr "Інформація недоступна"
+
+#: templates/notification_history.html:228
+msgid "notification_history.browser"
+msgstr "Браузер"
+
+#: templates/notification_history.html:249 templates/notification_history.html:255
+msgid "notification_history.previous"
+msgstr "Попередній"
+
+#: templates/notification_history.html:283 templates/notification_history.html:289
+msgid "notification_history.next"
+msgstr "Далі"
+
+#: templates/notification_history.html:300
+msgid "notification_history.shown"
+msgstr "Показано"
+
+#: templates/notification_history.html:301
+msgid "notification_history.from"
+msgstr "від"
+
+#: templates/notification_history.html:301
+msgid "notification_history.notifications"
+msgstr "сповіщення"
+
+#: templates/notification_history.html:302
+msgid "notification_history.notifications_only_once"
+msgstr "Сповіщення надсилаються лише один раз про кожну зміну в списку відтворення."
+
+#: templates/notification_history.html:312
+msgid "notification_history.empty"
+msgstr "Історія сповіщень порожня."
+
+#: templates/notification_history.html:314
+msgid "notification_history.empty_description"
+msgstr ""
+"Ви ще не отримали сповіщень. Додайте списки відтворення, щоб почати "
+"відстежувати зміни."
+
+#: templates/notification_history.html:317
+msgid "notification_history.go_to_playlists"
+msgstr "Перейти до списків відтворення"
+
+#: templates/notification_settings.html:3 templates/notification_settings.html:114
+msgid "notification_settings.title"
+msgstr "Налаштування сповіщень"
+
+#: templates/notification_settings.html:116
+msgid "notification_settings.subtitle"
+msgstr "Налаштуйте, як ви хочете отримувати сповіщення про зміну списку відтворення"
+
+#: templates/notification_settings.html:124
+msgid "notification_settings.manage_notifications"
+msgstr "Керувати сповіщеннями"
+
+#: templates/notification_settings.html:139
+msgid "notification_settings.receive_email_notifications"
+msgstr "Отримувати сповіщення електронною поштою"
+
+#: templates/notification_settings.html:148
+msgid "notification_settings.notifications_will_be_sent_to"
+msgstr "Сповіщення будуть надіслані на адресу"
+
+#: templates/notification_settings.html:162
+msgid "notification_settings.receive_telegram_notifications"
+msgstr "Отримуйте сповіщення в Telegram"
+
+#: templates/notification_settings.html:173
+msgid "notification_settings.telegram_connected"
+msgstr "Telegram підключено"
+
+#: templates/notification_settings.html:181
+msgid "notification_settings.telegram_not_connected"
+msgstr "Telegram не підключено"
+
+#: templates/notification_settings.html:199
+msgid "notification_settings.receive_browser_notifications"
+msgstr "Отримувати push-повідомлення в браузері"
+
+#: templates/notification_settings.html:210
+msgid "notification_settings.allow_notifications"
+msgstr "Дозволити сповіщення"
+
+#: templates/notification_settings.html:229
+msgid "notification_settings.notification_types"
+msgstr "Типи сповіщень:"
+
+#: templates/notification_settings.html:236
+msgid "notification_settings.track_removed"
+msgstr "Видалення треків зі списків відтворення"
+
+#: templates/notification_settings.html:242
+msgid "notification_settings.track_added"
+msgstr "Додавання нових треків"
+
+#: templates/notification_settings.html:248
+msgid "notification_settings.playlist_changes"
+msgstr "Зміни в списках відтворення"
+
+#: templates/notification_settings.html:255
+msgid "notification_settings.check_frequency"
+msgstr "Частота перевірок:"
+
+#: templates/notification_settings.html:257
+msgid "notification_settings.every_10_minutes"
+msgstr "Кожен день"
+
+#: templates/notification_settings.html:262
+msgid "notification_settings.privacy"
+msgstr "Конфіденційність:"
+
+#: templates/notification_settings.html:265
+msgid "notification_settings.we_do_not_share_your_data"
+msgstr "Ми не передаємо ваші дані третім особам. Сповіщення надсилаються лише вам."
+
+#: templates/notification_settings.html:294
+msgid "notification_settings.browser_does_not_support_push_notifications"
+msgstr "Ваш браузер не підтримує push-повідомлення."
+
+#: templates/notification_settings.html:304
+msgid "notification_settings.push_notifications_are_allowed"
+msgstr "Push-повідомлення дозволені."
+
+#: templates/notification_settings.html:313
+msgid "notification_settings.push_blocked"
+msgstr "Push-сповіщення заблоковано"
+
+#: templates/notification_settings.html:321
+msgid "notification_settings.click_button_to_allow_push_notifications"
+msgstr "Натисніть кнопку нижче, щоб дозволити push-повідомлення"
+
+#: templates/playlist_tracks.html:3
+msgid "playlist_tracks.tracks"
+msgstr "Доріжки"
+
+#: templates/playlist_tracks.html:194
+msgid "playlist_tracks.back_to_playlists"
+msgstr "Назад до списків відтворення"
+
+#: templates/playlist_tracks.html:206
+msgid "playlist_tracks.total_tracks"
+msgstr "Всього треків"
+
+#: templates/playlist_tracks.html:215 templates/playlist_tracks.html:247
+msgid "playlist_tracks.active_tracks"
+msgstr "Активний"
+
+#: templates/playlist_tracks.html:224 templates/playlist_tracks.html:250
+msgid "playlist_tracks.removed_tracks"
+msgstr "Видалено"
+
+#: templates/playlist_tracks.html:233
+msgid "playlist_tracks.last_check"
+msgstr "Остання перевірка"
+
+#: templates/playlist_tracks.html:244
+msgid "playlist_tracks.all_tracks"
+msgstr "Усі треки"
+
+#: templates/playlist_tracks.html:267
+msgid "playlist_tracks.artist"
+msgstr "Художник"
+
+#: templates/playlist_tracks.html:268
+msgid "playlist_tracks.album"
+msgstr "Альбом"
+
+#: templates/playlist_tracks.html:269
+msgid "playlist_tracks.duration"
+msgstr "Тривалість"
+
+#: templates/playlist_tracks.html:270
+msgid "playlist_tracks.status"
+msgstr "Статус"
+
+#: templates/playlist_tracks.html:271
+msgid "playlist_tracks.added_at"
+msgstr "Додано"
+
+#: templates/playlist_tracks.html:301
+msgid "playlist_tracks.removed"
+msgstr "Видалено"
+
+#: templates/playlist_tracks.html:310
+msgid "playlist_tracks.active"
+msgstr "Активний"
+
+#: templates/playlist_tracks.html:334
+msgid "playlist_tracks.tracks_not_found"
+msgstr "Треків не знайдено"
+
+#: templates/playlist_tracks.html:335
+msgid "playlist_tracks.no_tracks_in_playlist"
+msgstr "У цьому списку відтворення ще немає треків."
+
+#: templates/playlists.html:130
+msgid "playlists.subtitle"
+msgstr "Керуйте та відстежуйте всі свої списки відтворення в одному місці"
+
+#: templates/playlists.html:136 templates/playlists.html:177
+msgid "playlists.check_now"
+msgstr "Перевір зараз"
+
+#: templates/playlists.html:183
+msgid "playlists.view_tracks"
+msgstr "Переглянути треки"
+
+#: templates/playlists.html:190
+msgid "playlists.confirm_delete"
+msgstr ""
+"Вилучити цей список відтворення з моніторингу? Його історію сповіщень також "
+"буде видалено."
+
+#: templates/playlists.html:230
+msgid "playlists.not_checked"
+msgstr "Ще не перевірено"
+
+#: templates/playlists.html:236
+msgid "playlists.status.active"
+msgstr "Активний"
+
+#: templates/playlists.html:239
+msgid "playlists.status.pending"
+msgstr "В очікуванні"
+
+#: templates/register.html:5
+msgid "seo.register.description"
+msgstr ""
+"Зареєструйтеся в PlaylistChecker - професійному сервісі для моніторингу "
+"списків відтворення. Почніть відстежувати зміни у своїх музичних колекціях "
+"вже сьогодні."
+
+#: templates/register.html:7
+msgid "seo.register.keywords"
+msgstr ""
+"реєстрація, створення облікового запису, перевірка плейлистів, моніторинг "
+"плейлистів, spotify, apple music, yandex music, відстежувати зміни"
+
+#: templates/register.html:130
+msgid "register.subtitle"
+msgstr "Почніть захищати свої списки відтворення вже сьогодні"
+
+#: templates/register.html:195
+msgid "register.have_account"
+msgstr "Вже маєте обліковий запис?"
+
+#: templates/register.html:205
+msgid "register.feature.unlimited"
+msgstr "Відстежуйте необмежену кількість списків відтворення"
+
+#: templates/register.html:211
+msgid "register.feature.realtime"
+msgstr "Сповіщення в реальному часі"
+
+#: templates/register.html:217
+msgid "register.feature.free"
+msgstr "Вільний назавжди"
+
+#: templates/reset_password.html:3
+msgid "reset.title"
+msgstr "Скинути пароль"
+
+#: templates/reset_password.html:12
+msgid "reset.heading"
+msgstr "Новий пароль"
+
+#: templates/reset_password.html:13
+msgid "reset.subtitle"
+msgstr "Введіть новий пароль для свого облікового запису"
+
+#: templates/reset_password.html:43
+msgid "reset.go_to_login"
+msgstr "Перейти до входу"
+
+# Spotify Playlists page
+#: templates/spotify_playlists.html:3 templates/spotify_playlists.html:178
+msgid "spotify_playlists.title"
+msgstr "Мої списки відтворення Spotify"
+
+#: templates/spotify_playlists.html:180
+msgid "spotify_playlists.subtitle"
+msgstr "Виберіть списки відтворення, щоб почати моніторинг"
+
+#: templates/spotify_playlists.html:184
+msgid "spotify_playlists.add_manually"
+msgstr "Додати вручну"
+
+#: templates/spotify_playlists.html:199
+msgid "spotify_playlists.public"
+msgstr "Громадський"
+
+#: templates/spotify_playlists.html:199
+msgid "spotify_playlists.private"
+msgstr "Приватний"
+
+#: templates/spotify_playlists.html:213
+msgid "spotify_playlists.tracks"
+msgstr "Доріжки"
+
+#: templates/spotify_playlists.html:217
+msgid "spotify_playlists.owner"
+msgstr "Власник"
+
+#: templates/spotify_playlists.html:225
+msgid "spotify_playlists.add_for_monitoring"
+msgstr "Додати для моніторингу"
+
+#: templates/spotify_playlists.html:229
+msgid "spotify_playlists.open_in_spotify"
+msgstr "Відкрийте в Spotify"
+
+#: templates/spotify_playlists.html:240
+msgid "spotify_playlists.how_it_works"
+msgstr "Як це працює"
+
+#: templates/spotify_playlists.html:243
+msgid "spotify_playlists.how_it_works_description"
+msgstr ""
+"Виберіть списки відтворення, які ви хочете відстежувати. Ми перевірятимемо їх"
+" щодня та сповіщатимемо вас, якщо будь-які доріжки буде видалено чи виявлено "
+"зміни."
+
+#: templates/spotify_playlists.html:254
+msgid "spotify_playlists.no_playlists_found"
+msgstr "Списків відтворення не знайдено"
+
+#: templates/spotify_playlists.html:256
+msgid "spotify_playlists.no_playlists_description"
+msgstr ""
+"У вас ще немає списків відтворення в Spotify або під час їх отримання сталася"
+" помилка."
+
+#: templates/spotify_playlists.html:259
+msgid "spotify_playlists.add_playlist_manually"
+msgstr "Додати список відтворення вручну"
+
+msgid "notification_settings.check_hour"
+msgstr "Перевірити годину"
+
+msgid "notification_settings.timezone"
+msgstr "Часовий пояс"
+
+msgid "notification_settings.check_schedule_help"
+msgstr ""
+"Списки відтворення перевіряються один раз на день у вибрану вами годину у "
+"вашому часовому поясі."
+
+msgid "playlists.check_failed"
+msgstr "Перевірити не вдалося"
+
+msgid "page.home.h1"
+msgstr ""
+"Відстежуйте зміни списку відтворення на Spotify, Deezer, Apple Music і Yandex"
+" Music"
+
+msgid "page.about.h1"
+msgstr "Чому пісні зникають з плейлистів"
+
+#~ msgid "nav.home"
+#~ msgstr "Home"
+
+#~ msgid "nav.about"
+#~ msgstr "About"
+
+#~ msgid "nav.login"
+#~ msgstr "Login"
+
+#~ msgid "nav.register"
+#~ msgstr "Register"
+
+#~ msgid "nav.playlists"
+#~ msgstr "My Playlists"
+
+#~ msgid "nav.notifications"
+#~ msgstr "Notifications"
+
+#~ msgid "nav.settings"
+#~ msgstr "Settings"
+
+# Common actions
+#~ msgid "action.add"
+#~ msgstr "Add"
+
+#~ msgid "action.edit"
+#~ msgstr "Edit"
+
+#~ msgid "action.delete"
+#~ msgstr "Delete"
+
+#~ msgid "action.save"
+#~ msgstr "Save"
+
+#~ msgid "action.cancel"
+#~ msgstr "Cancel"
+
+#~ msgid "action.submit"
+#~ msgstr "Submit"
+
+#~ msgid "action.logout"
+#~ msgstr "Logout"
+
+#~ msgid "form.password"
+#~ msgstr "Password"
+
+#~ msgid "form.email"
+#~ msgstr "Email"
+
+#~ msgid "form.confirm_password"
+#~ msgstr "Confirm Password"
+
+#~ msgid "form.remember_me"
+#~ msgstr "Remember Me"
+
+# Messages
+#~ msgid "msg.login_success"
+#~ msgstr "You have successfully logged in"
+
+#~ msgid "msg.logout_success"
+#~ msgstr "You have logged out"
+
+#~ msgid "msg.registration_success"
+#~ msgstr "Registration successful"
+
+#~ msgid "msg.login_error"
+#~ msgstr "Invalid username or password"
+
+#~ msgid "msg.registration_error"
+#~ msgstr "Registration error"
+
+# Pages
+#~ msgid "page.home.title"
+#~ msgstr "PlaylistChecker - Playlist Monitoring"
+
+#~ msgid "page.about.title"
+#~ msgstr "About - PlaylistChecker"
+
+#~ msgid "page.about.subtitle"
+#~ msgstr "Professional service for monitoring playlist changes"
+
+#~ msgid "page.why_check.title"
+#~ msgstr "Why Check Playlists? - PlaylistChecker"
+
+#~ msgid "Добавить"
+#~ msgstr "Add"
+
+#~ msgid "Отмена"
+#~ msgstr "Cancel"
+
+#~ msgid "base.dashboard"
+#~ msgstr "Dashboard"
+
+#~ msgid "base.settings"
+#~ msgstr "Settings"
+
+#~ msgid "dashboard.statistics"
+#~ msgstr "Your Statistics"
+
+#~ msgid "dashboard.total_playlists"
+#~ msgstr "Total playlists"
+
+#~ msgid "dashboard.total_tracks"
+#~ msgstr "Total tracks"
+
+#~ msgid "dashboard.added_tracks"
+#~ msgstr "Added tracks"
+
+#~ msgid "dashboard.deleted_tracks"
+#~ msgstr "Deleted tracks"
+
+#~ msgid "dashboard.deleted_last_month"
+#~ msgstr "Deleted in the last month"
+
+#~ msgid "dashboard.new_tracks"
+#~ msgstr "New tracks in the last month"
+
+#~ msgid "dashboard.sort_by"
+#~ msgstr "Sort by:"
+
+#~ msgid "dashboard.sort.name"
+#~ msgstr "Name"
+
+#~ msgid "dashboard.sort.date"
+#~ msgstr "Date added"
+
+#~ msgid "dashboard.sort.tracks"
+#~ msgstr "Number of tracks"
+
+#~ msgid "dashboard.sort.changes"
+#~ msgstr "Recent changes"
+
+#~ msgid "dashboard.show_archived"
+#~ msgstr "Show archived"
+
+#~ msgid "dashboard.no_playlists"
+#~ msgstr "You haven't added any playlists yet"
+
+#~ msgid "dashboard.add_first_description"
+#~ msgstr "Start monitoring your music collections to never lose your favorite songs"
+
+#~ msgid "how_it_works.title"
+#~ msgstr "How It Works"
+
+#~ msgid "how_it_works.subtitle"
+#~ msgstr "Simple and effective playlist monitoring in 3 steps"
+
+#~ msgid "how_it_works.step1.title"
+#~ msgstr "Add Playlist"
+
+#~ msgid "how_it_works.step1.description"
+#~ msgstr ""
+#~ "Simply copy the link to your playlist"
+#~ " from Spotify, Apple Music or Yandex "
+#~ "Music and paste it into our service."
+#~ " We support all types of public and"
+#~ " private playlists."
+
+#~ msgid "how_it_works.step2.title"
+#~ msgstr "Automatic Monitoring"
+
+#~ msgid "how_it_works.step2.description"
+#~ msgstr ""
+#~ "Our service checks your playlists daily "
+#~ "for any changes. You don't need to "
+#~ "do anything - the entire monitoring "
+#~ "process happens automatically in the "
+#~ "background."
+
+#~ msgid "how_it_works.step3.title"
+#~ msgstr "Get Notifications"
+
+#~ msgid "how_it_works.step3.description"
+#~ msgstr ""
+#~ "When changes are detected in your "
+#~ "playlists, you'll immediately receive "
+#~ "notifications. You'll know exactly which "
+#~ "tracks have been added or removed."
+
+#~ msgid "how_it_works.features.title"
+#~ msgstr "Service Features"
+
+#~ msgid "how_it_works.features.multiplatform"
+#~ msgstr "Multiplatform"
+
+#~ msgid "how_it_works.features.multiplatform.description"
+#~ msgstr "Support for all major music streaming services in one place"
+
+#~ msgid "how_it_works.features.realtime"
+#~ msgstr "Real-time"
+
+#~ msgid "how_it_works.features.realtime.description"
+#~ msgstr "Monitoring playlists and notifying about changes within 24 hours"
+
+#~ msgid "how_it_works.features.security"
+#~ msgstr "Security"
+
+#~ msgid "how_it_works.features.security.description"
+#~ msgstr "Your data is protected with modern encryption methods"
+
+#~ msgid "how_it_works.features.analytics"
+#~ msgstr "Analytics"
+
+#~ msgid "how_it_works.features.analytics.description"
+#~ msgstr "Detailed statistics of changes and trends in your collections"
+
+#~ msgid "how_it_works.process.title"
+#~ msgstr "Detailed Process"
+
+#~ msgid "how_it_works.process.registration.title"
+#~ msgstr "Registration"
+
+#~ msgid "how_it_works.process.registration.description"
+#~ msgstr ""
+#~ "Create a free account in just a "
+#~ "few seconds. No credit card or "
+#~ "complicated verification required."
+
+#~ msgid "how_it_works.process.add_playlist.title"
+#~ msgstr "Adding Playlists"
+
+#~ msgid "how_it_works.process.add_playlist.description"
+#~ msgstr ""
+#~ "Copy the link to a playlist from "
+#~ "your favorite music service and paste "
+#~ "it into PlaylistChecker. We automatically "
+#~ "recognize the format and start monitoring."
+
+#~ msgid "how_it_works.process.monitoring.title"
+#~ msgstr "Monitoring"
+
+#~ msgid "how_it_works.process.monitoring.description"
+#~ msgstr ""
+#~ "Our system checks your playlists daily, "
+#~ "comparing the current state with the "
+#~ "previous version and recording all changes."
+
+#~ msgid "how_it_works.process.notifications.title"
+#~ msgstr "Notifications"
+
+#~ msgid "how_it_works.process.notifications.description"
+#~ msgstr ""
+#~ "When changes are detected, you receive "
+#~ "notifications via email or in your "
+#~ "personal account with detailed information "
+#~ "about what has changed."
+
+#~ msgid "how_it_works.supported.title"
+#~ msgstr "Supported Services"
+
+#~ msgid "how_it_works.supported.spotify"
+#~ msgstr "Full support for all Spotify playlist types"
+
+#~ msgid "how_it_works.supported.apple_music"
+#~ msgstr "Monitoring Apple Music playlists with all metadata"
+
+#~ msgid "how_it_works.supported.yandex_music"
+#~ msgstr "Tracking Yandex Music public playlists"
+
+#~ msgid "how_it_works.supported.deezer"
+#~ msgstr "Support for Deezer playlists coming soon"
+
+#~ msgid "how_it_works.cta.title"
+#~ msgstr "Start monitoring your playlists"
+
+#~ msgid "how_it_works.cta.description"
+#~ msgstr ""
+#~ "Join thousands of users who are "
+#~ "already protecting their music collections "
+#~ "from losses"
+
+#~ msgid "how_it_works.cta.register"
+#~ msgstr "Register for Free"
+
+#~ msgid "how_it_works.cta.try_now"
+#~ msgstr "Try Now"
+
+#~ msgid "hero.title"
+#~ msgstr "Never Lose Your Favorite Songs"
+
+#~ msgid "hero.subtitle"
+#~ msgstr ""
+#~ "PlaylistChecker monitors your playlists on "
+#~ "Spotify, Apple Music and Yandex Music, "
+#~ "notifying you of any changes"
+
+#~ msgid "hero.cta.start"
+#~ msgstr "Start Monitoring"
+
+#~ msgid "hero.cta.learn_more"
+#~ msgstr "Learn More"
+
+#~ msgid "feature.monitoring"
+#~ msgstr "Daily Monitoring"
+
+#~ msgid "feature.notifications"
+#~ msgstr "Instant Notifications"
+
+#~ msgid "feature.notifications.description"
+#~ msgstr "Receive alerts about any changes in your playlists"
+
+#~ msgid "feature.multiplatform"
+#~ msgstr "Multiple Platforms"
+
+#~ msgid "feature.multiplatform.description"
+#~ msgstr "Support for Spotify, Apple Music and Yandex Music"
+
+#~ msgid "nav.dashboard"
+#~ msgstr "Dashboard"
+
+#~ msgid "problem.title"
+#~ msgstr "The Problem We Solve"
+
+#~ msgid "problem.subtitle"
+#~ msgstr "Every day thousands of tracks disappear from music services"
+
+#~ msgid "problem.reason1"
+#~ msgstr "Licensing Issues"
+
+#~ msgid "problem.reason1.description"
+#~ msgstr "Artists and labels terminate contracts with streaming platforms"
+
+#~ msgid "problem.reason2"
+#~ msgstr "Regional Restrictions"
+
+#~ msgid "problem.reason2.description"
+#~ msgstr "Content becomes unavailable in certain countries"
+
+#~ msgid "problem.reason3"
+#~ msgstr "Technical Failures"
+
+#~ msgid "problem.reason3.description"
+#~ msgstr "Errors and failures can lead to data loss"
+
+#~ msgid "services.title"
+#~ msgstr "We Support Your Favorite Services"
+
+#~ msgid "services.spotify"
+#~ msgstr "Spotify"
+
+#~ msgid "services.apple_music"
+#~ msgstr "Apple Music"
+
+#~ msgid "services.yandex_music"
+#~ msgstr "Yandex Music"
+
+#~ msgid "stats.title"
+#~ msgstr "Our Numbers"
+
+#~ msgid "stats.users"
+#~ msgstr "1,000+"
+
+#~ msgid "stats.users.label"
+#~ msgstr "Active Users"
+
+#~ msgid "stats.playlists"
+#~ msgstr "10,000+"
+
+#~ msgid "stats.playlists.label"
+#~ msgstr "Monitored Playlists"
+
+#~ msgid "stats.tracks"
+#~ msgstr "500,000+"
+
+#~ msgid "stats.tracks.label"
+#~ msgstr "Tracked Songs"
+
+#~ msgid "stats.notifications"
+#~ msgstr "50,000+"
+
+#~ msgid "stats.notifications.label"
+#~ msgstr "Sent Notifications"
+
+#~ msgid "testimonials.title"
+#~ msgstr "What Our Users Say"
+
+#~ msgid "testimonials.user1.name"
+#~ msgstr "Alexander"
+
+#~ msgid "testimonials.user1.role"
+#~ msgstr "Music Lover"
+
+#~ msgid "testimonials.user1.text"
+#~ msgstr ""
+#~ "Finally I can stop worrying about my"
+#~ " playlists! PlaylistChecker saved dozens of "
+#~ "my favorite tracks that would have "
+#~ "been lost."
+
+#~ msgid "testimonials.user2.name"
+#~ msgstr "Maria"
+
+#~ msgid "testimonials.user2.role"
+#~ msgstr "DJ"
+
+#~ msgid "testimonials.user2.text"
+#~ msgstr ""
+#~ "As a DJ, it's critical for me to"
+#~ " keep my sets intact. This service "
+#~ "has become an indispensable tool in my"
+#~ " work."
+
+#~ msgid "testimonials.user3.name"
+#~ msgstr "Dmitry"
+
+#~ msgid "testimonials.user3.role"
+#~ msgstr "Melomaniac"
+
+#~ msgid "testimonials.user3.text"
+#~ msgstr ""
+#~ "Simple, convenient and effective. Now I "
+#~ "always know what's happening with my "
+#~ "music collection."
+
+#~ msgid "faq.title"
+#~ msgstr "Frequently Asked Questions"
+
+#~ msgid "faq.q1"
+#~ msgstr "How often are playlists checked?"
+
+#~ msgid "faq.a1"
+#~ msgstr "We check your playlists daily to ensure you don't miss any changes."
+
+#~ msgid "faq.q2"
+#~ msgstr "Is the service free?"
+
+#~ msgid "faq.a2"
+#~ msgstr ""
+#~ "Yes, the basic version with monitoring "
+#~ "up to 5 playlists is completely free."
+
+#~ msgid "faq.q3"
+#~ msgstr "What services are supported?"
+
+#~ msgid "faq.a3"
+#~ msgstr "Currently we support Spotify, Apple Music and Yandex Music."
+
+#~ msgid "cta.title"
+#~ msgstr "Start Protecting Your Music Today"
+
+#~ msgid "cta.button"
+#~ msgstr "Create Free Account"
+
+#~ msgid "footer.company"
+#~ msgstr "Company"
+
+#~ msgid "footer.about"
+#~ msgstr "About Us"
+
+#~ msgid "footer.how_it_works"
+#~ msgstr "How It Works"
+
+#~ msgid "footer.pricing"
+#~ msgstr "Pricing"
+
+#~ msgid "footer.contact"
+#~ msgstr "Contact"
+
+#~ msgid "footer.support"
+#~ msgstr "Support"
+
+#~ msgid "footer.help"
+#~ msgstr "Help Center"
+
+#~ msgid "footer.faq"
+#~ msgstr "FAQ"
+
+#~ msgid "footer.api"
+#~ msgstr "API"
+
+#~ msgid "footer.status"
+#~ msgstr "Status"
+
+#~ msgid "footer.legal"
+#~ msgstr "Legal"
+
+#~ msgid "footer.privacy"
+#~ msgstr "Privacy Policy"
+
+#~ msgid "footer.cookies"
+#~ msgstr "Cookie Policy"
+
+#~ msgid "footer.rights"
+#~ msgstr "All rights reserved"
+
+#~ msgid "Имя пользователя"
+#~ msgstr "Username"
+
+#~ msgid "Пароль"
+#~ msgstr "Password"
+
+#~ msgid "Запомнить меня"
+#~ msgstr "Remember me"
+
+#~ msgid "notifications.filter.all"
+#~ msgstr "All"
+
+#~ msgid "notifications.filter.unread"
+#~ msgstr "Unread"
+
+#~ msgid "notifications.filter.important"
+#~ msgstr "Important"
+
+#~ msgid "notifications.mark_read"
+#~ msgstr "Mark as read"
+
+#~ msgid "notifications.empty"
+#~ msgstr "No notifications"
+
+#~ msgid "Электронная почта"
+#~ msgstr "Email"
+
+#~ msgid "Подтверждение пароля"
+#~ msgstr "Confirm password"
+
+#~ msgid "Уже есть аккаунт?"
+#~ msgstr "Already have an account?"
+
+#~ msgid "Войдите"
+#~ msgstr "Log in"
+
+#~ msgid "settings.account"
+#~ msgstr "Account"
+
+#~ msgid "settings.notifications_tab"
+#~ msgstr "Notifications"
+
+#~ msgid "settings.security"
+#~ msgstr "Security"
+
+#~ msgid "settings.connected"
+#~ msgstr "Connected Services"
+
+#~ msgid "settings.account.title"
+#~ msgstr "Account Settings"
+
+#~ msgid "settings.email"
+#~ msgstr "Email"
+
+#~ msgid "settings.new_password"
+#~ msgstr "New Password"
+
+#~ msgid "settings.confirm_password"
+#~ msgstr "Confirm Password"
+
+#~ msgid "settings.save"
+#~ msgstr "Save Changes"
+
+#~ msgid "settings.notifications.email"
+#~ msgstr "Email Notifications"
+
+#~ msgid "settings.notifications.email.description"
+#~ msgstr "Receive notifications about playlist changes via email"
+
+#~ msgid "settings.notifications.browser"
+#~ msgstr "Browser Notifications"
+
+#~ msgid "settings.notifications.browser.description"
+#~ msgstr "Receive push notifications in your browser"
+
+#~ msgid "settings.notifications.frequency"
+#~ msgstr "Notification Frequency"
+
+#~ msgid "settings.notifications.instant"
+#~ msgstr "Instant"
+
+#~ msgid "settings.notifications.daily"
+#~ msgstr "Daily Digest"
+
+#~ msgid "settings.notifications.weekly"
+#~ msgstr "Weekly Digest"
+
+#~ msgid "settings.security.title"
+#~ msgstr "Security Settings"
+
+#~ msgid "settings.2fa"
+#~ msgstr "Two-Factor Authentication"
+
+#~ msgid "settings.2fa.description"
+#~ msgstr "Add an extra layer of security to your account"
+
+#~ msgid "settings.enable"
+#~ msgstr "Enable"
+
+#~ msgid "settings.sessions"
+#~ msgstr "Active Sessions"
+
+#~ msgid "settings.sessions.description"
+#~ msgstr "Manage devices that have access to your account"
+
+#~ msgid "settings.view_sessions"
+#~ msgstr "View Sessions"
+
+#~ msgid "settings.connected.title"
+#~ msgstr "Connected Music Services"
+
+#~ msgid "settings.spotify.status"
+#~ msgstr "Not connected"
+
+#~ msgid "settings.spotify.description"
+#~ msgstr "Connect your Spotify account for automatic playlist import"
+
+#~ msgid "settings.connect"
+#~ msgstr "Connect"
+
+#~ msgid "settings.apple_music.status"
+#~ msgstr "Not connected"
+
+#~ msgid "settings.apple_music.description"
+#~ msgstr "Connect Apple Music to monitor your playlists"
+
+#~ msgid "settings.yandex_music.status"
+#~ msgstr "Connected"
+
+#~ msgid "settings.yandex_music.description"
+#~ msgstr "Your Yandex Music account is connected"
+
+#~ msgid "settings.disconnect"
+#~ msgstr "Disconnect"
+
+#~ msgid "settings.deezer.status"
+#~ msgstr "Coming soon"
+
+#~ msgid "why_check.intro"
+#~ msgstr ""
+#~ "In the era of digital music, we've "
+#~ "gotten used to having instant access "
+#~ "to millions of songs. However, this "
+#~ "convenience hides a serious problem - "
+#~ "tracks can disappear from your playlists "
+#~ "at any moment."
+
+#~ msgid "why_check.stat1.number"
+#~ msgstr "20%"
+
+#~ msgid "why_check.stat1.description"
+#~ msgstr "of tracks disappear from services within a year"
+
+#~ msgid "why_check.stat2.number"
+#~ msgstr "1 in 5"
+
+#~ msgid "why_check.stat2.description"
+#~ msgstr "playlists lose at least one track per month"
+
+#~ msgid "why_check.stat3.number"
+#~ msgstr "72 hours"
+
+#~ msgid "why_check.stat3.description"
+#~ msgstr "average time before a user notices a loss"
+
+#~ msgid "why_check.stat4.number"
+#~ msgstr "85%"
+
+#~ msgid "why_check.stat4.description"
+#~ msgstr "of users don't know which tracks disappeared"
+
+#~ msgid "why_check.reasons_subtitle"
+#~ msgstr "There are many reasons why your favorite tracks might become unavailable"
+
+#~ msgid "Разочарование в сервисе"
+#~ msgstr "Service disappointment"
+
+#~ msgid "Время на поиск альтернатив"
+#~ msgstr "Time to find alternatives"
+
+#~ msgid "Нарушение музыкального опыта"
+#~ msgstr "Musical experience disruption"
+
+#~ msgid "page.about.problem.title1"
+#~ msgstr "The Problem of Disappearing Songs"
+
+#~ msgid "page.about.problem.title"
+#~ msgstr "Why do songs disappear?"
+
+#~ msgid "page.about.problem.license"
+#~ msgstr "Expiration of licensing agreements"
+
+#~ msgid "page.about.problem.policy"
+#~ msgstr "Changes in platform policies"
+
+#~ msgid "page.about.problem.copyright"
+#~ msgstr "Copyright issues"
+
+#~ msgid "page.about.problem.technical"
+#~ msgstr "Technical service failures"
+
+#~ msgid "page.about.problem.regional"
+#~ msgstr "Regional restrictions"
+
+#~ msgid "page.about.problem.consequences"
+#~ msgstr "Consequences for users"
+
+#~ msgid "page.about.ready.title"
+#~ msgstr "Ready to start?"
+
+#~ msgid "page.about.ready.description"
+#~ msgstr ""
+#~ "Join thousands of users who are "
+#~ "already protecting their music collections "
+#~ "with PlaylistChecker"
+
+#~ msgid "base.why_check"
+#~ msgstr "Why Check"
+
+#~ msgid "why_check.title"
+#~ msgstr "Why Check Playlists?"
+
+#~ msgid "why_check.subtitle"
+#~ msgstr "Understand the importance of monitoring your music collections"
+
+#~ msgid ""
+#~ "Узнайте, почему важно отслеживать изменения "
+#~ "в плейлистах. Подробное объяснение проблем "
+#~ "исчезающих песен, их влияния на музыкальные"
+#~ " коллекции и способов защиты ваших "
+#~ "плейлистов."
+#~ msgstr ""
+
+#~ msgid ""
+#~ "зачем проверять плейлисты, исчезающие песни, "
+#~ "мониторинг плейлистов, проблемы музыкальных "
+#~ "сервисов, защита коллекций, spotify, apple "
+#~ "music"
+#~ msgstr ""
+
+#~ msgid "why_check.problem_title"
+#~ msgstr "Why Check Playlists?"
+
+#~ msgid "why_check.problem_description"
+#~ msgstr ""
+#~ "Start protecting your music collections "
+#~ "today. PlaylistChecker will help you "
+#~ "preserve what matters."
+
+#~ msgid ""
+#~ "Согласно исследованиям, каждый третий пользователь"
+#~ " сталкивается с проблемой исчезающих песен "
+#~ "из плейлистов. Это не просто техническая "
+#~ "проблема — это реальная угроза для "
+#~ "ваших музыкальных воспоминаний и предпочтений."
+#~ msgstr ""
+
+#~ msgid "why_check.cta.learn_more"
+#~ msgstr "Learn More"
+
+#~ msgid "Подключить"
+#~ msgstr ""
+
+#~ msgid "Date and time"
+#~ msgstr ""
+
+#~ msgid "Playlist"
+#~ msgstr ""
+
+#~ msgid "Change type"
+#~ msgstr ""
+
+#~ msgid "Track"
+#~ msgstr ""
+
+#~ msgid "Sending method"
+#~ msgstr ""
+
+#~ msgid "Track added"
+#~ msgstr ""
+
+#~ msgid "Track deleted"
+#~ msgstr ""
+
+#~ msgid "Change"
+#~ msgstr ""
+
+#~ msgid "Information not available"
+#~ msgstr ""
+
+#~ msgid "Browser"
+#~ msgstr ""
+
+#~ msgid "Previous"
+#~ msgstr ""
+
+#~ msgid "Duration"
+#~ msgstr ""
+
+#~ msgid "Status"
+#~ msgstr ""
+
+#~ msgid "Added"
+#~ msgstr ""
+
+#~ msgid "Deleted"
+#~ msgstr ""
+
+#~ msgid "Active"
+#~ msgstr ""
+
+#~ msgid "Tracks are not found"
+#~ msgstr ""
+
+#~ msgid ""
+#~ "Добавьте плейлисты из ваших любимых "
+#~ "музыкальных сервисов для отслеживания изменений"
+#~ msgstr ""
+
+# Новые переводы для форм
+#~ msgid "login.username"
+#~ msgstr "Username"
+
+#~ msgid "form.service"
+#~ msgstr "Service"
+
+#~ msgid "form.playlist_url"
+#~ msgstr "Playlist URL"
+
+#~ msgid "form.save_settings"
+#~ msgstr "Save Settings"
+
+#~ msgid "add_playlist.open_deezer"
+#~ msgstr "Open Deezer in your browser"
+
+#~ msgid "add_playlist.click_share_button"
+#~ msgstr "Click the Share button"
+
+#~ msgid "dashboard.checked"
+#~ msgstr "Checked"
+
+#~ msgid "dashboard.tracks"
+#~ msgstr "tracks"
+
+#~ msgid "page.home.seo.title"
+#~ msgstr "What is PlaylistChecker?"
+
+#~ msgid "notification_settings.information"
+#~ msgstr "Information"
+
+#~ msgid "login.password"
+#~ msgstr "Password"
+
+#~ msgid "flash.registration_success"
+#~ msgstr "Registration successful! You can now log in."
+
+#~ msgid "Если такой email существует, мы отправили письмо с инструкциями"
+#~ msgstr ""
+
+#~ msgid "Ссылка для восстановления недействительна или устарела"
+#~ msgstr ""
+
+#~ msgid "Пароль успешно обновлён. Войдите с новым паролем."
+#~ msgstr ""
+
+#~ msgid "flash.deezer_auth_coming_soon"
+#~ msgstr "Deezer authorization will be implemented"
+
+#~ msgid "flash.apple_music_auth_coming_soon"
+#~ msgstr "Apple Music authorization will be implemented soon"
+
+#~ msgid "flash.apple_music_public_only"
+#~ msgstr "Apple Music: public playlists available without authorization"
+
+#~ msgid "flash.yandex_music_auth_coming_soon"
+#~ msgstr "Yandex Music authorization will be implemented soon"
+

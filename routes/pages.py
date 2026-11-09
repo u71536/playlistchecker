@@ -1,4 +1,4 @@
-from flask import Response, jsonify, redirect, render_template, request, url_for
+from flask import Response, current_app, jsonify, redirect, render_template, request, url_for
 from flask_login import current_user
 from sqlalchemy import text
 
@@ -55,8 +55,12 @@ def sitemap():
         sitemap_content += f'        <loc>{page_url}</loc>\n'
         sitemap_content += f'        <changefreq>{page["changefreq"]}</changefreq>\n'
         sitemap_content += f'        <priority>{page["priority"]}</priority>\n'
-        sitemap_content += f'        <xhtml:link rel="alternate" hreflang="ru" href="{page_url}" />\n'
-        sitemap_content += f'        <xhtml:link rel="alternate" hreflang="en" href="{page_url}?lang=en" />\n'
+        for code in current_app.config['LANGUAGES']:
+            href = page_url if code == 'ru' else f'{page_url}?lang={code}'
+            sitemap_content += (
+                f'        <xhtml:link rel="alternate" hreflang="{current_app.config["HREFLANG"][code]}" '
+                f'href="{href}" />\n'
+            )
         sitemap_content += f'        <xhtml:link rel="alternate" hreflang="x-default" href="{page_url}" />\n'
         sitemap_content += '    </url>\n'
     sitemap_content += '</urlset>'
