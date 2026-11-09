@@ -296,14 +296,16 @@ PlaylistChecker - Уведомление
         """Проверить, было ли уже отправлено уведомление для этого конкретного изменения"""
         from app import NotificationHistory
         
-        existing_notification = NotificationHistory.query.filter_by(
-            user_id=user_id,
-            playlist_id=playlist_id,
-            track_service_id=track_service_id,
-            notification_type=notification_type
-        ).first()
-        
-        return existing_notification is not None
+        latest = (
+            NotificationHistory.query.filter_by(
+                user_id=user_id,
+                playlist_id=playlist_id,
+                track_service_id=track_service_id,
+            )
+            .order_by(NotificationHistory.id.desc())
+            .first()
+        )
+        return latest is not None and latest.notification_type == notification_type
     
     def save_notification_history(self, user_id, playlist_id, notification_data, sent_via):
         """Сохранить историю отправленного уведомления"""
@@ -441,14 +443,19 @@ PlaylistChecker - Уведомление
         logger.info(f"Уведомления для пользователя {user.username}: {results}")
         return results
 
-    def send_batch_notifications(self, user, tracks_data, playlist_name, playlist_id):
-        """Отправить одно сводное уведомление о нескольких удалённых треках.
-        
-        Вместо отдельного письма/сообщения на каждый трек, группирует все удалённые
-        треки из одного плейлиста в одно уведомление.
-        """
+    def send_batch_notifications(
+        self, user, tracks_data, playlist_name, playlist_id, notification_type='track_removed',
+    ):
+        """Отправить одно сводное уведомление о нескольких треках одного плейлиста."""
         if not tracks_data:
             return
+        if notification_type == 'track_added':
+            list_label = 'Новые треки'
+            count_label = 'Добавлено треков'
+        else:
+            notification_type = 'track_removed'
+            list_label = 'Удалённые треки'
+            count_label = 'Удалено треков'
         
         count = len(tracks_data)
         
@@ -458,14 +465,16 @@ PlaylistChecker - Уведомление
         
         new_tracks = []
         for td in tracks_data:
-            if self.check_notification_already_sent(user.id, playlist_id, td['track_service_id'], 'track_removed'):
+            if self.check_notification_already_sent(
+                user.id, playlist_id, td['track_service_id'], notification_type,
+            ):
                 logger.info(f"Уведомление для трека {td['track_service_id']} уже было отправлено, пропускаем")
                 continue
             try:
                 history = NotificationHistory(
                     user_id=user.id,
                     playlist_id=playlist_id,
-                    notification_type='track_removed',
+                    notification_type=notification_type,
                     track_service_id=td['track_service_id'],
                     track_name=td['track_name'],
                     artist_name=td['artist_name'],
@@ -497,30 +506,43 @@ PlaylistChecker - Уведомление
             return
         
         actual_count = len(new_tracks)
-        
-        # Формируем сводное сообщение
-        if actual_count == 1:
-            td = new_tracks[0]['data']
-            summary_message = f"Трек '{td['track_name']}' от {td['artist_name']} был удалён из плейлиста '{playlist_name}'"
-            track_list_text = f"  - {td['track_name']} — {td['artist_name']}"
-            track_list_html = f"<li><strong>{td['track_name']}</strong> — {td['artist_name']}</li>"
+        lines_text = []
+        lines_html = []
+        display_limit = 20
+        for index, item in enumerate(new_tracks):
+            track_data = item['data']
+            if index < display_limit:
+                lines_text.append(
+                    f"  - {track_data['track_name']} — {track_data['artist_name']}"
+                )
+                lines_html.append(
+                    f"<li><strong>{track_data['track_name']}</strong> — {track_data['artist_name']}</li>"
+                )
+        if actual_count > display_limit:
+            remaining = actual_count - display_limit
+            lines_text.append(f"  ... и ещё {remaining}")
+            lines_html.append(f"<li><em>... и ещё {remaining}</em></li>")
+        track_list_text = "\n".join(lines_text)
+        track_list_html = "\n".join(lines_html)
+        word = self._pluralize_tracks(actual_count)
+        first = new_tracks[0]['data']
+        if notification_type == 'track_added':
+            if actual_count == 1:
+                summary_message = (
+                    f"Трек '{first['track_name']}' от {first['artist_name']} "
+                    f"добавлен в плейлист '{playlist_name}'"
+                )
+            else:
+                summary_message = (
+                    f"В плейлист '{playlist_name}' добавлено {actual_count} {word}"
+                )
+        elif actual_count == 1:
+            summary_message = (
+                f"Трек '{first['track_name']}' от {first['artist_name']} "
+                f"был удалён из плейлиста '{playlist_name}'"
+            )
         else:
-            word = self._pluralize_tracks(actual_count)
             summary_message = f"Из плейлиста '{playlist_name}' удалено {actual_count} {word}"
-            lines_text = []
-            lines_html = []
-            display_limit = 20
-            for i, nt in enumerate(new_tracks):
-                td = nt['data']
-                if i < display_limit:
-                    lines_text.append(f"  - {td['track_name']} — {td['artist_name']}")
-                    lines_html.append(f"<li><strong>{td['track_name']}</strong> — {td['artist_name']}</li>")
-            if actual_count > display_limit:
-                remaining = actual_count - display_limit
-                lines_text.append(f"  ... и ещё {remaining}")
-                lines_html.append(f"<li><em>... и ещё {remaining}</em></li>")
-            track_list_text = "\n".join(lines_text)
-            track_list_html = "\n".join(lines_html)
         
         title = f"Изменения в плейлисте {playlist_name}"
         
@@ -528,12 +550,18 @@ PlaylistChecker - Уведомление
         
         # Email
         if user.email and user.email_notifications_enabled:
-            if self._send_batch_email(user.email, title, summary_message, track_list_text, track_list_html, playlist_name, actual_count):
+            if self._send_batch_email(
+                user.email, title, summary_message, track_list_text, track_list_html,
+                playlist_name, actual_count, list_label, count_label,
+            ):
                 sent_channels.append('email')
         
         # Telegram
         if hasattr(user, 'telegram_chat_id') and user.telegram_chat_id and user.telegram_notifications_enabled:
-            if self._send_batch_telegram(user.telegram_chat_id, summary_message, track_list_text, playlist_name, actual_count):
+            if self._send_batch_telegram(
+                user.telegram_chat_id, summary_message, track_list_text,
+                playlist_name, actual_count, list_label, count_label,
+            ):
                 sent_channels.append('telegram')
         
         # Browser push
@@ -565,7 +593,10 @@ PlaylistChecker - Уведомление
         else:
             return "треков"
     
-    def _send_batch_email(self, user_email, subject, summary, track_list_text, track_list_html, playlist_name, count):
+    def _send_batch_email(
+        self, user_email, subject, summary, track_list_text, track_list_html,
+        playlist_name, count, list_label, count_label,
+    ):
         """Отправить одно сводное email-уведомление о нескольких удалённых треках"""
         if not all([self.email_config['username'], self.email_config['password']]):
             logger.warning("Email настройки не настроены, пропускаем отправку email")
@@ -587,7 +618,7 @@ PlaylistChecker - Сводное уведомление
 
 {summary}
 
-Удалённые треки:
+{list_label}:
 {track_list_text}
 
 Плейлист: {playlist_name}
@@ -628,7 +659,7 @@ PlaylistChecker - Сводное уведомление
             
             <div class="track-list">
                 <strong>📋 Плейлист:</strong> {playlist_name}<br>
-                <strong>🎵 Удалено треков:</strong> <span class="count-badge">{count}</span><br>
+                <strong>🎵 {count_label}:</strong> <span class="count-badge">{count}</span><br>
                 <strong>🕒 Время:</strong> {datetime.now().strftime('%d.%m.%Y %H:%M')}
                 <hr>
                 <ul>
@@ -665,7 +696,9 @@ PlaylistChecker - Сводное уведомление
             logger.error(f"Ошибка отправки сводного email уведомления: {str(e)}")
             return False
     
-    def _send_batch_telegram(self, chat_id, summary, track_list_text, playlist_name, count):
+    def _send_batch_telegram(
+        self, chat_id, summary, track_list_text, playlist_name, count, list_label, count_label,
+    ):
         """Отправить одно сводное Telegram-уведомление о нескольких удалённых треках"""
         if not self.telegram_config['bot_token']:
             logger.warning("Telegram bot token не настроен, пропускаем отправку в Telegram")
@@ -678,20 +711,19 @@ PlaylistChecker - Сводное уведомление
 {summary}
 
 📋 *Плейлист:* {playlist_name}
-🔢 *Удалено треков:* {count}
+🔢 *{count_label}:* {count}
 🕒 *Время:* {datetime.now().strftime('%d.%m.%Y %H:%M')}
 
-*Удалённые треки:*
+*{list_label}:*
 {track_list_text}
             """
             
             # Telegram ограничивает сообщения 4096 символами
             if len(telegram_message) > 4000:
-                word = self._pluralize_tracks(count)
                 telegram_message = f"""
 🎵 *PlaylistChecker — Сводное уведомление*
 
-Из плейлиста *{playlist_name}* удалено *{count}* {word}.
+{summary}
 
 🕒 *Время:* {datetime.now().strftime('%d.%m.%Y %H:%M')}
 

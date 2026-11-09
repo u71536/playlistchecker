@@ -94,8 +94,14 @@ class YandexMusicService:
                 'service.yandex_music.playlist_tracks_error',
                 error=str(error),
             ))
+        raw_tracks = result.get('tracks')
+        if (result.get('trackCount') or 0) > 0 and not raw_tracks:
+            raise Exception(gettext(
+                'service.yandex_music.playlist_tracks_error',
+                error='incomplete',
+            ))
         tracks = []
-        for track_data in result.get('tracks') or []:
+        for track_data in raw_tracks or []:
             track = track_data.get('track') if isinstance(track_data, dict) else None
             if not track or not track.get('id'):
                 continue

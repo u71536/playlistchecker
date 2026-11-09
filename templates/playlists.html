@@ -230,8 +230,11 @@
                             <i class="fas fa-exclamation-circle text-warning me-1"></i>{{ _('playlists.not_checked') }}
                         {% endif %}
                     </small>
-                    <span class="playlist-status {% if playlist.last_checked %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %}">
-                        {% if playlist.last_checked %}
+                    <span class="playlist-status {% if playlist.last_check_error %}bg-danger-subtle text-danger{% elif playlist.last_checked %}bg-success-subtle text-success{% else %}bg-warning-subtle text-warning{% endif %}">
+                        {% if playlist.last_check_error %}
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>{{ _('playlists.check_failed') }}</span>
+                        {% elif playlist.last_checked %}
                             <i class="fas fa-check-circle"></i>
                             <span>{{ _('playlists.status.active') }}</span>
                         {% else %}
@@ -240,6 +243,11 @@
                         {% endif %}
                     </span>
                 </div>
+                {% if playlist.last_check_error %}
+                <p class="small text-danger mb-0 mt-2">
+                    {% if playlist.last_check_failed_at %}{{ playlist.last_check_failed_at.strftime('%d.%m.%Y %H:%M') }} — {% endif %}{{ playlist.last_check_error }}
+                </p>
+                {% endif %}
             </div>
         </div>
     </div>

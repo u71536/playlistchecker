@@ -2363,3 +2363,15 @@ msgstr "Add Playlist Manually"
 #~ msgid "flash.yandex_music_auth_coming_soon"
 #~ msgstr "Yandex Music authorization will be implemented soon"
 
+msgid "notification_settings.check_hour"
+msgstr "Check hour"
+
+msgid "notification_settings.timezone"
+msgstr "Time zone"
+
+msgid "notification_settings.check_schedule_help"
+msgstr "Playlists are checked once a day at the hour you choose, in your time zone."
+
+msgid "playlists.check_failed"
+msgstr "Check failed"
+

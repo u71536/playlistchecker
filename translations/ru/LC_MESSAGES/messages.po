@@ -1665,3 +1665,15 @@ msgstr "Добавить плейлист вручную"
 #~ msgid "flash.yandex_music_auth_coming_soon"
 #~ msgstr "Авторизация Yandex Music будет реализована в скором времени"
 
+msgid "notification_settings.check_hour"
+msgstr "Час проверки"
+
+msgid "notification_settings.timezone"
+msgstr "Часовой пояс"
+
+msgid "notification_settings.check_schedule_help"
+msgstr "Проверка запускается каждый день в выбранный час по вашему часовому поясу."
+
+msgid "playlists.check_failed"
+msgstr "Проверка не удалась"
+

@@ -48,6 +48,8 @@ def notification_settings():
         current_user.email_notifications_enabled = form.email_notifications_enabled.data
         current_user.telegram_notifications_enabled = form.telegram_notifications_enabled.data
         current_user.browser_notifications_enabled = form.browser_notifications_enabled.data
+        current_user.check_hour = form.check_hour.data
+        current_user.timezone = form.timezone.data
         db.session.commit()
         flash(gettext('flash.notification_settings_saved'))
         return redirect(url_for('notification_settings'))
@@ -55,6 +57,8 @@ def notification_settings():
     form.email_notifications_enabled.data = current_user.email_notifications_enabled
     form.telegram_notifications_enabled.data = current_user.telegram_notifications_enabled
     form.browser_notifications_enabled.data = current_user.browser_notifications_enabled
+    form.check_hour.data = current_user.check_hour
+    form.timezone.data = current_user.timezone
     return render_template('notification_settings.html', form=form)
 
 

@@ -400,7 +400,15 @@
                                                 <i class="fas fa-exclamation-circle text-warning me-1"></i>{{ _('dashboard.not_checked') }}
                                             {% endif %}
                                         </small>
+                                        {% if playlist.last_check_error %}
+                                        <span class="badge bg-danger-subtle text-danger">{{ _('playlists.check_failed') }}</span>
+                                        {% endif %}
                                     </div>
+                                    {% if playlist.last_check_error %}
+                                    <p class="small text-danger mb-0 mt-2">
+                                        {% if playlist.last_check_failed_at %}{{ playlist.last_check_failed_at.strftime('%d.%m.%Y %H:%M') }} — {% endif %}{{ playlist.last_check_error }}
+                                    </p>
+                                    {% endif %}
                                 </div>
                             </div>
                         </div>

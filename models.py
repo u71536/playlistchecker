@@ -3,6 +3,7 @@ from datetime import datetime
 from flask_login import UserMixin
 
 from extensions import db
+from services.check_schedule import default_check_hour
 from services.token_crypto import EncryptedText
 
 
@@ -21,6 +22,8 @@ class User(UserMixin, db.Model):
     telegram_username = db.Column(db.String(100))
 
     language = db.Column(db.String(5), default='ru')
+    check_hour = db.Column(db.Integer, nullable=False, default=default_check_hour, server_default='9')
+    timezone = db.Column(db.String(64), nullable=False, default='UTC', server_default='UTC')
     email_verified = db.Column(db.Boolean, nullable=False, default=True)
     email_verify_nonce = db.Column(db.String(64))
     password_reset_nonce = db.Column(db.String(64))
@@ -77,6 +80,8 @@ class Playlist(db.Model):
     description = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_checked = db.Column(db.DateTime)
+    last_check_error = db.Column(db.Text)
+    last_check_failed_at = db.Column(db.DateTime)
     tracks = db.relationship('Track', backref='playlist', lazy=True, cascade='all, delete-orphan')
 
     __table_args__ = (
@@ -142,6 +147,6 @@ class NotificationHistory(db.Model):
         db.Index(
             'idx_unique_notification',
             'user_id', 'playlist_id', 'track_service_id', 'notification_type',
-            unique=True,
+            unique=False,
         ),
     )

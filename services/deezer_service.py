@@ -176,11 +176,17 @@ class DeezerService:
             raise ValueError(gettext('service.deezer.invalid_playlist_url'))
         try:
             tracks = []
+            seen = 0
+            total = None
             url = f'{self.base_url}/playlist/{playlist_id}/tracks'
             params = {'limit': 100}
             while url:
                 data = self._fetch_public_json(url, params=params)
-                for track_data in data.get('data') or []:
+                page = data.get('data') or []
+                if total is None:
+                    total = data.get('total')
+                seen += len(page)
+                for track_data in page:
                     if not track_data or not track_data.get('id'):
                         continue
                     artist = track_data.get('artist') or {}
@@ -195,6 +201,11 @@ class DeezerService:
                     })
                 url = data.get('next')
                 params = None
+            if total is not None and seen < total:
+                raise Exception(gettext(
+                    'service.deezer.playlist_tracks_error',
+                    error='incomplete',
+                ))
             return tracks
         except ValueError:
             raise

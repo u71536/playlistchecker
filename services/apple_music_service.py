@@ -1,9 +1,19 @@
-import requests
 import os
-import jwt
+import re
 import time
 from datetime import datetime
+
+import jwt
+import requests
 from flask_babel import gettext
+
+
+_STOREFRONT = re.compile(r'music\.apple\.com/([a-z]{2})/')
+_PLAYLIST_ID = (
+    re.compile(r'music\.apple\.com/.*?/playlist/[^/]+/([a-zA-Z0-9\.]+)'),
+    re.compile(r'playlist/([a-zA-Z0-9\.]+)'),
+    re.compile(r'pl\.([a-zA-Z0-9\.]+)'),
+)
 
 
 class AppleMusicService:
@@ -81,7 +91,7 @@ class AppleMusicService:
     
     def get_playlist_info(self, playlist_url, user_token=None):
         """Получить информацию о плейлисте"""
-        playlist_id = self._extract_playlist_id(playlist_url)
+        storefront, playlist_id = self.parse_playlist_ref(playlist_url)
         if not playlist_id:
             raise ValueError(gettext('service.apple_music.invalid_playlist_url'))
         
@@ -94,15 +104,15 @@ class AppleMusicService:
         if user_token:
             headers['Music-User-Token'] = user_token
         
-        url = f"{self.base_url}/v1/catalog/us/playlists/{playlist_id}"
-        
-        response = requests.get(url, headers=headers)
+        url = f"{self.base_url}/v1/catalog/{storefront}/playlists/{playlist_id}"
+
+        response = requests.get(url, headers=headers, timeout=20)
         if response.status_code == 200:
             data = response.json()
             playlist = data['data'][0]
             tracks_data = playlist['relationships'].get('tracks', {}).get('data', [])
             return {
-                'id': playlist['id'],
+                'id': self.storage_id(storefront, playlist['id']),
                 'name': playlist['attributes']['name'],
                 'description': playlist['attributes'].get('description', {}).get('standard', ''),
                 'tracks_count': len(tracks_data),
@@ -121,77 +131,94 @@ class AppleMusicService:
         """Получить информацию о публичном плейлисте (без user token)"""
         return self.get_playlist_info(playlist_url, user_token=None)
     
-    def get_playlist_tracks(self, playlist_id, user_token=None):
-        """Получить треки плейлиста"""
+    def get_playlist_tracks(self, playlist_id, user_token=None, storefront=None):
+        """Получить треки плейлиста. Неполный ответ считается ошибкой, а не пустым плейлистом."""
+        if storefront is None:
+            storefront, playlist_id = self.split_storage_id(playlist_id)
         developer_token = self.get_developer_token()
         headers = {
             'Authorization': f'Bearer {developer_token}'
         }
-        
-        # User Token опционален - нужен только для приватных плейлистов
         if user_token:
             headers['Music-User-Token'] = user_token
-        
+
         tracks = []
-        url = f"{self.base_url}/v1/catalog/us/playlists/{playlist_id}/tracks"
+        url = f"{self.base_url}/v1/catalog/{storefront}/playlists/{playlist_id}/tracks"
         limit = 100
         offset = 0
-        
+
         while True:
-            params = {
-                'limit': limit,
-                'offset': offset
-            }
-            
-            response = requests.get(url, headers=headers, params=params)
+            response = requests.get(
+                url,
+                headers=headers,
+                params={'limit': limit, 'offset': offset},
+                timeout=20,
+            )
             if response.status_code != 200:
-                break
-            
+                raise Exception(gettext(
+                    'service.apple_music.playlist_info_error',
+                    status_code=response.status_code,
+                ))
             data = response.json()
-            if not data.get('data'):
-                break
-            
-            for track_data in data['data']:
-                if track_data['type'] == 'songs':
-                    track = track_data['attributes']
-                    tracks.append({
-                        'id': track_data['id'],
-                        'name': track['name'],
-                        'artist': track['artistName'],
-                        'album': track['albumName'],
-                        'duration': int(track['durationInMillis'] / 1000),  # Конвертируем в секунды
-                        'added_at': datetime.utcnow().isoformat()  # Apple Music не предоставляет время добавления
-                    })
-            
+            page = data.get('data') or []
+            total = (data.get('meta') or {}).get('total')
+            for track_data in page:
+                if track_data.get('type') != 'songs':
+                    continue
+                track = track_data['attributes']
+                tracks.append({
+                    'id': track_data['id'],
+                    'name': track['name'],
+                    'artist': track['artistName'],
+                    'album': track['albumName'],
+                    'duration': int(track['durationInMillis'] / 1000),
+                    'added_at': datetime.utcnow().isoformat(),
+                })
             offset += limit
-            if offset >= data.get('meta', {}).get('total', 0):
+            if total is None:
+                if len(page) < limit:
+                    break
+                continue
+            if offset >= total:
                 break
-        
+            if not page:
+                raise Exception(gettext(
+                    'service.apple_music.playlist_info_error',
+                    status_code='incomplete',
+                ))
         return tracks
-    
+
     def get_public_playlist_tracks(self, playlist_url):
         """Получить треки публичного плейлиста (без user token)"""
-        playlist_id = self._extract_playlist_id(playlist_url)
+        storefront, playlist_id = self.parse_playlist_ref(playlist_url)
         if not playlist_id:
             raise ValueError(gettext('service.apple_music.invalid_playlist_url'))
-        return self.get_playlist_tracks(playlist_id, user_token=None)
-    
+        return self.get_playlist_tracks(playlist_id, user_token=None, storefront=storefront)
+
+    def parse_playlist_ref(self, url):
+        storefront_match = _STOREFRONT.search(url or '')
+        storefront = storefront_match.group(1) if storefront_match else 'us'
+        return storefront, self._extract_playlist_id(url)
+
+    def storage_id(self, storefront, playlist_id):
+        return f'{storefront}:{playlist_id}'
+
+    def split_storage_id(self, storage_id):
+        if storage_id and ':' in storage_id:
+            storefront, playlist_id = storage_id.split(':', 1)
+            if len(storefront) == 2 and storefront.isalpha():
+                return storefront.lower(), playlist_id
+        return 'us', storage_id
+
     def _extract_playlist_id(self, url):
         """Извлечь ID плейлиста из URL"""
-        import re
-        
-        # Паттерны для различных форматов URL Apple Music
-        patterns = [
-            r'music\.apple\.com/.*?/playlist/[^/]+/([a-zA-Z0-9\.]+)',
-            r'playlist/([a-zA-Z0-9\.]+)',
-            r'pl\.([a-zA-Z0-9\.]+)'
-        ]
-        
-        for pattern in patterns:
-            match = re.search(pattern, url)
+        for pattern in _PLAYLIST_ID:
+            match = pattern.search(url or '')
             if match:
-                return match.group(1)
-        
+                playlist_id = match.group(1)
+                if pattern is _PLAYLIST_ID[2] and not playlist_id.startswith('pl.'):
+                    return f'pl.{playlist_id}'
+                return playlist_id
         return None
     
     def is_token_valid(self, user_token):
